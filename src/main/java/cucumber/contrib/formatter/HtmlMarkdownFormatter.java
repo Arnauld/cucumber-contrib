@@ -51,11 +51,11 @@ public class HtmlMarkdownFormatter implements Formatter, Reporter {
     private NiceAppendable jsOut;
 
     private int embeddedIndex;
-    private Report report;
+    private HtmlMarkdownReport report;
 
     public SpecFormatter(File htmlReportDir) {
         this.htmlReportDir = htmlReportDir;
-        this.report = new Report(jsOut());
+        this.report = new HtmlMarkdownReport(jsOut());
         this.copyReportFiles();
     }
 
