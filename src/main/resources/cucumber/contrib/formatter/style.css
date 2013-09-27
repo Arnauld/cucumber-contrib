@@ -1,0 +1,77 @@
+
+.cucumber-report h1 {
+  font-size: 24px;
+  width:100%;
+  border-bottom: 1px solid black;
+}
+
+.cucumber-report h2 {
+  font-size: 18px;
+}
+
+.cucumber-report h2 small {
+  font-size: 14px;
+}
+
+.cucumber-report .scenario {
+  margin-top: 20px;
+}
+
+/* unnecessary with the raw img approach
+.cucumber-report .step-status {
+  padding-right: 10px;
+  margin-right: 10px;
+}
+*/
+
+.cucumber-report .keyword,
+.cucumber-report .step-keyword {
+  font-weight: bold;
+}
+
+.cucumber-report .description {
+  font-style: italic;
+  margin-left: 40px;
+}
+
+
+.cucumber-report ol.step-list {
+  list-style-type: none;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.cucumber-report .step .embedded-text {
+  background: #dddddd;
+}
+
+.cucumber-report .doc_string {
+  margin: 0 0 0 20px;
+}
+
+.cucumber-report .tags {
+  display: inline;
+}
+
+.cucumber-report .tag {
+  margin-right: 0.25em;
+  color: #246ac1;
+}
+
+.cucumber-report .parameters {
+  margin-left: 4em;
+}
+
+/*
+.cucumber-report .comments {
+  display: inline;
+}
+
+.cucumber-report .comment {
+  margin 0;
+  padding 0;
+  font-size: 80%;
+  color: "LightSteelBlue";
+}
+*/
+
