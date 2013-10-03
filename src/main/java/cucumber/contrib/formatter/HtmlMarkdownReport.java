@@ -21,6 +21,8 @@ import java.util.regex.Pattern;
 
 import org.pegdown.PegDownProcessor;
 
+import static cucumber.contrib.formatter.BricABrac.NL;
+
 public class HtmlMarkdownReport {
 
     private final NiceAppendable appendable;
@@ -32,7 +34,7 @@ public class HtmlMarkdownReport {
     private Statistics statistics;
     private boolean useChartJS = false;
 
-    public Report(NiceAppendable out) {
+    public HtmlMarkdownReport(NiceAppendable out) {
         this.appendable = out;
         this.markdown = new PegDownProcessor();
         this.statistics = new Statistics();
@@ -223,10 +225,8 @@ public class HtmlMarkdownReport {
     public interface Wrapper {
         void consolidate(Statistics statistics);
 
-        void emit(Report out);
+        void emit(HtmlMarkdownReport out);
     }
-
-    public static final String NL = "\n";
 
     public class FeatureWrapper implements Wrapper {
 
@@ -279,7 +279,7 @@ public class HtmlMarkdownReport {
         }
 
         @Override
-        public void emit(Report r) {
+        public void emit(HtmlMarkdownReport r) {
             r.begin("<section class='feature'>");
             String featureName = feature.getName();
             r.out("<h1 id='" + featureNameToAnchor(featureName) + "'>" + featureName + "</h1>");
@@ -334,7 +334,7 @@ public class HtmlMarkdownReport {
         }
 
         @Override
-        public void emit(Report out) {
+        public void emit(HtmlMarkdownReport out) {
         }
 
         @Override
@@ -383,7 +383,7 @@ public class HtmlMarkdownReport {
         }
 
         @Override
-        public void emit(Report r) {
+        public void emit(HtmlMarkdownReport r) {
             r.begin("<section class='scenario'>");
 
             String extra = "";
@@ -479,7 +479,7 @@ public class HtmlMarkdownReport {
         }
 
         @Override
-        public void emit(Report r) {
+        public void emit(HtmlMarkdownReport r) {
             String cssStyles = "step";
             if (!isMatching())
                 cssStyles = " step-unmatch";

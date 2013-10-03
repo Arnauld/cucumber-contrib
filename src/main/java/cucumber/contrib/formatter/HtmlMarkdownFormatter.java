@@ -53,7 +53,7 @@ public class HtmlMarkdownFormatter implements Formatter, Reporter {
     private int embeddedIndex;
     private HtmlMarkdownReport report;
 
-    public SpecFormatter(File htmlReportDir) {
+    public HtmlMarkdownFormatter(File htmlReportDir) {
         this.htmlReportDir = htmlReportDir;
         this.report = new HtmlMarkdownReport(jsOut());
         this.copyReportFiles();
