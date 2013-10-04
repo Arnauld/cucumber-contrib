@@ -113,7 +113,7 @@ public class PdfEmitter {
 
         Paragraph steps = new Paragraph("");
         for (StepWrapper step : scenario.getSteps()) {
-            emit(section, step);
+            emit(steps, step);
         }
         steps.setIndentationLeft(25.0f);
         steps.setSpacingBefore(25.0f);
@@ -121,7 +121,7 @@ public class PdfEmitter {
         section.add(steps);
     }
 
-    public void emit(Section section, StepWrapper step) {
+    public void emit(Paragraph steps, StepWrapper step) {
         Paragraph stepParagraph = new Paragraph();
         stepParagraph.add(new Chunk(step.getKeyword(), stepKeywordFont()));
         stepParagraph.add(new Chunk(step.getName(), stepDefaultFont()));
@@ -131,7 +131,7 @@ public class PdfEmitter {
             stepParagraph.add(table);
         }
 
-        section.add(stepParagraph);
+        steps.add(stepParagraph);
     }
 
     private BaseColor VERY_LIGHT_GRAY = new BaseColor(215, 215, 215);
