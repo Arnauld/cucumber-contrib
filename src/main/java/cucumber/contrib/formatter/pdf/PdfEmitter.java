@@ -58,7 +58,7 @@ public class PdfEmitter {
     }
 
     protected Font tableHeaderFont() {
-        return stepKeywordFont();
+        return FontFactory.getFont(FontFactory.COURIER, 8, Font.BOLD, BaseColor.WHITE);
     }
 
     protected Font tableDataFont() {
@@ -166,29 +166,25 @@ public class PdfEmitter {
             Font font = getTableFont(firstRow);
 
             for (int i = 0; i < cells.size(); i++) {
+                boolean firstColumn = (i == 0);
                 String content = cells.get(i);
                 PdfPCell c = new PdfPCell(new Phrase(content, font));
-                c.setUseVariableBorders(true);
-                int border = 0;
-                if (i > 0) {
-                    border += Rectangle.LEFT;
+                if (!firstColumn) {
+                    c.setBorder(Rectangle.LEFT);
                 }
 
                 if (firstRow) {
-                    border += Rectangle.BOTTOM;
-                    c.setBorderWidthBottom(1.5f);
-                    c.setPaddingTop(5);
                     c.setPaddingBottom(5);
+                    c.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    c.setBackgroundColor(new BaseColor(0, 183, 255));
                 } else {
                     c.setBorderWidthBottom(0.5f);
-                    border += Rectangle.TOP;
                 }
 
                 // alternate bg
                 if (j > 0 && j % 2 == 0) {
                     c.setBackgroundColor(VERY_LIGHT_GRAY);
                 }
-                c.setBorder(border);
                 table.addCell(c);
             }
         }
