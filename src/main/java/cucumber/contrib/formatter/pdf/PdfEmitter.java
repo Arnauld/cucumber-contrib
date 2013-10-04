@@ -115,21 +115,32 @@ public class PdfEmitter {
         for (StepWrapper step : scenario.getSteps()) {
             emit(steps, step);
         }
-        steps.setIndentationLeft(25.0f);
+        //steps.setIndentationLeft(25.0f);
         steps.setSpacingBefore(25.0f);
         steps.setSpacingAfter(25.0f);
         section.add(steps);
     }
 
+    private float documentContentWidth() {
+        return document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin();
+    }
+
     public void emit(Paragraph steps, StepWrapper step) {
 
         PdfPTable stepAsTable = new PdfPTable(2);
+        try {
+            stepAsTable.setTotalWidth(new float[] {16.5f, documentContentWidth() - 16.5f});
+        } catch (DocumentException e) {
+            // ignore?
+            e.printStackTrace();
+        }
 
         Image stepStatus = getStepStatusAsImageOrNull(step);
         PdfPCell cell;
         if(stepStatus != null) {
             stepStatus.scaleAbsolute(16.5f, 10.5f);
             cell = new PdfPCell(stepStatus);
+            cell.setPaddingTop(2.0f);
         }
         else {
             cell = new PdfPCell(new Phrase(""));
@@ -142,15 +153,24 @@ public class PdfEmitter {
         stepParagraph.add(new Chunk(step.getKeyword(), stepKeywordFont()));
         stepParagraph.add(new Chunk(step.getName(), stepDefaultFont()));
 
-        if (step.hasTable()) {
-            PdfPTable table = formatTable(step.getTableRows());
-            stepParagraph.add(table);
-        }
-
         cell = new PdfPCell(stepParagraph);
         cell.setBorder(Rectangle.NO_BORDER);
         stepAsTable.addCell(cell);
+
+        if (step.hasTable()) {
+            // table added on stepParagraph is not visible...
+            // thus it becomes a direct nested table
+            PdfPTable table = formatTable(step.getTableRows());
+            stepAsTable.addCell(noBorder(new PdfPCell(new Phrase(""))));
+            stepAsTable.addCell(noBorder(new PdfPCell(table)));
+        }
+
         steps.add(stepAsTable);
+    }
+
+    private static PdfPCell noBorder(PdfPCell pdfPCell) {
+        pdfPCell.setBorder(Rectangle.NO_BORDER);
+        return pdfPCell;
     }
 
     private Image getStepStatusAsImageOrNull(StepWrapper step) {
