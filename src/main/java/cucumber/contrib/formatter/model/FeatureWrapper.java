@@ -1,6 +1,5 @@
 package cucumber.contrib.formatter.model;
 
-import cucumber.contrib.formatter.DescriptionExtractor;
 import gherkin.formatter.model.*;
 
 import java.util.ArrayList;

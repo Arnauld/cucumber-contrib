@@ -2,24 +2,13 @@ package cucumber.contrib.formatter;
 
 import gherkin.formatter.Argument;
 import gherkin.formatter.NiceAppendable;
-import gherkin.formatter.model.Background;
-import gherkin.formatter.model.Comment;
-import gherkin.formatter.model.Examples;
-import gherkin.formatter.model.Feature;
-import gherkin.formatter.model.Match;
-import gherkin.formatter.model.Result;
-import gherkin.formatter.model.Row;
-import gherkin.formatter.model.Scenario;
-import gherkin.formatter.model.ScenarioOutline;
-import gherkin.formatter.model.Step;
-import gherkin.formatter.model.Tag;
+import gherkin.formatter.model.*;
+import org.pegdown.PegDownProcessor;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import org.pegdown.PegDownProcessor;
 
 import static cucumber.contrib.formatter.BricABrac.NL;
 

@@ -1,6 +1,5 @@
 package cucumber.contrib.formatter.model;
 
-import cucumber.contrib.formatter.DescriptionExtractor;
 import gherkin.formatter.model.Comment;
 import gherkin.formatter.model.Scenario;
 import gherkin.formatter.model.Tag;
