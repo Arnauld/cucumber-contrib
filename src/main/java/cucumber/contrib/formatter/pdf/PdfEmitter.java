@@ -148,9 +148,9 @@ public class PdfEmitter {
         PdfPTable table = null;
 
         for (int j = 0; j < tableRows.size(); j++) {
+            boolean firstRow = (j == 0);
             Row row = tableRows.get(j);
 
-            // first row
             List<String> cells = row.getCells();
             if (table == null) {
                 table = new PdfPTable(cells.size());
@@ -167,8 +167,7 @@ public class PdfEmitter {
                     border += Rectangle.LEFT;
                 }
 
-                // First row
-                if(j==0) {
+                if (firstRow) {
                     border += Rectangle.BOTTOM;
                     c.setBorderWidthBottom(1.5f);
                     c.setPaddingTop(5);
