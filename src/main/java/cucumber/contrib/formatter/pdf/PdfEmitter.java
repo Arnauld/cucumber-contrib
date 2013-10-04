@@ -136,22 +136,27 @@ public class PdfEmitter {
 
     private BaseColor VERY_LIGHT_GRAY = new BaseColor(215, 215, 215);
 
+    private Font getTableFont(boolean firstRow) {
+        if (firstRow) {
+            return tableHeaderFont();
+        } else {
+            return tableDataFont();
+        }
+    }
+
     private PdfPTable formatTable(List<DataTableRow> tableRows) {
         PdfPTable table = null;
 
         for (int j = 0; j < tableRows.size(); j++) {
             Row row = tableRows.get(j);
 
-            Font font = null;
             // first row
             List<String> cells = row.getCells();
             if (table == null) {
                 table = new PdfPTable(cells.size());
-                font = tableHeaderFont();
             }
-            else {
-                font = tableDataFont();
-            }
+
+            Font font = getTableFont(firstRow);
 
             for (int i = 0; i < cells.size(); i++) {
                 String content = cells.get(i);
