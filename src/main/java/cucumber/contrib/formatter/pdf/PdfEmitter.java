@@ -15,7 +15,6 @@ import gherkin.formatter.model.Tag;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.util.*;
 import java.util.List;
 
 /**
@@ -49,6 +48,7 @@ public class PdfEmitter {
     protected Font stepKeywordFont() {
         return FontFactory.getFont(FontFactory.COURIER, 8, Font.BOLD, new CMYKColor(255, 255, 0, 17));
     }
+
     protected Font stepDefaultFont() {
         return FontFactory.getFont(FontFactory.COURIER, 8, Font.NORMAL, new CMYKColor(255, 255, 0, 17));
     }
@@ -126,7 +126,7 @@ public class PdfEmitter {
         stepParagraph.add(new Chunk(step.getKeyword(), stepKeywordFont()));
         stepParagraph.add(new Chunk(step.getName(), stepDefaultFont()));
 
-        if(step.hasTable()) {
+        if (step.hasTable()) {
             PdfPTable table = formatTable(step.getTableRows());
             stepParagraph.add(table);
         }
@@ -138,13 +138,14 @@ public class PdfEmitter {
 
     private PdfPTable formatTable(List<DataTableRow> tableRows) {
         PdfPTable table = null;
-        for (int j=0; j<tableRows.size(); j++) {
+
+        for (int j = 0; j < tableRows.size(); j++) {
             Row row = tableRows.get(j);
 
             Font font = null;
             // first row
             List<String> cells = row.getCells();
-            if(table == null) {
+            if (table == null) {
                 table = new PdfPTable(cells.size());
                 font = tableHeaderFont();
             }
@@ -152,12 +153,12 @@ public class PdfEmitter {
                 font = tableDataFont();
             }
 
-            for(int i=0;i<cells.size();i++) {
+            for (int i = 0; i < cells.size(); i++) {
                 String content = cells.get(i);
                 PdfPCell c = new PdfPCell(new Phrase(content, font));
                 c.setUseVariableBorders(true);
                 int border = 0;
-                if(i>0) {
+                if (i > 0) {
                     border += Rectangle.LEFT;
                 }
 
@@ -167,14 +168,13 @@ public class PdfEmitter {
                     c.setBorderWidthBottom(1.5f);
                     c.setPaddingTop(5);
                     c.setPaddingBottom(5);
-                }
-                else {
+                } else {
                     c.setBorderWidthBottom(0.5f);
                     border += Rectangle.TOP;
                 }
 
                 // alternate bg
-                if(j>0 && j % 2 == 0) {
+                if (j > 0 && j % 2 == 0) {
                     c.setBackgroundColor(VERY_LIGHT_GRAY);
                 }
                 c.setBorder(border);
