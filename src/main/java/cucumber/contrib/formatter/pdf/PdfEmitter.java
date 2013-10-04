@@ -147,6 +147,8 @@ public class PdfEmitter {
     private PdfPTable formatTable(List<DataTableRow> tableRows) {
         PdfPTable table = null;
 
+        int[] columnMaxSizes = getTableColumnsContentMaxLength(tableRows);
+
         for (int j = 0; j < tableRows.size(); j++) {
             boolean firstRow = (j == 0);
             Row row = tableRows.get(j);
@@ -154,6 +156,11 @@ public class PdfEmitter {
             List<String> cells = row.getCells();
             if (table == null) {
                 table = new PdfPTable(cells.size());
+                try {
+                    table.setWidths(columnMaxSizes);
+                } catch (DocumentException e) {
+                    // Should not append since columnMaxSizes comes from tableRows.
+                }
             }
 
             Font font = getTableFont(firstRow);
@@ -186,6 +193,20 @@ public class PdfEmitter {
             }
         }
         return table;
+    }
+
+    private int[] getTableColumnsContentMaxLength(List<DataTableRow> tableRows) {
+        int[] columnMaxSizes = null;
+        for (int j = 0; j < tableRows.size(); j++) {
+            List<String> cells = tableRows.get(j).getCells();
+            for (int i = 0; i < cells.size(); i++) {
+                if (columnMaxSizes == null) {
+                    columnMaxSizes = new int[cells.size()];
+                }
+                columnMaxSizes[i] = Math.max(columnMaxSizes[i], cells.get(i).length());
+            }
+        }
+        return columnMaxSizes;
     }
 
     public void done() {
