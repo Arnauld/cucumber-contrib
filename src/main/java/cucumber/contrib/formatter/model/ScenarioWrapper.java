@@ -1,19 +1,15 @@
 package cucumber.contrib.formatter.model;
 
-import cucumber.contrib.formatter.BricABrac;
+import cucumber.contrib.formatter.DescriptionExtractor;
 import gherkin.formatter.model.Comment;
 import gherkin.formatter.model.Scenario;
 import gherkin.formatter.model.Tag;
 
 import java.util.List;
 
-import static cucumber.contrib.formatter.BricABrac.NL;
-import static cucumber.contrib.formatter.BricABrac.discardCommentChar;
+import static cucumber.contrib.formatter.DescriptionExtractor.extractDescription;
 
-/**
- *
- */
-public class ScenarioWrapper extends StepContainer implements Wrapper {
+public class ScenarioWrapper extends StepContainer implements Wrapper, HasComments {
     private final Scenario scenario;
     private BackgroundWrapper background;
 
@@ -67,17 +63,6 @@ public class ScenarioWrapper extends StepContainer implements Wrapper {
     }
 
     public String getDescription() {
-        String description = scenario.getDescription();
-        StringBuilder builder = new StringBuilder();
-        if(!BricABrac.isEmpty(description)) {
-            builder.append(description).append(NL);
-        }
-        if(!steps.isEmpty()) {
-            StepWrapper step = steps.get(0);
-            for(Comment comment : step.getComments()) {
-                builder.append(discardCommentChar(comment.getValue())).append(NL);
-            }
-        }
-        return builder.toString();
+        return extractDescription(scenario.getDescription(), steps);
     }
 }

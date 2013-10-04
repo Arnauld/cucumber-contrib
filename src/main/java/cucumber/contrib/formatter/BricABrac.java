@@ -3,9 +3,6 @@ package cucumber.contrib.formatter;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
-/**
- *
- */
 public class BricABrac {
     public static final String NL = "\n";
 
@@ -17,7 +14,7 @@ public class BricABrac {
         return one.equalsIgnoreCase(two);
     }
 
-    private static Pattern COMMENT = Pattern.compile("^\\s*#*");
+    private static Pattern COMMENT = Pattern.compile("^\\s*#");
 
     public static String discardCommentChar(String value) {
         return COMMENT.matcher(value).replaceAll("");
@@ -35,5 +32,9 @@ public class BricABrac {
         if (text == null)
             return "";
         return text;
+    }
+
+    public static boolean startsWithComment(String text) {
+        return text.startsWith("#");
     }
 }

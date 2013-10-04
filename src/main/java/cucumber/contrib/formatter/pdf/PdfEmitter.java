@@ -1,5 +1,7 @@
 package cucumber.contrib.formatter.pdf;
 
+import com.google.common.io.ByteSource;
+import com.google.common.io.Resources;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.CMYKColor;
 import com.itextpdf.text.pdf.PdfPCell;
@@ -12,9 +14,7 @@ import gherkin.formatter.model.DataTableRow;
 import gherkin.formatter.model.Row;
 import gherkin.formatter.model.Tag;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -122,6 +122,22 @@ public class PdfEmitter {
     }
 
     public void emit(Paragraph steps, StepWrapper step) {
+
+        PdfPTable stepAsTable = new PdfPTable(2);
+
+        Image stepStatus = getStepStatusAsImageOrNull(step);
+        PdfPCell cell;
+        if(stepStatus != null) {
+            stepStatus.scaleAbsolute(16.5f, 10.5f);
+            cell = new PdfPCell(stepStatus);
+        }
+        else {
+            cell = new PdfPCell(new Phrase(""));
+        }
+
+        cell.setBorder(Rectangle.NO_BORDER);
+        stepAsTable.addCell(cell);
+
         Paragraph stepParagraph = new Paragraph();
         stepParagraph.add(new Chunk(step.getKeyword(), stepKeywordFont()));
         stepParagraph.add(new Chunk(step.getName(), stepDefaultFont()));
@@ -131,7 +147,43 @@ public class PdfEmitter {
             stepParagraph.add(table);
         }
 
-        steps.add(stepParagraph);
+        cell = new PdfPCell(stepParagraph);
+        cell.setBorder(Rectangle.NO_BORDER);
+        stepAsTable.addCell(cell);
+        steps.add(stepAsTable);
+    }
+
+    private Image getStepStatusAsImageOrNull(StepWrapper step) {
+        ByteSource byteSource = null;
+        try {
+            String resourceName = getStepStatusResourceName(step);
+            byteSource = Resources.asByteSource(getClass().getResource(resourceName));
+            byte[] bytes = byteSource.read();
+            return Image.getInstance(bytes);
+        } catch (BadElementException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    private String getStepStatusResourceName(StepWrapper step) {
+        if (step.isSuccess()) {
+            return "images/ok-icon.PNG";
+        }
+        else if(step.isPending()) {
+            return "images/pending-icon.PNG";
+        }
+        else if(step.isFailure()) {
+            return "images/ko-icon.PNG";
+        }
+        else if(step.isSkipped()) {
+            return "images/skipped-icon.PNG";
+        }
+        else  {
+            return "images/unknown-icon.PNG";
+        }
     }
 
     private BaseColor VERY_LIGHT_GRAY = new BaseColor(215, 215, 215);
@@ -169,22 +221,24 @@ public class PdfEmitter {
                 boolean firstColumn = (i == 0);
                 String content = cells.get(i);
                 PdfPCell c = new PdfPCell(new Phrase(content, font));
-                if (!firstColumn) {
-                    c.setBorder(Rectangle.LEFT);
-                }
 
                 if (firstRow) {
                     c.setPaddingBottom(5);
                     c.setHorizontalAlignment(Element.ALIGN_CENTER);
                     c.setBackgroundColor(new BaseColor(0, 183, 255));
-                } else {
-                    c.setBorderWidthBottom(0.5f);
                 }
 
                 // alternate bg
                 if (j > 0 && j % 2 == 0) {
                     c.setBackgroundColor(VERY_LIGHT_GRAY);
                 }
+
+                int border = 0;
+                if (!firstColumn) {
+                    border += Rectangle.LEFT;
+                }
+                c.setBorder(border);
+
                 table.addCell(c);
             }
         }

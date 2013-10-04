@@ -7,10 +7,7 @@ import java.util.List;
 import static cucumber.contrib.formatter.BricABrac.areEquals;
 import static cucumber.contrib.formatter.BricABrac.isEmpty;
 
-/**
- *
- */
-public class StepWrapper implements Wrapper {
+public class StepWrapper implements Wrapper, HasComments {
     private final Step step;
     private Result result;
     private Match match;

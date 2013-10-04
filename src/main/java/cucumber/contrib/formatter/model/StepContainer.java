@@ -8,9 +8,6 @@ import gherkin.formatter.model.Step;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
 public class StepContainer {
     protected List<StepWrapper> steps = new ArrayList<StepWrapper>();
     private int stepCursor = -1; // used by match & result

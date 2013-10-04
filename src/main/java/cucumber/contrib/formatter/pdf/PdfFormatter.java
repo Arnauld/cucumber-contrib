@@ -70,22 +70,25 @@ public class PdfFormatter implements Formatter, Reporter {
     }
 
     @Override
-    public void eof() {
-        report.done();
-    }
-
-    @Override
     public void syntaxError(String s, String s2, List<String> strings, String s3, Integer integer) {
         //TODO
     }
 
     @Override
+    public void eof() {
+        System.out.println("PdfFormatter.eof");
+    }
+
+    @Override
     public void done() {
+        System.out.println("PdfFormatter.done");
+        report.done();
         pdfEmitter.done();
     }
 
     @Override
     public void close() {
+        System.out.println("PdfFormatter.close");
     }
 
     @Override

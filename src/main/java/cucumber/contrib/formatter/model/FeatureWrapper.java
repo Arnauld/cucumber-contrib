@@ -1,17 +1,13 @@
 package cucumber.contrib.formatter.model;
 
-import cucumber.contrib.formatter.BricABrac;
+import cucumber.contrib.formatter.DescriptionExtractor;
 import gherkin.formatter.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static cucumber.contrib.formatter.BricABrac.NL;
-import static cucumber.contrib.formatter.BricABrac.discardCommentChar;
+import static cucumber.contrib.formatter.DescriptionExtractor.extractDescription;
 
-/**
- *
- */
 public class FeatureWrapper implements Wrapper {
 
     private final Feature feature;
@@ -51,7 +47,6 @@ public class FeatureWrapper implements Wrapper {
 
     private StepContainer currentStepContainer() {
         return (background != null) ? background : currentScenario();
-
     }
 
     private ScenarioWrapper currentScenario() {
@@ -61,7 +56,6 @@ public class FeatureWrapper implements Wrapper {
     private String featureNameToAnchor(String name) {
         return "feature-" + name.toLowerCase().replace(' ', '_');
     }
-
 
     @Override
     public void consolidate(Statistics statistics) {
@@ -75,18 +69,7 @@ public class FeatureWrapper implements Wrapper {
     }
 
     public String getDescription() {
-        String description = feature.getDescription();
-        StringBuilder builder = new StringBuilder();
-        if(!BricABrac.isEmpty(description)) {
-            builder.append(description).append(NL);
-        }
-        if(!scenarios.isEmpty()) {
-            ScenarioWrapper scenario = scenarios.get(0);
-            for(Comment comment : scenario.getComments()) {
-                builder.append(discardCommentChar(comment.getValue())).append(NL);
-            }
-        }
-        return builder.toString();
+        return extractDescription(feature.getDescription(), scenarios);
     }
 
     public List<ScenarioWrapper> getScenarios() {
