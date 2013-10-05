@@ -20,6 +20,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
+import static com.google.common.io.Resources.asByteSource;
+
 public class PdfEmitter {
 
     private Document document;
@@ -174,10 +176,9 @@ public class PdfEmitter {
     }
 
     private Image getStepStatusAsImageOrNull(StepWrapper step) {
-        ByteSource byteSource = null;
         try {
             String resourceName = getStepStatusResourceName(step);
-            byteSource = Resources.asByteSource(getClass().getResource(resourceName));
+            ByteSource byteSource = asByteSource(getClass().getResource(resourceName));
             byte[] bytes = byteSource.read();
             return Image.getInstance(bytes);
         } catch (BadElementException e) {
@@ -262,8 +263,8 @@ public class PdfEmitter {
 
     private int[] getTableColumnsContentMaxLength(List<DataTableRow> tableRows) {
         int[] columnMaxSizes = null;
-        for (int j = 0; j < tableRows.size(); j++) {
-            List<String> cells = tableRows.get(j).getCells();
+        for (DataTableRow tableRow : tableRows) {
+            List<String> cells = tableRow.getCells();
             for (int i = 0; i < cells.size(); i++) {
                 if (columnMaxSizes == null) {
                     columnMaxSizes = new int[cells.size()];
