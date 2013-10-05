@@ -49,7 +49,7 @@ public class ScenarioWrapper extends StepContainer implements Wrapper, HasCommen
                 return;
             }
         }
-        statistics.scenarioSuccessed();
+        statistics.scenarioSucceeded();
     }
 
     public String getName() {

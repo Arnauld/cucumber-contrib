@@ -1,12 +1,12 @@
 package cucumber.contrib.formatter.model;
 
 public class Statistics {
-    private int nbScenarioSuccessed;
+    private int nbScenarioSucceeded;
     private int nbScenarioSkipped;
     private int nbScenarioFailed;
     private int nbScenarioOther;
     private int nbScenarioPending;
-    private int nbStepSuccessed;
+    private int nbStepSucceeded;
     private int nbFeature;
     private int nbStepOther;
     private int nbStepPending;
@@ -38,8 +38,8 @@ public class Statistics {
         nbStepNoMatching++;
     }
 
-    public void stepSuccessed() {
-        nbStepSuccessed++;
+    public void stepSucceeded() {
+        nbStepSucceeded++;
     }
 
     public void scenarioOther() {
@@ -54,8 +54,8 @@ public class Statistics {
         nbScenarioFailed++;
     }
 
-    public void scenarioSuccessed() {
-        nbScenarioSuccessed++;
+    public void scenarioSucceeded() {
+        nbScenarioSucceeded++;
     }
 
     public void scenarioSkipped() {

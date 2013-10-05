@@ -59,7 +59,7 @@ public class StepWrapper implements Wrapper, HasComments {
         } else if (isPending()) {
             statistics.stepPending();
         } else if (isSuccess()) {
-            statistics.stepSuccessed();
+            statistics.stepSucceeded();
         } else {
             statistics.stepOther();
         }
