@@ -79,7 +79,7 @@ public class StepWrapper implements Wrapper, HasComments {
 
     public boolean hasTable() {
         List<DataTableRow> tableRows = getTableRows();
-        return tableRows!=null && !tableRows.isEmpty();
+        return tableRows != null && !tableRows.isEmpty();
     }
 
     public List<DataTableRow> getTableRows() {

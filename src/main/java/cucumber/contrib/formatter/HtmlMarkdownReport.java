@@ -40,18 +40,19 @@ public class HtmlMarkdownReport {
         out("<link href='bootstrap/css/bootstrap.css' rel='stylesheet'>");
         out("<link href='style.css' rel='stylesheet'>");
         out("<script src='jquery-1.8.2.min.js'></script>");
-        if (useChartJS)
+        if (useChartJS) {
             out("<script src='chart.min.js'></script>");
-        else
+        } else {
             out("<script src='canvasjs.min.js'></script>");
+        }
         out("<script src='formatter.js'></script>");
         end("</head>");
         begin("<body>");
         begin("<div class='container cucumber-report'>");
         out("<div class='header'></div>");
-        if(useChartJS)
+        if (useChartJS) {
             out("<canvas id='chart' width='400' height='400'></canvas>");
-        else {
+        } else {
             begin("<div class='row'>");
             out("<div class='span6' id='chartScenario' style='height: 300px'></div>");
             out("<div class='span6' id='chartStep' style='height: 300px'></div>");
@@ -106,7 +107,6 @@ public class HtmlMarkdownReport {
             end("});");
             out("chartScenario.render();");
 
-            
             begin("var chartSteps = new CanvasJS.Chart('chartStep',");
             begin("{");
             out("title: {text:'Steps Summary'},");
@@ -277,8 +277,9 @@ public class HtmlMarkdownReport {
             r.out(formatHtml(feature.getDescription()));
             r.end("</p>");
             r.begin("<div class='scenario-list'>");
-            for (ScenarioWrapper scenario : scenarios)
+            for (ScenarioWrapper scenario : scenarios) {
                 scenario.emit(r);
+            }
             r.end("</div>");
             r.end("</section>");
         }
@@ -286,8 +287,9 @@ public class HtmlMarkdownReport {
         @Override
         public void consolidate(Statistics statistics) {
             statistics.feature();
-            for (ScenarioWrapper scenario : scenarios)
+            for (ScenarioWrapper scenario : scenarios) {
                 scenario.consolidate(statistics);
+            }
         }
     }
 
@@ -595,7 +597,7 @@ public class HtmlMarkdownReport {
         public void stepNoMatching() {
             nbStepNoMatching++;
         }
-        
+
         public void stepSuccessed() {
             nbStepSuccessed++;
         }

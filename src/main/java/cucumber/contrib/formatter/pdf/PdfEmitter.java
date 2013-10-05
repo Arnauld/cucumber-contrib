@@ -20,8 +20,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-/**
- */
 public class PdfEmitter {
 
     private Document document;
@@ -118,7 +116,7 @@ public class PdfEmitter {
         for (StepWrapper step : scenario.getSteps()) {
             emit(steps, step);
         }
-        //steps.setIndentationLeft(25.0f);
+        // steps.setIndentationLeft(25.0f);
         steps.setSpacingBefore(25.0f);
         steps.setSpacingAfter(25.0f);
         section.add(steps);
@@ -132,7 +130,7 @@ public class PdfEmitter {
 
         PdfPTable stepAsTable = new PdfPTable(2);
         try {
-            stepAsTable.setTotalWidth(new float[] {16.5f, documentContentWidth() - 16.5f});
+            stepAsTable.setTotalWidth(new float[] { 16.5f, documentContentWidth() - 16.5f });
         } catch (DocumentException e) {
             // ignore?
             e.printStackTrace();
@@ -140,12 +138,11 @@ public class PdfEmitter {
 
         Image stepStatus = getStepStatusAsImageOrNull(step);
         PdfPCell cell;
-        if(stepStatus != null) {
+        if (stepStatus != null) {
             stepStatus.scaleAbsolute(16.5f, 10.5f);
             cell = new PdfPCell(stepStatus);
             cell.setPaddingTop(2.0f);
-        }
-        else {
+        } else {
             cell = new PdfPCell(new Phrase(""));
         }
 
@@ -190,21 +187,16 @@ public class PdfEmitter {
         }
     }
 
-
     private String getStepStatusResourceName(StepWrapper step) {
         if (step.isSuccess()) {
             return "images/ok-icon.PNG";
-        }
-        else if(step.isPending()) {
+        } else if (step.isPending()) {
             return "images/pending-icon.PNG";
-        }
-        else if(step.isFailure()) {
+        } else if (step.isFailure()) {
             return "images/ko-icon.PNG";
-        }
-        else if(step.isSkipped()) {
+        } else if (step.isSkipped()) {
             return "images/skipped-icon.PNG";
-        }
-        else  {
+        } else {
             return "images/unknown-icon.PNG";
         }
     }

@@ -13,11 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- *
- */
 public class MarkdownEmitter {
-
 
     private PegDownProcessor markdown;
 
@@ -28,7 +24,7 @@ public class MarkdownEmitter {
     public List<Element> markdownToElements(String markdownText) {
         HashMap<String, Object> providers = new HashMap<String, Object>();
         providers.put(HTMLWorker.FONT_PROVIDER, new HtmlFontFactory());
-        //providers.put(HTMLWorker.IMG_PROVIDER, new ImageFactory());
+        // providers.put(HTMLWorker.IMG_PROVIDER, new ImageFactory());
         StyleSheet stylesheet = null;
         try {
             return HTMLWorker.parseToList(formatHtmlAsReader(markdownText), stylesheet, providers);
@@ -50,12 +46,12 @@ public class MarkdownEmitter {
     }
 
     private static class HtmlFontFactory implements FontProvider {
-        public Font getFont(String fontname,
-                            String encoding, boolean embedded, float size,
-                            int style, BaseColor color) {
+        @Override
+        public Font getFont(String fontname, String encoding, boolean embedded, float size, int style, BaseColor color) {
             return FontFactory.getFont(FontFactory.HELVETICA, 8, style, new CMYKColor(255, 255, 255, 17));
         }
 
+        @Override
         public boolean isRegistered(String fontname) {
             return false;
         }

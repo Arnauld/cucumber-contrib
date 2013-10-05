@@ -1,8 +1,5 @@
 package cucumber.contrib.formatter.model;
 
-/**
- *
- */
 public class Statistics {
     private int nbScenarioSuccessed;
     private int nbScenarioSkipped;
