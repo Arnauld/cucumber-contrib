@@ -4,7 +4,6 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.html.simpleparser.HTMLWorker;
 import com.itextpdf.text.html.simpleparser.StyleSheet;
 import com.itextpdf.text.pdf.CMYKColor;
-import cucumber.contrib.formatter.BricABrac;
 import org.pegdown.PegDownProcessor;
 
 import java.io.IOException;
@@ -12,6 +11,8 @@ import java.io.StringReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 public class MarkdownEmitter {
 
@@ -39,7 +40,7 @@ public class MarkdownEmitter {
     }
 
     private String formatHtml(String text) {
-        if (BricABrac.isEmpty(text)) {
+        if (isNullOrEmpty(text)) {
             return "";
         }
         return markdown.markdownToHtml(text);

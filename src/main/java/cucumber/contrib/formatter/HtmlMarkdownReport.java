@@ -6,11 +6,10 @@ import gherkin.formatter.model.*;
 import org.pegdown.PegDownProcessor;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.regex.Pattern;
 
-import static cucumber.contrib.formatter.BricABrac.NL;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static cucumber.contrib.formatter.BricABrac.*;
 
 public class HtmlMarkdownReport {
 
@@ -433,7 +432,7 @@ public class HtmlMarkdownReport {
         }
 
         public boolean isMatching() {
-            return !isEmpty(match.getLocation());
+            return !isNullOrEmpty(match.getLocation());
         }
 
         public boolean isSuccess() {
@@ -526,38 +525,10 @@ public class HtmlMarkdownReport {
     }
 
     public String formatHtml(String text) {
-        if (isEmpty(text)) {
+        if (isNullOrEmpty(text)) {
             return "";
         }
         return markdown.markdownToHtml(text);
-    }
-
-    public static boolean areEquals(String one, String two) {
-        if (one == two)
-            return true;
-        if (one == null || two == null)
-            return false;
-        return one.equalsIgnoreCase(two);
-    }
-
-    private static Pattern COMMENT = Pattern.compile("^\\s*#*");
-
-    public static String discardCommentChar(String value) {
-        return COMMENT.matcher(value).replaceAll("");
-    }
-
-    public static boolean isEmpty(String location) {
-        return location == null || location.isEmpty();
-    }
-
-    public static boolean isEmpty(Collection<?> location) {
-        return location == null || location.isEmpty();
-    }
-
-    public static CharSequence emptyIfNull(String text) {
-        if (text == null)
-            return "";
-        return text;
     }
 
     public static class Statistics {
