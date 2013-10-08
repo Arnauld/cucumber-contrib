@@ -21,7 +21,15 @@ public class Configuration {
     private static final BaseColor VERY_LIGHT_GRAY = new BaseColor(215, 215, 215);
 
     // TODO extract to 'TemplateEngine' thus one can plug an other template engine
-    private MarkdownEmitter markdownEmitter = new MarkdownEmitter();
+    private MarkdownEmitter markdownEmitter;
+    private URL preambuleURL;
+
+
+    private MarkdownEmitter getMarkdownEmitter() {
+        if(markdownEmitter == null)
+            markdownEmitter = new MarkdownEmitter(this);
+        return markdownEmitter;
+    }
 
     public Document createDocument() {
         return new Document(PageSize.A4, 50, 50, 50, 50);
@@ -71,35 +79,40 @@ public class Configuration {
         return null;
     }
 
-    public void writePreambule(String featureRootUri, Document document) throws DocumentException {
+    public void writePreambule(Document document) throws DocumentException {
         String preambule = getPreambule();
-        if(preambule == null) {
-            preambule = lookupForDefault(featureRootUri, preambule);
+        if(preambule == null && preambuleURL != null) {
+            preambule = loadResource(preambuleURL);
             if(preambule == null) {
                 return;
             }
         }
 
         Paragraph paragraph = new Paragraph();
-        paragraph.addAll(markdownEmitter.markdownToElements(preambule));
+        paragraph.addAll(getMarkdownEmitter().markdownToElements(preambule));
         document.add(paragraph);
     }
 
-    private String lookupForDefault(String featureRootUri, String preambule) {
+    private String loadResource(URL resource) {
         try {
-            URL url = new URL(featureRootUri + "preamble.md");
-            ByteSource source = asByteSource(url);
+            ByteSource source = asByteSource(resource);
             CharSource charSource = source.asCharSource(Charset.forName("UTF-8"));
-            preambule = charSource.read();
+            return charSource.read();
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return preambule;
+        return null;
     }
 
     public void appendMarkdownContent(final java.util.List<Element> elements, String markdownText) {
-        elements.addAll(markdownEmitter.markdownToElements(markdownText));
+        elements.addAll(getMarkdownEmitter().markdownToElements(markdownText));
     }
+
+    public Configuration withPreambule(URL preambuleURL) {
+        this.preambuleURL = preambuleURL;
+        return this;
+    }
+
 }

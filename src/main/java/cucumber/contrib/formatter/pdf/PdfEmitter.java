@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.util.List;
 
 import static com.google.common.io.Resources.asByteSource;
@@ -44,7 +43,7 @@ public class PdfEmitter {
     }
 
     private void writePreamble(String featureRootUri) throws DocumentException {
-        configuration.writePreambule(featureRootUri, document);
+        configuration.writePreambule(document);
     }
 
     protected Font defaultFont() {
@@ -53,6 +52,7 @@ public class PdfEmitter {
 
     public void emit(FeatureWrapper feature) {
         if(firstFeature) {
+            firstFeature = false;
             try {
                 writePreamble(extractUriParent(feature.getUri()));
             } catch (DocumentException e) {
