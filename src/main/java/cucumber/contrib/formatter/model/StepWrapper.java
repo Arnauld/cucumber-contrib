@@ -4,8 +4,8 @@ import gherkin.formatter.model.*;
 
 import java.util.List;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static cucumber.contrib.formatter.BricABrac.areEquals;
-import static cucumber.contrib.formatter.BricABrac.isEmpty;
 
 public class StepWrapper implements Wrapper, HasComments {
     private final Step step;
@@ -29,7 +29,7 @@ public class StepWrapper implements Wrapper, HasComments {
     }
 
     public boolean isMatching() {
-        return !isEmpty(match.getLocation());
+        return !isNullOrEmpty(match.getLocation());
     }
 
     public boolean isSuccess() {
@@ -59,7 +59,7 @@ public class StepWrapper implements Wrapper, HasComments {
         } else if (isPending()) {
             statistics.stepPending();
         } else if (isSuccess()) {
-            statistics.stepSuccessed();
+            statistics.stepSucceeded();
         } else {
             statistics.stepOther();
         }
@@ -79,7 +79,7 @@ public class StepWrapper implements Wrapper, HasComments {
 
     public boolean hasTable() {
         List<DataTableRow> tableRows = getTableRows();
-        return tableRows!=null && !tableRows.isEmpty();
+        return tableRows != null && !tableRows.isEmpty();
     }
 
     public List<DataTableRow> getTableRows() {

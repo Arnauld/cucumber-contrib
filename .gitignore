@@ -6,3 +6,7 @@
 *.ear
 target/
 cucumber-contrib.iml
+.classpath
+.project
+.settings/
+.idea/

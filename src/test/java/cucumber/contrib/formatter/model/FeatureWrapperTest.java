@@ -1,13 +1,10 @@
 package cucumber.contrib.formatter.model;
 
-import com.google.common.collect.Lists;
 import gherkin.formatter.model.Comment;
 import gherkin.formatter.model.Feature;
 import gherkin.formatter.model.Scenario;
-import org.fest.assertions.Assertions;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;

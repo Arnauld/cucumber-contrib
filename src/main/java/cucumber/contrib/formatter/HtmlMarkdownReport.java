@@ -2,26 +2,14 @@ package cucumber.contrib.formatter;
 
 import gherkin.formatter.Argument;
 import gherkin.formatter.NiceAppendable;
-import gherkin.formatter.model.Background;
-import gherkin.formatter.model.Comment;
-import gherkin.formatter.model.Examples;
-import gherkin.formatter.model.Feature;
-import gherkin.formatter.model.Match;
-import gherkin.formatter.model.Result;
-import gherkin.formatter.model.Row;
-import gherkin.formatter.model.Scenario;
-import gherkin.formatter.model.ScenarioOutline;
-import gherkin.formatter.model.Step;
-import gherkin.formatter.model.Tag;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.regex.Pattern;
-
+import gherkin.formatter.model.*;
 import org.pegdown.PegDownProcessor;
 
-import static cucumber.contrib.formatter.BricABrac.NL;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static cucumber.contrib.formatter.BricABrac.*;
 
 public class HtmlMarkdownReport {
 
@@ -51,18 +39,19 @@ public class HtmlMarkdownReport {
         out("<link href='bootstrap/css/bootstrap.css' rel='stylesheet'>");
         out("<link href='style.css' rel='stylesheet'>");
         out("<script src='jquery-1.8.2.min.js'></script>");
-        if (useChartJS)
+        if (useChartJS) {
             out("<script src='chart.min.js'></script>");
-        else
+        } else {
             out("<script src='canvasjs.min.js'></script>");
+        }
         out("<script src='formatter.js'></script>");
         end("</head>");
         begin("<body>");
         begin("<div class='container cucumber-report'>");
         out("<div class='header'></div>");
-        if(useChartJS)
+        if (useChartJS) {
             out("<canvas id='chart' width='400' height='400'></canvas>");
-        else {
+        } else {
             begin("<div class='row'>");
             out("<div class='span6' id='chartScenario' style='height: 300px'></div>");
             out("<div class='span6' id='chartStep' style='height: 300px'></div>");
@@ -117,7 +106,6 @@ public class HtmlMarkdownReport {
             end("});");
             out("chartScenario.render();");
 
-            
             begin("var chartSteps = new CanvasJS.Chart('chartStep',");
             begin("{");
             out("title: {text:'Steps Summary'},");
@@ -288,8 +276,9 @@ public class HtmlMarkdownReport {
             r.out(formatHtml(feature.getDescription()));
             r.end("</p>");
             r.begin("<div class='scenario-list'>");
-            for (ScenarioWrapper scenario : scenarios)
+            for (ScenarioWrapper scenario : scenarios) {
                 scenario.emit(r);
+            }
             r.end("</div>");
             r.end("</section>");
         }
@@ -297,8 +286,9 @@ public class HtmlMarkdownReport {
         @Override
         public void consolidate(Statistics statistics) {
             statistics.feature();
-            for (ScenarioWrapper scenario : scenarios)
+            for (ScenarioWrapper scenario : scenarios) {
                 scenario.consolidate(statistics);
+            }
         }
     }
 
@@ -442,7 +432,7 @@ public class HtmlMarkdownReport {
         }
 
         public boolean isMatching() {
-            return !isEmpty(match.getLocation());
+            return !isNullOrEmpty(match.getLocation());
         }
 
         public boolean isSuccess() {
@@ -535,38 +525,10 @@ public class HtmlMarkdownReport {
     }
 
     public String formatHtml(String text) {
-        if (isEmpty(text)) {
+        if (isNullOrEmpty(text)) {
             return "";
         }
         return markdown.markdownToHtml(text);
-    }
-
-    public static boolean areEquals(String one, String two) {
-        if (one == two)
-            return true;
-        if (one == null || two == null)
-            return false;
-        return one.equalsIgnoreCase(two);
-    }
-
-    private static Pattern COMMENT = Pattern.compile("^\\s*#*");
-
-    public static String discardCommentChar(String value) {
-        return COMMENT.matcher(value).replaceAll("");
-    }
-
-    public static boolean isEmpty(String location) {
-        return location == null || location.isEmpty();
-    }
-
-    public static boolean isEmpty(Collection<?> location) {
-        return location == null || location.isEmpty();
-    }
-
-    public static CharSequence emptyIfNull(String text) {
-        if (text == null)
-            return "";
-        return text;
     }
 
     public static class Statistics {
@@ -606,7 +568,7 @@ public class HtmlMarkdownReport {
         public void stepNoMatching() {
             nbStepNoMatching++;
         }
-        
+
         public void stepSuccessed() {
             nbStepSuccessed++;
         }

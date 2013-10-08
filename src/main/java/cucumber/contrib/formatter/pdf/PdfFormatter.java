@@ -11,11 +11,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 
-/**
- *
- */
 public class PdfFormatter implements Formatter, Reporter {
-
 
     private final File reportDir;
     private ModelBasedReport report;
@@ -71,7 +67,7 @@ public class PdfFormatter implements Formatter, Reporter {
 
     @Override
     public void syntaxError(String s, String s2, List<String> strings, String s3, Integer integer) {
-        //TODO
+        // TODO
     }
 
     @Override
@@ -93,12 +89,12 @@ public class PdfFormatter implements Formatter, Reporter {
 
     @Override
     public void before(Match match, Result result) {
-        //TODO
+        // TODO
     }
 
     @Override
     public void after(Match match, Result result) {
-        //TODO
+        // TODO
     }
 
     @Override
@@ -113,11 +109,11 @@ public class PdfFormatter implements Formatter, Reporter {
 
     @Override
     public void embedding(String s, byte[] bytes) {
-        //TODO
+        // TODO
     }
 
     @Override
     public void write(String s) {
-        //TODO
+        // TODO
     }
 }

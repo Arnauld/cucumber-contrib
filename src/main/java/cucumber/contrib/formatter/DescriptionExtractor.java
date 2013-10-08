@@ -1,16 +1,17 @@
 package cucumber.contrib.formatter;
 
 import cucumber.contrib.formatter.model.HasComments;
-import cucumber.contrib.formatter.model.StepWrapper;
 import gherkin.formatter.model.Comment;
 
 import java.util.List;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 public class DescriptionExtractor {
 
     public static String extractDescription(String description, List<? extends HasComments> hasComments) {
         StringBuilder builder = new StringBuilder();
-        if (!BricABrac.isEmpty(description)) {
+        if (!isNullOrEmpty(description)) {
             builder.append(description).append(BricABrac.NL);
         }
         if (!hasComments.isEmpty()) {
