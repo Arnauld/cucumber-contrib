@@ -5,7 +5,8 @@ import gherkin.formatter.model.*;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static cucumber.contrib.formatter.BricABrac.areEquals;
+import static cucumber.contrib.formatter.BricABrac.areEqualsIgnoringCase;
+import static cucumber.contrib.formatter.BricABrac.isEmpty;
 
 public class StepWrapper implements Wrapper, HasComments {
     private final Step step;
@@ -33,19 +34,19 @@ public class StepWrapper implements Wrapper, HasComments {
     }
 
     public boolean isSuccess() {
-        return areEquals("passed", result.getStatus());
+        return areEqualsIgnoringCase("passed", result.getStatus());
     }
 
     public boolean isSkipped() {
-        return areEquals("skipped", result.getStatus());
+        return areEqualsIgnoringCase("skipped", result.getStatus());
     }
 
     public boolean isPending() {
-        return areEquals("pending", result.getStatus());
+        return areEqualsIgnoringCase("pending", result.getStatus());
     }
 
     public boolean isFailure() {
-        return areEquals("failed", result.getStatus());
+        return areEqualsIgnoringCase("failed", result.getStatus());
     }
 
     @Override

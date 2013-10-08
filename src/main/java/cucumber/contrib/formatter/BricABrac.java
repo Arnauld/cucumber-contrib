@@ -12,7 +12,7 @@ public class BricABrac {
     private static final String COMMENT = "#";
     private static final Pattern COMMENT_PATTERN = compile("^\\s*" + COMMENT);
 
-    public static boolean areEquals(String one, String two) {
+    public static boolean areEqualsIgnoringCase(String one, String two) {
         if (one == two) {
             return true;
         }

@@ -19,6 +19,10 @@ public class FeatureWrapper implements Wrapper {
         this.feature = feature;
     }
 
+    public String getUri() {
+        return uri;
+    }
+
     public void background(Background background) {
         this.background = new BackgroundWrapper(background);
     }
@@ -59,8 +63,9 @@ public class FeatureWrapper implements Wrapper {
     @Override
     public void consolidate(Statistics statistics) {
         statistics.feature();
-        for (ScenarioWrapper scenario : scenarios)
+        for (ScenarioWrapper scenario : scenarios) {
             scenario.consolidate(statistics);
+        }
     }
 
     public String getName() {

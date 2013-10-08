@@ -1,6 +1,7 @@
 package cucumber.contrib.formatter.pdf;
 
 import com.itextpdf.text.DocumentException;
+import cucumber.contrib.formatter.FormatterException;
 import cucumber.contrib.formatter.model.FeatureWrapper;
 import cucumber.contrib.formatter.model.ModelBasedReport;
 import gherkin.formatter.Formatter;
@@ -15,54 +16,84 @@ public class PdfFormatter implements Formatter, Reporter {
 
     private final File reportDir;
     private ModelBasedReport report;
-    private final PdfEmitter pdfEmitter;
+    private PdfEmitter pdfEmitter;
+    private Configuration configuration;
 
-    public PdfFormatter(File reportDir) throws FileNotFoundException, DocumentException {
-        reportDir.mkdirs();
+    public PdfFormatter(File reportDir) throws FileNotFoundException {
         this.reportDir = reportDir;
-        this.pdfEmitter = new PdfEmitter();
-        this.pdfEmitter.init(new File(reportDir, "report.pdf"));
-        this.report = new ModelBasedReport() {
-            @Override
-            protected void emit(FeatureWrapper currentFeature) {
-                pdfEmitter.emit(currentFeature);
+        this.reportDir.mkdirs();
+    }
+
+    private Configuration getConfiguration() {
+        if(configuration == null) {
+            configuration = createConfiguration();
+        }
+        return configuration;
+    }
+
+    protected Configuration createConfiguration() {
+        return new Configuration();
+    }
+
+    private ModelBasedReport getReport() {
+        if(report == null) {
+            report = new ModelBasedReport() {
+                @Override
+                protected void emit(FeatureWrapper currentFeature) {
+                    getPdfEmitter().emit(currentFeature);
+                }
+            };
+        }
+        return report;
+    }
+
+    private PdfEmitter getPdfEmitter() {
+        if (pdfEmitter == null) {
+            pdfEmitter = new PdfEmitter(getConfiguration());
+            try {
+                pdfEmitter.init(new File(reportDir, "report.pdf"));
+            } catch (FileNotFoundException e) {
+                throw new FormatterException("Failed to create report file", e);
+            } catch (DocumentException e) {
+                throw new FormatterException("Failed to create report file", e);
             }
-        };
+        }
+        return pdfEmitter;
     }
 
     @Override
     public void uri(String uri) {
-        report.uri(uri);
+        getReport().uri(uri);
     }
 
     @Override
     public void feature(Feature feature) {
-        report.feature(feature);
+        getReport().feature(feature);
     }
 
     @Override
     public void background(Background background) {
-        report.background(background);
+        getReport().background(background);
     }
 
     @Override
     public void scenario(Scenario scenario) {
-        report.scenario(scenario);
+        getReport().scenario(scenario);
     }
 
     @Override
     public void scenarioOutline(ScenarioOutline scenarioOutline) {
-        report.scenarioOutline(scenarioOutline);
+        getReport().scenarioOutline(scenarioOutline);
     }
 
     @Override
     public void examples(Examples examples) {
-        report.examples(examples);
+        getReport().examples(examples);
     }
 
     @Override
     public void step(Step step) {
-        report.step(step);
+        getReport().step(step);
     }
 
     @Override
@@ -78,8 +109,8 @@ public class PdfFormatter implements Formatter, Reporter {
     @Override
     public void done() {
         System.out.println("PdfFormatter.done");
-        report.done();
-        pdfEmitter.done();
+        getReport().done();
+        getPdfEmitter().done();
     }
 
     @Override
@@ -99,12 +130,12 @@ public class PdfFormatter implements Formatter, Reporter {
 
     @Override
     public void result(Result result) {
-        report.result(result);
+        getReport().result(result);
     }
 
     @Override
     public void match(Match match) {
-        report.match(match);
+        getReport().match(match);
     }
 
     @Override
@@ -116,4 +147,5 @@ public class PdfFormatter implements Formatter, Reporter {
     public void write(String s) {
         // TODO
     }
+
 }

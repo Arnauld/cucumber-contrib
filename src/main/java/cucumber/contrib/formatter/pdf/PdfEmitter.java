@@ -1,7 +1,6 @@
 package cucumber.contrib.formatter.pdf;
 
 import com.google.common.io.ByteSource;
-import com.google.common.io.Resources;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.CMYKColor;
 import com.itextpdf.text.pdf.PdfPCell;
@@ -9,6 +8,7 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import cucumber.contrib.formatter.model.FeatureWrapper;
 import cucumber.contrib.formatter.model.ScenarioWrapper;
+import cucumber.contrib.formatter.model.Statistics;
 import cucumber.contrib.formatter.model.StepWrapper;
 import gherkin.formatter.model.DataTableRow;
 import gherkin.formatter.model.Row;
@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 
 import static com.google.common.io.Resources.asByteSource;
@@ -26,50 +27,24 @@ public class PdfEmitter {
 
     private Document document;
     private PdfWriter writer;
-    private MarkdownEmitter markdownEmitter;
+    private Configuration configuration;
+    private Statistics statistics;
+    private boolean firstFeature = true;
+
+    public PdfEmitter(Configuration configuration) {
+        this.configuration = configuration;
+        this.statistics = new Statistics();
+    }
 
     public void init(File file) throws FileNotFoundException, DocumentException {
-        markdownEmitter = new MarkdownEmitter();
-        document = new Document(PageSize.A4, 50, 50, 50, 50);
+        document = configuration.createDocument();
         writer = PdfWriter.getInstance(document, new FileOutputStream(file));
         document.open();
-        writePreamble();
+
     }
 
-    protected Font partFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 18, Font.ITALIC, new CMYKColor(0, 255, 255, 17));
-    }
-
-    protected Font featureTitleFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD, new CMYKColor(0, 255, 255, 17));
-    }
-
-    protected Font scenarioTitleFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 14, Font.BOLD, new CMYKColor(0, 255, 255, 17));
-    }
-
-    protected Font stepKeywordFont() {
-        return FontFactory.getFont(FontFactory.COURIER, 8, Font.BOLD, new CMYKColor(255, 255, 0, 17));
-    }
-
-    protected Font stepDefaultFont() {
-        return FontFactory.getFont(FontFactory.COURIER, 8, Font.NORMAL, new CMYKColor(255, 255, 0, 17));
-    }
-
-    protected Font tagsFont() {
-        return FontFactory.getFont(FontFactory.COURIER, 8, Font.ITALIC, new CMYKColor(25, 255, 255, 17));
-    }
-
-    protected Font tableHeaderFont() {
-        return FontFactory.getFont(FontFactory.COURIER, 8, Font.BOLD, BaseColor.WHITE);
-    }
-
-    protected Font tableDataFont() {
-        return stepDefaultFont();
-    }
-
-    protected void writePreamble() {
-
+    private void writePreamble(String featureRootUri) throws DocumentException {
+        configuration.writePreambule(featureRootUri, document);
     }
 
     protected Font defaultFont() {
@@ -77,16 +52,34 @@ public class PdfEmitter {
     }
 
     public void emit(FeatureWrapper feature) {
-        Paragraph featureTitle = new Paragraph(feature.getName(), featureTitleFont());
+        if(firstFeature) {
+            try {
+                writePreamble(extractUriParent(feature.getUri()));
+            } catch (DocumentException e) {
+                e.printStackTrace();
+            }
+        }
+
+        feature.consolidate(statistics);
+
+        //
+        // Title
+        Paragraph featureTitle = new Paragraph(feature.getName(), configuration.featureTitleFont());
         Chapter featureChap = new Chapter(featureTitle, 1);
         featureChap.setNumberDepth(0);
 
+        // Uri
+        Paragraph uri = new Paragraph("Uri: " + feature.getUri(), defaultFont());
+        featureChap.add(uri);
+
+        // Description
         Paragraph paragraph = new Paragraph("", defaultFont());
         paragraph.setSpacingBefore(25.0f);
         paragraph.setSpacingAfter(25.0f);
-        appendMarkdownContent(paragraph, feature.getDescription());
+        configuration.appendMarkdownContent(paragraph, feature.getDescription());
         featureChap.add(paragraph);
 
+        // Scenario
         for (ScenarioWrapper scenario : feature.getScenarios()) {
             emit(featureChap, scenario);
         }
@@ -99,20 +92,23 @@ public class PdfEmitter {
         }
     }
 
-    private void appendMarkdownContent(final java.util.List<Element> elements, String markdownText) {
-        elements.addAll(markdownEmitter.markdownToElements(markdownText));
+    private String extractUriParent(String uri) {
+        int index = uri.lastIndexOf('/');
+        if(index > 0)
+            return uri.substring(0, index);
+        return null;
     }
 
     public void emit(Chapter featureChap, ScenarioWrapper scenario) {
-        Paragraph scenarioTitle = new Paragraph(scenario.getName(), scenarioTitleFont());
+        Paragraph scenarioTitle = new Paragraph(scenario.getName(), configuration.scenarioTitleFont());
         Section section = featureChap.addSection(scenarioTitle);
 
         Paragraph tags = new Paragraph("Tags: ", defaultFont());
         for (Tag tag : scenario.getTags()) {
-            tags.add(new Chunk(tag.getName(), tagsFont()));
+            tags.add(new Chunk(tag.getName(), configuration.tagsFont()));
         }
         section.add(tags);
-        appendMarkdownContent(section, scenario.getDescription());
+        configuration.appendMarkdownContent(section, scenario.getDescription());
 
         Paragraph steps = new Paragraph("");
         for (StepWrapper step : scenario.getSteps()) {
@@ -132,7 +128,7 @@ public class PdfEmitter {
 
         PdfPTable stepAsTable = new PdfPTable(2);
         try {
-            stepAsTable.setTotalWidth(new float[] { 16.5f, documentContentWidth() - 16.5f });
+            stepAsTable.setTotalWidth(new float[]{16.5f, documentContentWidth() - 16.5f});
         } catch (DocumentException e) {
             // ignore?
             e.printStackTrace();
@@ -152,8 +148,8 @@ public class PdfEmitter {
         stepAsTable.addCell(cell);
 
         Paragraph stepParagraph = new Paragraph();
-        stepParagraph.add(new Chunk(step.getKeyword(), stepKeywordFont()));
-        stepParagraph.add(new Chunk(step.getName(), stepDefaultFont()));
+        stepParagraph.add(new Chunk(step.getKeyword(), configuration.stepKeywordFont()));
+        stepParagraph.add(new Chunk(step.getName(), configuration.stepDefaultFont()));
 
         cell = new PdfPCell(stepParagraph);
         cell.setBorder(Rectangle.NO_BORDER);
@@ -202,13 +198,11 @@ public class PdfEmitter {
         }
     }
 
-    private BaseColor VERY_LIGHT_GRAY = new BaseColor(215, 215, 215);
-
     private Font getTableFont(boolean firstRow) {
         if (firstRow) {
-            return tableHeaderFont();
+            return configuration.tableHeaderFont();
         } else {
-            return tableDataFont();
+            return configuration.tableDataFont();
         }
     }
 
@@ -239,14 +233,18 @@ public class PdfEmitter {
                 PdfPCell c = new PdfPCell(new Phrase(content, font));
 
                 if (firstRow) {
-                    c.setPaddingBottom(5);
+                    // c.setPaddingBottom(5);
                     c.setHorizontalAlignment(Element.ALIGN_CENTER);
-                    c.setBackgroundColor(new BaseColor(0, 183, 255));
+                    BaseColor backgroundColor = configuration.tableHeaderBackground();
+                    if (backgroundColor != null)
+                        c.setBackgroundColor(backgroundColor);
                 }
 
                 // alternate bg
                 if (j > 0 && j % 2 == 0) {
-                    c.setBackgroundColor(VERY_LIGHT_GRAY);
+                    BaseColor backgroundColor = configuration.tableRowAlternateBackground();
+                    if (backgroundColor != null)
+                        c.setBackgroundColor(backgroundColor);
                 }
 
                 int border = 0;

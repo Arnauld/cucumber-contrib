@@ -436,19 +436,19 @@ public class HtmlMarkdownReport {
         }
 
         public boolean isSuccess() {
-            return areEquals("passed", result.getStatus());
+            return areEqualsIgnoringCase("passed", result.getStatus());
         }
 
         public boolean isSkipped() {
-            return areEquals("skipped", result.getStatus());
+            return areEqualsIgnoringCase("skipped", result.getStatus());
         }
 
         public boolean isPending() {
-            return areEquals("pending", result.getStatus());
+            return areEqualsIgnoringCase("pending", result.getStatus());
         }
 
         public boolean isFailure() {
-            return areEquals("failed", result.getStatus());
+            return areEqualsIgnoringCase("failed", result.getStatus());
         }
 
         @Override
