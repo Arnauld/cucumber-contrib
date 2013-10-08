@@ -32,11 +32,10 @@ import cucumber.runtime.io.Resource;
  * Direct copy of {#link cucumber.runtime.formatter.HTMLFormatter} to customize it.
  */
 public class HtmlMarkdownFormatter implements Formatter, Reporter {
-    
+
     private static final String HTML_FILENAME = "index.html";
     private static final String ASSETS_ROOT = "spec/formatter/";
-    
-    @SuppressWarnings("serial")
+
     private static final Map<String, String> MIME_TYPES_EXTENSIONS = new HashMap<String, String>() {
         {
             put("image/bmp", "bmp");
@@ -59,18 +58,12 @@ public class HtmlMarkdownFormatter implements Formatter, Reporter {
         this.copyReportFiles();
     }
 
-    /* (non-Javadoc)
-     * @see gherkin.formatter.Formatter#uri(java.lang.String)
-     */
     @Override
     public void uri(String uri) {
         report.uri(uri);
         System.out.println("SpecFormatter.uri(" + uri + ")");
     }
 
-    /* (non-Javadoc)
-     * @see gherkin.formatter.Formatter#feature(gherkin.formatter.model.Feature)
-     */
     @Override
     public void feature(Feature feature) {
         System.out.println("SpecFormatter.feature(" + feature.toMap() + ")");
@@ -130,23 +123,12 @@ public class HtmlMarkdownFormatter implements Formatter, Reporter {
         jsOut().close();
     }
 
-//    private void writeToJsReport(String functionName, String arg) {
-//        String stringArg = gson.toJson(arg);
-//        jsOut().append(JS_FORMATTER_VAR).append(".").append(functionName).append("(").append(stringArg).append(");").println();
-//    }
-//
-//    private void writeToJsReport(String functionName, Mappable arg) {
-//        String stringArg = gson.toJson(arg.toMap());
-//        jsOut().append(JS_FORMATTER_VAR).append(".").append(functionName).append("(").append(stringArg).append(");").println();
-//    }
-
-
     @Override
     public void match(Match match) {
         System.out.println("SpecFormatter.match(" + match.toMap() + ")");
         report.match(match);
     }
-    
+
     @Override
     public void result(Result result) {
         System.out.println("SpecFormatter.result(" + result.toMap() + ")");
@@ -165,7 +147,6 @@ public class HtmlMarkdownFormatter implements Formatter, Reporter {
         throw new UnsupportedOperationException();
     }
 
-
     @Override
     public void embedding(String mimeType, byte[] data) {
         System.out.println("SpecFormatter.embedding(" + mimeType + ")");
@@ -174,7 +155,6 @@ public class HtmlMarkdownFormatter implements Formatter, Reporter {
         if (extension != null) {
             StringBuilder fileName = new StringBuilder("embedded").append(embeddedIndex++).append(".").append(extension);
             writeBytesAndClose(data, reportFileOutputStream(fileName.toString()));
-            //writeToJsReport("embedding", new StringBuilder("'").append(mimeType).append("','").append(fileName).append("'").toString());
             throw new UnsupportedOperationException();
         }
     }
@@ -182,26 +162,26 @@ public class HtmlMarkdownFormatter implements Formatter, Reporter {
     @Override
     public void write(String text) {
         System.out.println("SpecFormatter.write(" + text + ")");
-        //writeToJsReport("write", text);
         throw new UnsupportedOperationException();
     }
 
     private void copyReportFiles() {
-        Iterable<Resource> resources = 
-                new ClasspathResourceLoader(getClass().getClassLoader()).resources(ASSETS_ROOT, null);
-        for(Resource resource : resources) {
+        Iterable<Resource> resources = new ClasspathResourceLoader(getClass().getClassLoader()).resources(ASSETS_ROOT, null);
+        for (Resource resource : resources) {
             String textAsset = resource.getPath().substring(ASSETS_ROOT.length());
             try {
                 InputStream textAssetStream = resource.getInputStream();
-                
-                if(textAssetStream == null) {
-                    throw new CucumberException("Couldn't find " + textAsset + ". Is cucumber-html on your classpath? Make sure you have the right version.");
+
+                if (textAssetStream == null) {
+                    throw new CucumberException("Couldn't find " + textAsset
+                            + ". Is cucumber-html on your classpath? Make sure you have the right version.");
                 }
-                //String baseName = new File(textAsset).getName();
+                // String baseName = new File(textAsset).getName();
                 writeStreamAndClose(textAssetStream, reportFileOutputStream(textAsset));
-                
+
             } catch (IOException e) {
-                throw new CucumberException("Couldn't find " + textAsset + ". Is cucumber-spec on your classpath? Make sure you have the right version.", e);
+                throw new CucumberException("Couldn't find " + textAsset
+                        + ". Is cucumber-spec on your classpath? Make sure you have the right version.", e);
             }
         }
     }

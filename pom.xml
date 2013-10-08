@@ -4,10 +4,6 @@
 	<groupId>cucumber</groupId>
 	<artifactId>cucumber-contrib</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-
-	<!-- ************************************************ -->
-	<!-- *~~~~~~~~~~~~~~~~~PROPERTIES~~~~~~~~~~~~~~~~~~~* -->
-	<!-- ************************************************ -->
 	<properties>
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
@@ -15,37 +11,28 @@
 		<groovy.version>2.1.2</groovy.version>
 		<cucumber.version>1.1.1</cucumber.version>
 	</properties>
-
-	<!-- ************************************************ -->
-	<!-- *~~~~~~~~~~~~~~~~DEPENDENCIES~~~~~~~~~~~~~~~~~~* -->
-	<!-- ************************************************ -->
 	<dependencies>
 		<dependency>
 			<groupId>info.cukes</groupId>
 			<artifactId>cucumber-picocontainer</artifactId>
 			<version>${cucumber.version}</version>
-			<!-- <scope>test</scope> : not in scope test since one defines a custom formatter-->
 		</dependency>
-		
 		<dependency>
-		  <groupId>org.pegdown</groupId>
-		  <artifactId>pegdown</artifactId>
-		  <version>1.4.0</version>
+			<groupId>org.pegdown</groupId>
+			<artifactId>pegdown</artifactId>
+			<version>1.4.0</version>
 		</dependency>
-
-        <dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>itextpdf</artifactId>
-            <version>5.3.0</version>
-        </dependency>
-		
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>itextpdf</artifactId>
+			<version>5.3.0</version>
+		</dependency>
 		<dependency>
 			<groupId>info.cukes</groupId>
 			<artifactId>cucumber-junit</artifactId>
 			<version>${cucumber.version}</version>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -64,18 +51,22 @@
 			<version>1.4</version>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>com.google.collections</groupId>
-            <artifactId>google-collections</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>14.0</version>
-        </dependency>
-    </dependencies>
-
+		<dependency>
+			<groupId>com.google.collections</groupId>
+			<artifactId>google-collections</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>15.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.itextpdf.tool</groupId>
+			<artifactId>xmlworker</artifactId>
+			<version>5.4.4</version>
+		</dependency>
+	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
@@ -88,53 +79,6 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
-			<!--<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>overrides-cucumber-report-resources</id>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<phase>prepare-package</phase>
-						<configuration>
-							<target>
-								<taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy"
-									classpathref="maven.plugin.classpath" />
-								<groovy><![CDATA[
-
-def reportSrcDir = new File(project.baseDir, "src${File.separator}report")
-def reportDstDir = new File(project.baseDir, "target${File.separator}cucumber-html-report")
-
-new AntBuilder().copy( todir:reportDstDir, verbose:"on", overwrite:"true" ) {
-  fileset( dir:reportSrcDir )
-}
-
-]]></groovy>
-							</target>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>-->
 		</plugins>
-
-		<pluginManagement>
-			<plugins>
-				<!-- Standard plugins - alphabetically -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-antrun-plugin</artifactId>
-					<version>1.7</version>
-					<dependencies>
-						<dependency>
-							<groupId>org.codehaus.groovy</groupId>
-							<artifactId>groovy-all</artifactId>
-							<version>${groovy.version}</version>
-						</dependency>
-					</dependencies>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 </project>

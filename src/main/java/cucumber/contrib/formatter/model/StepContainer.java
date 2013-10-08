@@ -1,6 +1,5 @@
 package cucumber.contrib.formatter.model;
 
-import gherkin.formatter.model.Comment;
 import gherkin.formatter.model.Match;
 import gherkin.formatter.model.Result;
 import gherkin.formatter.model.Step;

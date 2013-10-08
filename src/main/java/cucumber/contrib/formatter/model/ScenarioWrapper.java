@@ -1,6 +1,5 @@
 package cucumber.contrib.formatter.model;
 
-import cucumber.contrib.formatter.DescriptionExtractor;
 import gherkin.formatter.model.Comment;
 import gherkin.formatter.model.Scenario;
 import gherkin.formatter.model.Tag;
@@ -29,7 +28,6 @@ public class ScenarioWrapper extends StepContainer implements Wrapper, HasCommen
         return scenario.getComments();
     }
 
-
     @Override
     public void consolidate(Statistics statistics) {
         for (StepWrapper step : steps) {
@@ -51,7 +49,7 @@ public class ScenarioWrapper extends StepContainer implements Wrapper, HasCommen
                 return;
             }
         }
-        statistics.scenarioSuccessed();
+        statistics.scenarioSucceeded();
     }
 
     public String getName() {
