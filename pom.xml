@@ -1,90 +1,122 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>cucumber</groupId>
-	<artifactId>cucumber-contrib</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<properties>
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<groovy.version>2.1.2</groovy.version>
-		<cucumber.version>1.1.1</cucumber.version>
-        <itext.version>5.4.4</itext.version>
-	</properties>
-	<dependencies>
-		<dependency>
-			<groupId>info.cukes</groupId>
-			<artifactId>cucumber-picocontainer</artifactId>
-			<version>${cucumber.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.pegdown</groupId>
-			<artifactId>pegdown</artifactId>
-			<version>1.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.itextpdf</groupId>
-			<artifactId>itextpdf</artifactId>
-			<version>${itext.version}</version>
-		</dependency>
-        <dependency>
-            <groupId>com.itextpdf.tool</groupId>
-            <artifactId>xmlworker</artifactId>
-            <version>${itext.version}</version>
-        </dependency>
-		<dependency>
-			<groupId>info.cukes</groupId>
-			<artifactId>cucumber-junit</artifactId>
-			<version>${cucumber.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.10</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.easytesting</groupId>
-			<artifactId>fest-assert</artifactId>
-			<version>1.4</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.collections</groupId>
-			<artifactId>google-collections</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>15.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.itextpdf.tool</groupId>
-			<artifactId>xmlworker</artifactId>
-			<version>5.4.4</version>
-		</dependency>
-	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.0</version>
-				<configuration>
-					<encoding>UTF-8</encoding>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>cucumber</groupId>
+  <artifactId>cucumber-contrib</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <!-- Properties -->
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <properties>
+    <maven.compiler.source>1.6</maven.compiler.source>
+    <maven.compiler.target>1.6</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <groovy.version>2.1.2</groovy.version>
+    <cucumber.version>1.1.1</cucumber.version>
+    <itext.version>5.4.4</itext.version>
+  </properties>
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <!-- Dependencies -->
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <dependencies>
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Cucumber -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <dependency>
+      <groupId>info.cukes</groupId>
+      <artifactId>cucumber-picocontainer</artifactId>
+      <version>${cucumber.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>info.cukes</groupId>
+      <artifactId>cucumber-junit</artifactId>
+      <version>${cucumber.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Markdown -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+    <dependency>
+      <groupId>org.pegdown</groupId>
+      <artifactId>pegdown</artifactId>
+      <version>1.4.0</version>
+    </dependency>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- iText -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+    <dependency>
+      <groupId>com.itextpdf</groupId>
+      <artifactId>itextpdf</artifactId>
+      <version>${itext.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.itextpdf.tool</groupId>
+      <artifactId>xmlworker</artifactId>
+      <version>${itext.version}</version>
+    </dependency>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Utils -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.4</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.collections</groupId>
+      <artifactId>google-collections</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>15.0</version>
+    </dependency>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Test -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.10</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.easytesting</groupId>
+      <artifactId>fest-assert</artifactId>
+      <version>1.4</version>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <!-- Build -->
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.0</version>
+        <configuration>
+          <encoding>UTF-8</encoding>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

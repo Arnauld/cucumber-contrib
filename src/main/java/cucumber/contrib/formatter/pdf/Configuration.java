@@ -39,12 +39,33 @@ public class Configuration {
         return FontFactory.getFont(FontFactory.HELVETICA, 18, Font.ITALIC, new CMYKColor(0, 255, 255, 17));
     }
 
-    public Font featureTitleFont() {
+    public Font chapterTitleFont() {
         return FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD, new CMYKColor(0, 255, 255, 17));
     }
 
-    public Font scenarioTitleFont() {
+    public Font sectionTitleFont() {
         return FontFactory.getFont(FontFactory.HELVETICA, 14, Font.BOLD, new CMYKColor(0, 255, 255, 17));
+    }
+
+    public Font defaultFont() {
+        return FontFactory.getFont(FontFactory.HELVETICA, 12, Font.NORMAL, BaseColor.BLACK);
+    }
+
+    public Font defaultStrongFont() {
+        return FontFactory.getFont(FontFactory.HELVETICA, 12, Font.BOLD, BaseColor.BLACK);
+    }
+
+    protected Font defaultMetaFont() {
+        return FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, new CMYKColor(0, 255, 255, 17));
+    }
+
+
+    public Font featureTitleFont() {
+        return chapterTitleFont();
+    }
+
+    public Font scenarioTitleFont() {
+        return sectionTitleFont();
     }
 
     public Font stepKeywordFont() {
@@ -59,19 +80,19 @@ public class Configuration {
         return FontFactory.getFont(FontFactory.COURIER, 8, Font.ITALIC, new CMYKColor(25, 255, 255, 17));
     }
 
-    public Font tableHeaderFont() {
+    public Font stepDataTableHeaderFont() {
         return FontFactory.getFont(FontFactory.COURIER, 8, Font.BOLD, BaseColor.WHITE);
     }
 
-    public Font tableDataFont() {
+    public Font stepDataTableContentFont() {
         return stepDefaultFont();
     }
 
-    public BaseColor tableHeaderBackground() {
+    public BaseColor stepDataTableHeaderBackground() {
         return CYAN;
     }
 
-    public BaseColor tableRowAlternateBackground() {
+    public BaseColor stepDataTableRowAlternateBackground() {
         return VERY_LIGHT_GRAY;
     }
 
@@ -122,7 +143,12 @@ public class Configuration {
         titleParagraph.setSpacingBefore(10f);
         titleParagraph.setSpacingAfter(10f);
         Chapter chapter = new Chapter(titleParagraph, ++chapterCount);
-        chapter.setNumberDepth(0);
+        chapter.setNumberDepth(2);
         return chapter;
     }
+
+    public boolean shouldEmitSummary() {
+        return true;
+    }
+
 }

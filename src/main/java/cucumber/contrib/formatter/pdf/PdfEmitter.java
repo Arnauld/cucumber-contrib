@@ -1,8 +1,21 @@
 package cucumber.contrib.formatter.pdf;
 
+import static com.google.common.io.Resources.asByteSource;
+
 import com.google.common.io.ByteSource;
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.CMYKColor;
+import com.itextpdf.text.BadElementException;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chapter;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.Section;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -19,8 +32,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
-
-import static com.google.common.io.Resources.asByteSource;
 
 public class PdfEmitter {
 
@@ -41,22 +52,21 @@ public class PdfEmitter {
         document.open();
     }
 
-    private void writePreamble(String featureRootUri) throws DocumentException {
-        configuration.writePreambule(document);
+    private void writePreamble() {
+        try {
+            configuration.writePreambule(document);
+        }
+        catch (DocumentException e) {
+            e.printStackTrace();
+        }
     }
 
-    protected Font defaultFont() {
-        return FontFactory.getFont(FontFactory.TIMES, 8, Font.NORMAL, new CMYKColor(0, 255, 255, 17));
-    }
 
     public void emit(FeatureWrapper feature) {
-        if(firstFeature) {
+        if (firstFeature) {
             firstFeature = false;
-            try {
-                writePreamble(extractUriParent(feature.getUri()));
-            } catch (DocumentException e) {
-                e.printStackTrace();
-            }
+            writePreamble();
+
         }
 
         feature.consolidate(statistics);
@@ -66,11 +76,11 @@ public class PdfEmitter {
         Chapter featureChap = configuration.createTitledChapter(feature.getName());
 
         // Uri
-        Paragraph uri = new Paragraph("Uri: " + feature.getUri(), defaultFont());
+        Paragraph uri = new Paragraph("Uri: " + feature.getUri(), configuration.defaultMetaFont());
         featureChap.add(uri);
 
         // Description
-        Paragraph paragraph = new Paragraph("", defaultFont());
+        Paragraph paragraph = new Paragraph("", configuration.defaultFont());
         paragraph.setSpacingBefore(25.0f);
         paragraph.setSpacingAfter(25.0f);
         configuration.appendMarkdownContent(paragraph, feature.getDescription());
@@ -84,27 +94,24 @@ public class PdfEmitter {
         //
         try {
             document.add(featureChap);
-        } catch (DocumentException e) {
+        }
+        catch (DocumentException e) {
             e.printStackTrace();
         }
-    }
-
-    private String extractUriParent(String uri) {
-        int index = uri.lastIndexOf('/');
-        if(index > 0)
-            return uri.substring(0, index);
-        return null;
     }
 
     public void emit(Chapter featureChap, ScenarioWrapper scenario) {
         Paragraph scenarioTitle = new Paragraph(scenario.getName(), configuration.scenarioTitleFont());
         Section section = featureChap.addSection(scenarioTitle);
 
-        Paragraph tags = new Paragraph("Tags: ", defaultFont());
-        for (Tag tag : scenario.getTags()) {
-            tags.add(new Chunk(tag.getName(), configuration.tagsFont()));
+        List<Tag> tagList = scenario.getTags();
+        if (!tagList.isEmpty()) {
+            Paragraph tags = new Paragraph("Tags: ", configuration.defaultMetaFont());
+            for (Tag tag : tagList) {
+                tags.add(new Chunk(tag.getName(), configuration.tagsFont()));
+            }
+            section.add(tags);
         }
-        section.add(tags);
         configuration.appendMarkdownContent(section, scenario.getDescription());
 
         Paragraph steps = new Paragraph("");
@@ -126,7 +133,8 @@ public class PdfEmitter {
         PdfPTable stepAsTable = new PdfPTable(2);
         try {
             stepAsTable.setTotalWidth(new float[]{16.5f, documentContentWidth() - 16.5f});
-        } catch (DocumentException e) {
+        }
+        catch (DocumentException e) {
             // ignore?
             e.printStackTrace();
         }
@@ -137,7 +145,8 @@ public class PdfEmitter {
             stepStatus.scaleAbsolute(16.5f, 10.5f);
             cell = new PdfPCell(stepStatus);
             cell.setPaddingTop(2.0f);
-        } else {
+        }
+        else {
             cell = new PdfPCell(new Phrase(""));
         }
 
@@ -174,9 +183,11 @@ public class PdfEmitter {
             ByteSource byteSource = asByteSource(getClass().getResource(resourceName));
             byte[] bytes = byteSource.read();
             return Image.getInstance(bytes);
-        } catch (BadElementException e) {
+        }
+        catch (BadElementException e) {
             throw new RuntimeException(e);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -184,22 +195,27 @@ public class PdfEmitter {
     private String getStepStatusResourceName(StepWrapper step) {
         if (step.isSuccess()) {
             return "images/ok-icon.PNG";
-        } else if (step.isPending()) {
+        }
+        else if (step.isPending()) {
             return "images/pending-icon.PNG";
-        } else if (step.isFailure()) {
+        }
+        else if (step.isFailure()) {
             return "images/ko-icon.PNG";
-        } else if (step.isSkipped()) {
+        }
+        else if (step.isSkipped()) {
             return "images/skipped-icon.PNG";
-        } else {
+        }
+        else {
             return "images/unknown-icon.PNG";
         }
     }
 
     private Font getTableFont(boolean firstRow) {
         if (firstRow) {
-            return configuration.tableHeaderFont();
-        } else {
-            return configuration.tableDataFont();
+            return configuration.stepDataTableHeaderFont();
+        }
+        else {
+            return configuration.stepDataTableContentFont();
         }
     }
 
@@ -217,7 +233,8 @@ public class PdfEmitter {
                 table = new PdfPTable(cells.size());
                 try {
                     table.setWidths(columnMaxSizes);
-                } catch (DocumentException e) {
+                }
+                catch (DocumentException e) {
                     // Should not append since columnMaxSizes comes from tableRows.
                 }
             }
@@ -232,16 +249,18 @@ public class PdfEmitter {
                 if (firstRow) {
                     // c.setPaddingBottom(5);
                     c.setHorizontalAlignment(Element.ALIGN_CENTER);
-                    BaseColor backgroundColor = configuration.tableHeaderBackground();
-                    if (backgroundColor != null)
+                    BaseColor backgroundColor = configuration.stepDataTableHeaderBackground();
+                    if (backgroundColor != null) {
                         c.setBackgroundColor(backgroundColor);
+                    }
                 }
 
                 // alternate bg
                 if (j > 0 && j % 2 == 0) {
-                    BaseColor backgroundColor = configuration.tableRowAlternateBackground();
-                    if (backgroundColor != null)
+                    BaseColor backgroundColor = configuration.stepDataTableRowAlternateBackground();
+                    if (backgroundColor != null) {
                         c.setBackgroundColor(backgroundColor);
+                    }
                 }
 
                 int border = 0;
@@ -271,7 +290,100 @@ public class PdfEmitter {
     }
 
     public void done() {
+        emitSummary();
         System.out.println("PdfEmitter.done!");
         document.close();
+    }
+
+    private void emitSummary() {
+        if (!configuration.shouldEmitSummary()) {
+            return;
+        }
+
+        Chapter summary = configuration.createTitledChapter("Summary");
+
+        emitScenarioSummary(summary);
+        emitStepsSummary(summary);
+
+        try {
+            document.add(summary);
+        }
+        catch (DocumentException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void emitStepsSummary(Chapter chapter) {
+        Paragraph paragraph = new Paragraph();
+        paragraph.add(createStepsStatisticsTable(statistics));
+        paragraph.setSpacingBefore(20f);
+        paragraph.setSpacingAfter(20f);
+
+        Section section = chapter.addSection(20f, new Paragraph("Steps", configuration.sectionTitleFont()));
+        section.add(paragraph);
+    }
+
+    private void emitScenarioSummary(Chapter chapter) {
+        Paragraph paragraph = new Paragraph();
+        paragraph.add(createScenarioStatisticsTable(statistics));
+        paragraph.setSpacingBefore(20f);
+        paragraph.setSpacingAfter(20f);
+
+        Section section = chapter.addSection(20f, new Paragraph("Scenario", configuration.sectionTitleFont()));
+        section.add(paragraph);
+    }
+
+    private PdfPTable createScenarioStatisticsTable(Statistics statistics) {
+
+        ColorThresholdSelector successColors = ColorThresholdSelectors.redOrangeGreenPercent();
+        ColorThresholdSelector errorColors = ColorThresholdSelectors.yellowOrangeRedPercent();
+
+
+        PdfPTable table = new PdfPTable(2);
+        int total = statistics.getNbScenario();
+        appendRow(table, successColors, total, statistics.getNbScenarioSucceeded(), "Success");
+        appendRow(table, errorColors, total, statistics.getNbScenarioFailed(), "Failure");
+        appendRow(table, errorColors, total, statistics.getNbScenarioPending(), "Pending");
+        appendRow(table, errorColors, total, statistics.getNbScenarioSkipped(), "Skipped");
+        appendRow(table, errorColors, total, statistics.getNbScenarioOther(), "Other");
+        appendTotalRow(table, total, "Total");
+        return table;
+    }
+
+    private PdfPTable createStepsStatisticsTable(Statistics statistics) {
+
+        ColorThresholdSelector successColors = ColorThresholdSelectors.redOrangeGreenPercent();
+        ColorThresholdSelector errorColors = ColorThresholdSelectors.yellowOrangeRedPercent();
+
+        PdfPTable table = new PdfPTable(2);
+
+        int total = statistics.getNbSteps();
+        appendRow(table, successColors, total, statistics.getNbStepSucceeded(), "Success");
+        appendRow(table, errorColors, total, statistics.getNbStepFailed(), "Failure");
+        appendRow(table, errorColors, total, statistics.getNbStepPending(), "Pending");
+        appendRow(table, errorColors, total, statistics.getNbStepSkipped(), "Skipped");
+        appendRow(table, errorColors, total, statistics.getNbStepNoMatching(), "No matching");
+        appendRow(table, errorColors, total, statistics.getNbStepOther(), "Other");
+        appendTotalRow(table, total, "Total");
+        return table;
+    }
+
+
+    private void appendTotalRow(PdfPTable table, int count, String title) {
+        PdfPCell cellTitle = new PdfPCell(new Phrase(title, configuration.defaultStrongFont()));
+        cellTitle.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        PdfPCell cellValue = new PdfPCell(new Phrase(String.valueOf(count)));
+        cellValue.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        table.addCell(cellTitle);
+        table.addCell(cellValue);
+    }
+
+    private void appendRow(PdfPTable table, ColorThresholdSelector colorSelector, int total, int count, String title) {
+        PdfPCell cellTitle = new PdfPCell(new Phrase(title, configuration.defaultStrongFont()));
+        PdfPCell cellValue = new PdfPCell(new Phrase(String.valueOf(count)));
+        cellValue.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cellValue.setCellEvent(new PercentBackgroundEvent(count, total, colorSelector));
+        table.addCell(cellTitle);
+        table.addCell(cellValue);
     }
 }

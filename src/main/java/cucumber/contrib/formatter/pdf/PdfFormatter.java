@@ -110,12 +110,12 @@ public class PdfFormatter implements Formatter, Reporter {
     public void done() {
         System.out.println("PdfFormatter.done");
         getReport().done();
-        getPdfEmitter().done();
     }
 
     @Override
     public void close() {
         System.out.println("PdfFormatter.close");
+        getPdfEmitter().done();
     }
 
     @Override

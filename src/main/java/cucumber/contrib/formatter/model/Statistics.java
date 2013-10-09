@@ -62,4 +62,68 @@ public class Statistics {
         nbScenarioSkipped++;
     }
 
+    public int getNbScenarioSucceeded() {
+        return nbScenarioSucceeded;
+    }
+
+    public int getNbScenarioSkipped() {
+        return nbScenarioSkipped;
+    }
+
+    public int getNbScenarioFailed() {
+        return nbScenarioFailed;
+    }
+
+    public int getNbScenarioOther() {
+        return nbScenarioOther;
+    }
+
+    public int getNbScenarioPending() {
+        return nbScenarioPending;
+    }
+
+    public int getNbStepSucceeded() {
+        return nbStepSucceeded;
+    }
+
+    public int getNbFeature() {
+        return nbFeature;
+    }
+
+    public int getNbStepOther() {
+        return nbStepOther;
+    }
+
+    public int getNbStepPending() {
+        return nbStepPending;
+    }
+
+    public int getNbStepSkipped() {
+        return nbStepSkipped;
+    }
+
+    public int getNbStepFailed() {
+        return nbStepFailed;
+    }
+
+    public int getNbStepNoMatching() {
+        return nbStepNoMatching;
+    }
+
+    public int getNbScenario() {
+        return getNbScenarioFailed() +
+                getNbScenarioOther() +
+                getNbScenarioPending() +
+                getNbScenarioSkipped() +
+                getNbScenarioSucceeded();
+    }
+
+    public int getNbSteps() {
+        return getNbStepFailed() +
+                getNbStepOther() +
+                getNbStepNoMatching() +
+                getNbStepPending() +
+                getNbStepSkipped() +
+                getNbStepSucceeded();
+    }
 }
