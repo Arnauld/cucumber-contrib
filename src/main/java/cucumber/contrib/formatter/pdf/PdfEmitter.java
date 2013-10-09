@@ -49,6 +49,8 @@ public class PdfEmitter {
     public void init(File file) throws FileNotFoundException, DocumentException {
         document = configuration.createDocument();
         writer = PdfWriter.getInstance(document, new FileOutputStream(file));
+        writer.setBoxSize("art", configuration.getDocumentArtBox());
+        writer.setPageEvent(configuration.createHeaderFooter());
         document.open();
     }
 

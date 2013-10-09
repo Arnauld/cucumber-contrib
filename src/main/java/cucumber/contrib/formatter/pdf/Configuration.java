@@ -16,7 +16,9 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.CMYKColor;
+import com.itextpdf.text.pdf.PdfPageEvent;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 import cucumber.contrib.formatter.BricABrac;
 import cucumber.contrib.formatter.FormatterException;
@@ -69,42 +71,50 @@ public class Configuration {
         return new Document(PageSize.A4, 50, 50, 50, 50);
     }
 
+    public Rectangle getDocumentArtBox() {
+        return new Rectangle(50, 50, 545, 792);
+    }
+
+    private Font footerFont() {
+        return FontFactory.getFont(FontFactory.HELVETICA, 10, Font.ITALIC, getPrimaryColor());
+    }
+
     public Font mainTitleFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 32, Font.ITALIC, Colors.DARK_RED);
+        return FontFactory.getFont(FontFactory.HELVETICA, 32, Font.ITALIC, getPrimaryColor());
     }
 
     public Font subTitleFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 18, Font.ITALIC, Colors.DARK_RED);
+        return FontFactory.getFont(FontFactory.HELVETICA, 18, Font.ITALIC, getPrimaryColor());
     }
 
     public Font versionTitleFont() {
-        return FontFactory.getFont(FontFactory.COURIER, 14, Font.ITALIC, Colors.DARK_RED);
+        return FontFactory.getFont(FontFactory.COURIER, 14, Font.ITALIC, getPrimaryColor());
     }
 
     public Font generationDateFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 12, Font.NORMAL, BaseColor.BLACK);
+        return FontFactory.getFont(FontFactory.HELVETICA, 12, Font.NORMAL, getMainColor());
     }
 
     //
 
     public Font chapterTitleFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD, Colors.DARK_RED);
+        return FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD, getPrimaryColor());
     }
 
     public Font sectionTitleFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 14, Font.BOLD, Colors.DARK_RED);
+        return FontFactory.getFont(FontFactory.HELVETICA, 14, Font.BOLD, getPrimaryColor());
     }
 
     public Font defaultFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 12, Font.NORMAL, BaseColor.BLACK);
+        return FontFactory.getFont(FontFactory.HELVETICA, 12, Font.NORMAL, getMainColor());
     }
 
     public Font defaultStrongFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 12, Font.BOLD, BaseColor.BLACK);
+        return FontFactory.getFont(FontFactory.HELVETICA, 12, Font.BOLD, getMainColor());
     }
 
     protected Font defaultMetaFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, Colors.DARK_RED);
+        return FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, getPrimaryColor());
     }
 
 
@@ -198,20 +208,39 @@ public class Configuration {
             data++;
         }
 
-        if (!Strings.isNullOrEmpty(generationDateFormat)) {
-            String generationDate = new SimpleDateFormat(generationDateFormat).format(new Date());
-            Paragraph paragraph = new Paragraph(generationDate, generationDateFont());
-            paragraph.setAlignment(Element.ALIGN_RIGHT);
-            paragraph.setSpacingAfter(10.0f);
-            preface.add(paragraph);
-            data++;
-        }
-
         document.add(preface);
         if (data > 0) {
             document.newPage();
         }
+    }
 
+    public PdfPageEvent createHeaderFooter() {
+
+        String pageFooter = "";
+        String firstPageFooter = "";
+
+        if (!Strings.isNullOrEmpty(title)) {
+            pageFooter = title;
+        }
+
+        if (!Strings.isNullOrEmpty(generationDateFormat)) {
+            firstPageFooter = getFormattedGenerationDate();
+        }
+
+        return new HeaderFooter(firstPageFooter, pageFooter, getPrimaryColor(), footerFont());
+    }
+
+
+    private String getFormattedGenerationDate() {
+        return new SimpleDateFormat(generationDateFormat).format(new Date());
+    }
+
+    private BaseColor getMainColor() {
+        return BaseColor.BLACK;
+    }
+
+    private BaseColor getPrimaryColor() {
+        return Colors.DARK_RED;
     }
 
     private Paragraph addEmptyLines(Paragraph owner, int nb) {
