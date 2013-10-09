@@ -1,11 +1,9 @@
 package sample.coffeemachine;
 
-import cucumber.contrib.formatter.pdf.Configuration;
-import cucumber.contrib.formatter.pdf.PdfFormatter;
-import org.junit.runner.RunWith;
-
 import cucumber.api.junit.Cucumber;
+import cucumber.contrib.formatter.pdf.PdfFormatter;
 
+import org.junit.runner.RunWith;
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -17,12 +15,12 @@ public class RunCucumberTest {
 
     public static class ConfiguredFormatter extends PdfFormatter {
         public ConfiguredFormatter(File reportDir) throws FileNotFoundException {
-            super(reportDir);
-        }
-
-        @Override
-        protected Configuration createConfiguration() {
-            return super.createConfiguration().withPreambule(getClass().getResource("00-preambule.md"));
+            super(reportDir, defaultConfiguration()
+                    .withMetaInformationsResources(RunCucumberTest.class, "00-meta.properties")
+                    // override some of the previous meta infomations
+                    .withAuthor("Arnauld")
+                    .withTitle("Coffee Machine Specification")
+                    .withPreambuleResource(RunCucumberTest.class, "00-preambule.md"));
         }
     }
 }

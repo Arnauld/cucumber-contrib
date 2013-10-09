@@ -52,8 +52,10 @@ public class PdfEmitter {
         document.open();
     }
 
-    private void writePreamble() {
+    private void writeInitialData() {
         try {
+            configuration.writeMetaInformations(document);
+            configuration.writeFirstPages(document);
             configuration.writePreambule(document);
         }
         catch (DocumentException e) {
@@ -61,12 +63,10 @@ public class PdfEmitter {
         }
     }
 
-
     public void emit(FeatureWrapper feature) {
         if (firstFeature) {
             firstFeature = false;
-            writePreamble();
-
+            writeInitialData();
         }
 
         feature.consolidate(statistics);
@@ -133,10 +133,13 @@ public class PdfEmitter {
     }
 
     private void emitStep(Paragraph steps, StepWrapper step) {
+        float imageWidth = 16.5f;
+        float imageHeight = 10.5f;
 
         PdfPTable stepAsTable = new PdfPTable(2);
         try {
-            stepAsTable.setTotalWidth(new float[]{16.5f, documentContentWidth() - 16.5f});
+            float imageCellWidth = imageWidth + 5f;
+            stepAsTable.setTotalWidth(new float[]{imageCellWidth, documentContentWidth() - imageCellWidth});
         }
         catch (DocumentException e) {
             // ignore?
@@ -146,7 +149,7 @@ public class PdfEmitter {
         Image stepStatus = getStepStatusAsImageOrNull(step);
         PdfPCell cell;
         if (stepStatus != null) {
-            stepStatus.scaleAbsolute(16.5f, 10.5f);
+            stepStatus.scaleAbsolute(imageWidth, imageHeight);
             cell = new PdfPCell(stepStatus);
             cell.setPaddingTop(2.0f);
         }
@@ -168,7 +171,7 @@ public class PdfEmitter {
         if (step.hasTable()) {
             // table added on stepParagraph is not visible...
             // thus it becomes a direct nested table
-            PdfPTable table = formatTable(step.getTableRows());
+            PdfPTable table = createStepDataTable(step.getTableRows());
             stepAsTable.addCell(noBorder(new PdfPCell(new Phrase(""))));
             stepAsTable.addCell(noBorder(new PdfPCell(table)));
         }
@@ -223,26 +226,14 @@ public class PdfEmitter {
         }
     }
 
-    private PdfPTable formatTable(List<DataTableRow> tableRows) {
-        PdfPTable table = null;
-
-        int[] columnMaxSizes = getTableColumnsContentMaxLength(tableRows);
+    private PdfPTable createStepDataTable(List<DataTableRow> tableRows) {
+        PdfPTable table = createEmptyStepDataTable(tableRows);
 
         for (int j = 0; j < tableRows.size(); j++) {
             boolean firstRow = (j == 0);
             Row row = tableRows.get(j);
 
             List<String> cells = row.getCells();
-            if (table == null) {
-                table = new PdfPTable(cells.size());
-                try {
-                    table.setWidths(columnMaxSizes);
-                }
-                catch (DocumentException e) {
-                    // Should not append since columnMaxSizes comes from tableRows.
-                }
-            }
-
             Font font = getTableFont(firstRow);
 
             for (int i = 0; i < cells.size(); i++) {
@@ -259,13 +250,6 @@ public class PdfEmitter {
                     }
                 }
 
-                // alternate bg
-                if (j > 0 && j % 2 == 0) {
-                    BaseColor backgroundColor = configuration.stepDataTableRowAlternateBackground();
-                    if (backgroundColor != null) {
-                        c.setBackgroundColor(backgroundColor);
-                    }
-                }
 
                 int border = 0;
                 if (!firstColumn) {
@@ -277,6 +261,28 @@ public class PdfEmitter {
             }
         }
         return table;
+    }
+
+    private PdfPTable createEmptyStepDataTable(List<DataTableRow> tableRows) {
+        PdfPTable table = new PdfPTable(getTableColumnCount(tableRows));
+        table.setTableEvent(new AlternatingBackgroundEvent(configuration.stepDataTableRowAlternateBackground()));
+        try {
+            int[] columnMaxSizes = getTableColumnsContentMaxLength(tableRows);
+            table.setWidths(columnMaxSizes);
+        }
+        catch (DocumentException e) {
+            // Should not append since columnMaxSizes comes from tableRows.
+        }
+        return table;
+    }
+
+    private int getTableColumnCount(List<DataTableRow> tableRows) {
+        if(!tableRows.isEmpty()) {
+            List<String> cells = tableRows.get(0).getCells();
+            if(cells != null)
+                return cells.size();
+        }
+        return 1; // weird
     }
 
     private int[] getTableColumnsContentMaxLength(List<DataTableRow> tableRows) {

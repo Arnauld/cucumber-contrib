@@ -24,14 +24,20 @@ public class PdfFormatter implements Formatter, Reporter {
         this.reportDir.mkdirs();
     }
 
+    public PdfFormatter(File reportDir, Configuration configuration) throws FileNotFoundException {
+        this.reportDir = reportDir;
+        this.reportDir.mkdirs();
+        this.configuration = configuration;
+    }
+
     private Configuration getConfiguration() {
         if(configuration == null) {
-            configuration = createConfiguration();
+            configuration = defaultConfiguration();
         }
         return configuration;
     }
 
-    protected Configuration createConfiguration() {
+    public static Configuration defaultConfiguration() {
         return new Configuration();
     }
 

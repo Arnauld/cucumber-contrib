@@ -1,11 +1,14 @@
 package cucumber.contrib.formatter;
 
+import static java.util.regex.Pattern.compile;
+
 import com.google.common.collect.Iterables;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.regex.Pattern;
-
-import static java.util.regex.Pattern.compile;
 
 public class BricABrac {
     public static final String NL = "\n";
@@ -33,5 +36,29 @@ public class BricABrac {
 
     public static boolean startsWithComment(String text) {
         return text.startsWith(COMMENT);
+    }
+
+    public static void closeQuietly(Closeable closeable) {
+        try {
+            if (closeable != null) {
+                closeable.close();
+            }
+        }
+        catch (IOException e) {
+            // ignore
+        }
+    }
+
+    public static String join(List<String> values, String separator) {
+        StringBuilder b = new StringBuilder();
+        for (String value : values) {
+            if (value != null && !value.isEmpty()) {
+                if (b.length() > 0) {
+                    b.append(separator);
+                }
+                b.append(value);
+            }
+        }
+        return b.toString();
     }
 }
