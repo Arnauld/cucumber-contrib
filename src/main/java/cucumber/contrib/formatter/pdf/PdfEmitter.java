@@ -39,7 +39,6 @@ public class PdfEmitter {
         document = configuration.createDocument();
         writer = PdfWriter.getInstance(document, new FileOutputStream(file));
         document.open();
-
     }
 
     private void writePreamble(String featureRootUri) throws DocumentException {
@@ -64,9 +63,7 @@ public class PdfEmitter {
 
         //
         // Title
-        Paragraph featureTitle = new Paragraph(feature.getName(), configuration.featureTitleFont());
-        Chapter featureChap = new Chapter(featureTitle, 1);
-        featureChap.setNumberDepth(0);
+        Chapter featureChap = configuration.createTitledChapter(feature.getName());
 
         // Uri
         Paragraph uri = new Paragraph("Uri: " + feature.getUri(), defaultFont());

@@ -115,4 +115,14 @@ public class Configuration {
         return this;
     }
 
+    private int chapterCount = 0;
+
+    public Chapter createTitledChapter(String title) {
+        Paragraph titleParagraph = new Paragraph(title, featureTitleFont());
+        titleParagraph.setSpacingBefore(10f);
+        titleParagraph.setSpacingAfter(10f);
+        Chapter chapter = new Chapter(titleParagraph, ++chapterCount);
+        chapter.setNumberDepth(0);
+        return chapter;
+    }
 }

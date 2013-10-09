@@ -93,10 +93,8 @@ public class MarkdownEmitter {
             list.add(new WritableDirectElement() {
 
                 public void write(final PdfWriter writer, final Document doc) throws DocumentException {
-                    Paragraph featureTitle = new Paragraph(content, configuration.featureTitleFont());
-                    Chapter title = new Chapter(featureTitle, 1);
-                    title.setNumberDepth(0);
-                    doc.add(title);
+                    Chapter chapter = configuration.createTitledChapter(content);
+                    doc.add(chapter);
                 }
             });
             return list;
