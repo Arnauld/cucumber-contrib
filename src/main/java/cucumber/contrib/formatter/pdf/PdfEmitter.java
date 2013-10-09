@@ -88,7 +88,7 @@ public class PdfEmitter {
 
         // Scenario
         for (ScenarioWrapper scenario : feature.getScenarios()) {
-            emit(featureChap, scenario);
+            emitScenario(featureChap, scenario);
         }
 
         //
@@ -100,10 +100,24 @@ public class PdfEmitter {
         }
     }
 
-    public void emit(Chapter featureChap, ScenarioWrapper scenario) {
+    private void emitScenario(Chapter featureChap, ScenarioWrapper scenario) {
         Paragraph scenarioTitle = new Paragraph(scenario.getName(), configuration.scenarioTitleFont());
         Section section = featureChap.addSection(scenarioTitle);
 
+        emitScenarioTags(scenario, section);
+        configuration.appendMarkdownContent(section, scenario.getDescription());
+
+        Paragraph steps = new Paragraph("");
+        for (StepWrapper step : scenario.getSteps()) {
+            emitStep(steps, step);
+        }
+        // steps.setIndentationLeft(25.0f);
+        steps.setSpacingBefore(25.0f);
+        steps.setSpacingAfter(25.0f);
+        section.add(steps);
+    }
+
+    private void emitScenarioTags(ScenarioWrapper scenario, Section section) {
         List<Tag> tagList = scenario.getTags();
         if (!tagList.isEmpty()) {
             Paragraph tags = new Paragraph("Tags: ", configuration.defaultMetaFont());
@@ -112,23 +126,13 @@ public class PdfEmitter {
             }
             section.add(tags);
         }
-        configuration.appendMarkdownContent(section, scenario.getDescription());
-
-        Paragraph steps = new Paragraph("");
-        for (StepWrapper step : scenario.getSteps()) {
-            emit(steps, step);
-        }
-        // steps.setIndentationLeft(25.0f);
-        steps.setSpacingBefore(25.0f);
-        steps.setSpacingAfter(25.0f);
-        section.add(steps);
     }
 
     private float documentContentWidth() {
         return document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin();
     }
 
-    public void emit(Paragraph steps, StepWrapper step) {
+    private void emitStep(Paragraph steps, StepWrapper step) {
 
         PdfPTable stepAsTable = new PdfPTable(2);
         try {
