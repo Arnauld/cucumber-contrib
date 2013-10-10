@@ -59,6 +59,8 @@ public class Configuration {
     private String preambule;
     private String keywords;
 
+    public Configuration() {
+    }
 
     private MarkdownEmitter getMarkdownEmitter() {
         if (markdownEmitter == null) {
@@ -102,11 +104,11 @@ public class Configuration {
     }
 
     public Font defaultFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 12, Font.NORMAL, getMainColor());
+        return FontFactory.getFont(FontFactory.HELVETICA, 12, Font.NORMAL, getDefaultColor());
     }
 
     public Font defaultStrongFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 12, Font.BOLD, getMainColor());
+        return FontFactory.getFont(FontFactory.HELVETICA, 12, Font.BOLD, getDefaultColor());
     }
 
     protected Font defaultMetaFont() {
@@ -231,11 +233,11 @@ public class Configuration {
         return new SimpleDateFormat(generationDateFormat).format(new Date());
     }
 
-    private BaseColor getMainColor() {
+    public BaseColor getDefaultColor() {
         return BaseColor.BLACK;
     }
 
-    private BaseColor getPrimaryColor() {
+    public BaseColor getPrimaryColor() {
         return Colors.DARK_RED;
     }
 

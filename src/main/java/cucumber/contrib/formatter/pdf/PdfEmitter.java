@@ -6,6 +6,7 @@ import com.google.common.io.ByteSource;
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chapter;
+import com.itextpdf.text.ChapterAutoNumber;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -16,9 +17,15 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.Section;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfImportedPage;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.draw.LineSeparator;
+import cucumber.contrib.formatter.FormatterException;
 import cucumber.contrib.formatter.model.FeatureWrapper;
 import cucumber.contrib.formatter.model.ScenarioWrapper;
 import cucumber.contrib.formatter.model.Statistics;
@@ -28,6 +35,7 @@ import gherkin.formatter.model.Row;
 import gherkin.formatter.model.Tag;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,17 +48,23 @@ public class PdfEmitter {
     private Configuration configuration;
     private Statistics statistics;
     private boolean firstFeature = true;
+    private FileOutputStream fileOutputStream;
+    private TableOfContents tableOfContents;
 
     public PdfEmitter(Configuration configuration) {
         this.configuration = configuration;
         this.statistics = new Statistics();
     }
 
-    public void init(File file) throws FileNotFoundException, DocumentException {
-        document = configuration.createDocument();
-        writer = PdfWriter.getInstance(document, new FileOutputStream(file));
+    public void init(File fileDst) throws FileNotFoundException, DocumentException {
+        this.document = configuration.createDocument();
+        this.fileOutputStream = new FileOutputStream(fileDst);
+        this.writer = PdfWriter.getInstance(document, fileOutputStream);
+        this.tableOfContents = new TableOfContents();
+        //
         writer.setBoxSize("art", configuration.getDocumentArtBox());
         writer.setPageEvent(configuration.createHeaderFooter());
+        writer.setPageEvent(tableOfContents);
         document.open();
     }
 
@@ -311,8 +325,51 @@ public class PdfEmitter {
 
     public void done() {
         emitSummary();
+        emitTableOfContents();
         System.out.println("PdfEmitter.done!");
-        document.close();
+        closeDocumentAndFile();
+    }
+
+    private void emitTableOfContents() {
+        Chapter toc = new Chapter(new Paragraph("Table of content", configuration.chapterTitleFont()), -1);
+        toc.setNumberDepth(0);
+        toc.add(new Paragraph(""));
+
+        Chunk CONNECT = new Chunk(new LineSeparator(0.5f, 95, configuration.getDefaultColor(), Element.ALIGN_CENTER, -.5f));
+        Paragraph paragraph = new Paragraph();
+        paragraph.setSpacingBefore(20.0f); // first paragraph only
+        for(TableOfContents.Entry entry : tableOfContents.getEntries()) {
+            Chunk chunk = new Chunk(entry.getText());
+            chunk.setLocalGoto(entry.getAnchorDst());
+            paragraph.add(chunk);
+            paragraph.add(CONNECT);
+            paragraph.add(new Chunk("" + entry.getPage()));
+
+            float indent = 10.0f * entry.getLevel();
+            paragraph.setIndentationLeft(indent);
+
+            toc.add(paragraph);
+            paragraph = new Paragraph();
+        }
+        try {
+            document.add(toc);
+        }
+        catch (DocumentException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void closeDocumentAndFile() {
+        try {
+            if(document != null)
+                document.close();
+
+            if(fileOutputStream != null)
+                fileOutputStream.close();
+        }
+        catch (Exception e) {
+            throw new FormatterException("Error while flushing report to disk", e);
+        }
     }
 
     private void emitSummary() {
@@ -357,7 +414,6 @@ public class PdfEmitter {
 
         ColorThresholdSelector successColors = ColorThresholdSelectors.redOrangeGreenPercent();
         ColorThresholdSelector errorColors = ColorThresholdSelectors.yellowOrangeRedPercent();
-
 
         PdfPTable table = new PdfPTable(2);
         int total = statistics.getNbScenario();
