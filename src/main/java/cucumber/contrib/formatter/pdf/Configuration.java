@@ -91,10 +91,6 @@ public class Configuration {
         return FontFactory.getFont(FontFactory.COURIER, 14, Font.ITALIC, getPrimaryColor());
     }
 
-    public Font generationDateFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 12, Font.NORMAL, getMainColor());
-    }
-
     //
 
     public Font chapterTitleFont() {

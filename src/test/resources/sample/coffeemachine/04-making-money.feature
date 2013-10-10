@@ -1,9 +1,14 @@
 Feature: Making Money
 
-  In order to have daily reports of what is sold and when
-  As a shop keeper
-  I want to track statistics of machine usage
+#
+#  **In order to** have daily reports of what is sold and when
+#
+# **As a** shop keeper
+#
+# **I want to** track statistics of machine usage
+#
 
+  @Reporting
   Scenario: Statistics collect basic usage
 
     Given the following orders:
@@ -24,6 +29,7 @@ Feature: Making Money
     Total: 3.00€
     """
 
+  @Reporting
   Scenario: Statistics collect no usage
 
     When I query for a report

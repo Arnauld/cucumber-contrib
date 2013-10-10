@@ -123,8 +123,16 @@ public class PdfEmitter {
         List<Tag> tagList = scenario.getTags();
         if (!tagList.isEmpty()) {
             Paragraph tags = new Paragraph("Tags: ", configuration.defaultMetaFont());
+            boolean first = true;
             for (Tag tag : tagList) {
-                tags.add(new Chunk(tag.getName(), configuration.tagsFont()));
+                String text = tag.getName();
+                if(first) {
+                    first = false;
+                }
+                else {
+                    text = ", " + tag.getName();
+                }
+                tags.add(new Chunk(text, configuration.tagsFont()));
             }
             section.add(tags);
         }
