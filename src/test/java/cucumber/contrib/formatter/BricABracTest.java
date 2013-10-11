@@ -29,4 +29,19 @@ public class BricABracTest {
     public void discardCommentChar_double_comment_is_kept() {
         assertThat(BricABrac.discardCommentChar("  ##  bob")).isEqualTo("#  bob");
     }
+
+    @Test
+    public void isBlank() {
+        assertThat(BricABrac.isBlank(null)).isTrue();
+        assertThat(BricABrac.isBlank("  ")).isTrue();
+        assertThat(BricABrac.isBlank("\t")).isTrue();
+        assertThat(BricABrac.isBlank("\n\t\r")).isTrue();
+        assertThat(BricABrac.isBlank("\na\t\r")).isFalse();
+    }
+
+    @Test
+    public void isBlank__nbsp() {
+        assertThat(BricABrac.isBlank(" \u00A0")).isTrue();
+
+    }
 }

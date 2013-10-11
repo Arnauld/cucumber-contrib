@@ -1,18 +1,33 @@
 package cucumber.contrib.formatter.model;
 
 public class Statistics {
+
+    public interface Filter {
+        boolean isManual(ScenarioWrapper scenarioWrapper);
+    }
+
+    private int nbFeature;
+    //
     private int nbScenarioSucceeded;
     private int nbScenarioSkipped;
     private int nbScenarioFailed;
     private int nbScenarioOther;
     private int nbScenarioPending;
+    private int nbScenarioManual;
+    //
     private int nbStepSucceeded;
-    private int nbFeature;
     private int nbStepOther;
     private int nbStepPending;
     private int nbStepSkipped;
     private int nbStepFailed;
     private int nbStepNoMatching;
+    private int nbStepManual;
+
+    private Filter filter;
+
+    public Statistics(Filter filter) {
+        this.filter = filter;
+    }
 
     public void feature() {
         nbFeature++;
@@ -42,6 +57,10 @@ public class Statistics {
         nbStepSucceeded++;
     }
 
+    public void stepManual() {
+        nbStepManual++;
+    }
+
     public void scenarioOther() {
         nbScenarioOther++;
     }
@@ -52,6 +71,10 @@ public class Statistics {
 
     public void scenarioFailed() {
         nbScenarioFailed++;
+    }
+
+    public void scenarioManual() {
+        nbScenarioManual++;
     }
 
     public void scenarioSucceeded() {
@@ -86,6 +109,14 @@ public class Statistics {
         return nbStepSucceeded;
     }
 
+    public int getNbScenarioManual() {
+        return nbScenarioManual;
+    }
+
+    public int getNbStepManual() {
+        return nbStepManual;
+    }
+
     public int getNbFeature() {
         return nbFeature;
     }
@@ -110,7 +141,7 @@ public class Statistics {
         return nbStepNoMatching;
     }
 
-    public int getNbScenario() {
+    public int getNbScenarioExceptManual() {
         return getNbScenarioFailed() +
                 getNbScenarioOther() +
                 getNbScenarioPending() +
@@ -118,12 +149,73 @@ public class Statistics {
                 getNbScenarioSucceeded();
     }
 
-    public int getNbSteps() {
+    public int getNbScenario() {
+        return getNbScenarioExceptManual() +
+                getNbScenarioManual();
+    }
+
+    public int getNbStepsExceptManual() {
         return getNbStepFailed() +
                 getNbStepOther() +
                 getNbStepNoMatching() +
                 getNbStepPending() +
                 getNbStepSkipped() +
                 getNbStepSucceeded();
+    }
+
+    public int getNbSteps() {
+        return  getNbStepsExceptManual() +
+                getNbStepManual();
+    }
+
+
+
+    public void consolidate(ScenarioWrapper scenarioWrapper) {
+        boolean isManual = filter == null ? false : filter.isManual(scenarioWrapper);
+
+        if(isManual) {
+            scenarioManual();
+            for (StepWrapper step : scenarioWrapper.getSteps()) {
+                stepManual();
+            }
+            return;
+        }
+
+        for (StepWrapper step : scenarioWrapper.getSteps()) {
+            step.consolidate(this);
+        }
+
+        for (StepWrapper step : scenarioWrapper.getSteps()) {
+            if (step.isFailure()) {
+                scenarioFailed();
+                return;
+            } else if (step.isSkipped()) {
+                scenarioSkipped();
+                return;
+            } else if (step.isPending()) {
+                scenarioPending();
+                return;
+            } else if (!step.isSuccess()) {
+                scenarioOther();
+                return;
+            }
+        }
+        scenarioSucceeded();
+    }
+
+    public void consolidate(StepWrapper stepWrapper) {
+        if (!stepWrapper.isMatching()) {
+            stepNoMatching();
+        } else if (stepWrapper.isFailure()) {
+            stepFailed();
+        } else if (stepWrapper.isSkipped()) {
+            stepSkipped();
+        } else if (stepWrapper.isPending()) {
+            stepPending();
+        } else if (stepWrapper.isSuccess()) {
+            stepSucceeded();
+        } else {
+            stepOther();
+        }
     }
 }

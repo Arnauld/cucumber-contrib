@@ -51,19 +51,7 @@ public class StepWrapper implements Wrapper, HasComments {
 
     @Override
     public void consolidate(Statistics statistics) {
-        if (!isMatching()) {
-            statistics.stepNoMatching();
-        } else if (isFailure()) {
-            statistics.stepFailed();
-        } else if (isSkipped()) {
-            statistics.stepSkipped();
-        } else if (isPending()) {
-            statistics.stepPending();
-        } else if (isSuccess()) {
-            statistics.stepSucceeded();
-        } else {
-            statistics.stepOther();
-        }
+        statistics.consolidate(this);
     }
 
     public List<Comment> getComments() {

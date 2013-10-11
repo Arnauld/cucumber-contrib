@@ -14,12 +14,15 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.CMYKColor;
 import com.itextpdf.text.pdf.PdfPageEvent;
 import com.itextpdf.text.pdf.draw.LineSeparator;
+import com.itextpdf.tool.xml.pipeline.html.AbstractImageProvider;
+import com.itextpdf.tool.xml.pipeline.html.ImageProvider;
 import cucumber.contrib.formatter.BricABrac;
 import cucumber.contrib.formatter.FormatterException;
 
@@ -45,6 +48,7 @@ public class Configuration {
     public static final String META_VERSION = "version";
     public static final String META_GENERATION_DATE_FORMAT = "generation-date-format";
     public static final Charset UTF8 = Charset.forName("UTF-8");
+    private static final String META_IMAGE_ROOT_PATH = "image-root-path";
 
     // TODO extract to 'TemplateEngine' thus one can plug an other template engine
     private MarkdownEmitter markdownEmitter;
@@ -58,6 +62,7 @@ public class Configuration {
     private int chapterCount = 0;
     private String preambule;
     private String keywords;
+    private String imageRootPath;
 
     public Configuration() {
     }
@@ -328,6 +333,7 @@ public class Configuration {
                 .withKeywords(properties.getProperty(META_KEYWORDS, keywords))
                 .withSubject(properties.getProperty(META_SUBJECT, subject))
                 .withVersion(properties.getProperty(META_VERSION, version))
+                .withImageRootPath(properties.getProperty(META_IMAGE_ROOT_PATH, imageRootPath))
                 .withGenerationDateFormat(properties.getProperty(META_GENERATION_DATE_FORMAT, generationDateFormat));
     }
 
@@ -363,4 +369,31 @@ public class Configuration {
         return this;
     }
 
+    public String manualTag() {
+        return "@manual";
+    }
+
+    public ImageProvider getImageProvider() {
+        return new AbstractImageProvider() {
+
+            @Override
+            public Image retrieve(String src) {
+                return super.retrieve(src);
+            }
+
+            @Override
+            public String getImageRootPath() {
+                throw new FormatterException("ImageRootPath");
+            }
+        };
+    }
+
+    public String getImageRootPath() {
+        return imageRootPath;
+    }
+
+    public Configuration withImageRootPath(String imageRootPath) {
+        this.imageRootPath = imageRootPath;
+        return this;
+    }
 }

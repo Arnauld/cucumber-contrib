@@ -6,7 +6,6 @@ import com.google.common.io.ByteSource;
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chapter;
-import com.itextpdf.text.ChapterAutoNumber;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -17,12 +16,8 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.Section;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfImportedPage;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 import cucumber.contrib.formatter.FormatterException;
@@ -35,7 +30,6 @@ import gherkin.formatter.model.Row;
 import gherkin.formatter.model.Tag;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -53,7 +47,16 @@ public class PdfEmitter {
 
     public PdfEmitter(Configuration configuration) {
         this.configuration = configuration;
-        this.statistics = new Statistics();
+        initStatistics();
+    }
+
+    private void initStatistics() {
+        this.statistics = new Statistics(new Statistics.Filter() {
+            @Override
+            public boolean isManual(ScenarioWrapper scenarioWrapper) {
+                return scenarioWrapper.hasTag(configuration.manualTag());
+            }
+        });
     }
 
     public void init(File fileDst) throws FileNotFoundException, DocumentException {
@@ -85,6 +88,7 @@ public class PdfEmitter {
             writeInitialData();
         }
 
+        // statistics
         feature.consolidate(statistics);
 
         //
@@ -125,7 +129,7 @@ public class PdfEmitter {
 
         Paragraph steps = new Paragraph("");
         for (StepWrapper step : scenario.getSteps()) {
-            emitStep(steps, step);
+            emitStep(scenario, steps, step);
         }
         // steps.setIndentationLeft(25.0f);
         steps.setSpacingBefore(25.0f);
@@ -156,7 +160,10 @@ public class PdfEmitter {
         return document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin();
     }
 
-    private void emitStep(Paragraph steps, StepWrapper step) {
+    private void emitStep(ScenarioWrapper scenario, Paragraph steps, StepWrapper step) {
+        boolean isManualStep = scenario.hasTag(configuration.manualTag());
+
+
         float imageWidth = 16.5f;
         float imageHeight = 10.5f;
 
@@ -170,7 +177,7 @@ public class PdfEmitter {
             e.printStackTrace();
         }
 
-        Image stepStatus = getStepStatusAsImageOrNull(step);
+        Image stepStatus = isManualStep? getManualStepImageOrNull() :getStepStatusAsImageOrNull(step);
         PdfPCell cell;
         if (stepStatus != null) {
             stepStatus.scaleAbsolute(imageWidth, imageHeight);
@@ -209,8 +216,15 @@ public class PdfEmitter {
     }
 
     private Image getStepStatusAsImageOrNull(StepWrapper step) {
+        return getResourceImageOrNull(getStepStatusResourceName(step));
+    }
+
+    private Image getManualStepImageOrNull() {
+        return getResourceImageOrNull("images/manual.PNG");
+    }
+
+    private Image getResourceImageOrNull(String resourceName) {
         try {
-            String resourceName = getStepStatusResourceName(step);
             ByteSource byteSource = asByteSource(getClass().getResource(resourceName));
             byte[] bytes = byteSource.read();
             return Image.getInstance(bytes);
@@ -392,8 +406,8 @@ public class PdfEmitter {
 
     private void emitStepsSummary(Chapter chapter) {
         Paragraph paragraph = new Paragraph();
-        paragraph.add(createStepsStatisticsTable(statistics));
-        paragraph.setSpacingBefore(20f);
+        paragraph.add(createStepsManualStatisticsTable(statistics));
+        paragraph.add(createStepsAutomaticStatisticsTable(statistics));
         paragraph.setSpacingAfter(20f);
 
         Section section = chapter.addSection(20f, new Paragraph("Steps", configuration.sectionTitleFont()));
@@ -402,38 +416,60 @@ public class PdfEmitter {
 
     private void emitScenarioSummary(Chapter chapter) {
         Paragraph paragraph = new Paragraph();
-        paragraph.add(createScenarioStatisticsTable(statistics));
-        paragraph.setSpacingBefore(20f);
+        paragraph.add(createScenarioManualStatisticsTable(statistics));
+        paragraph.add(createScenarioAutomaticStatisticsTable(statistics));
         paragraph.setSpacingAfter(20f);
 
         Section section = chapter.addSection(20f, new Paragraph("Scenario", configuration.sectionTitleFont()));
         section.add(paragraph);
     }
 
-    private PdfPTable createScenarioStatisticsTable(Statistics statistics) {
+    private Paragraph createScenarioManualStatisticsTable(Statistics statistics) {
+
+        ColorThresholdSelector errorColors = ColorThresholdSelectors.yellowOrangeRedPercent();
+
+        PdfPTable table = new PdfPTable(2);
+        int total = statistics.getNbScenario();
+        appendRow(table, errorColors, total, statistics.getNbScenarioManual(), "Manual");
+
+        Paragraph paragraph = new Paragraph();
+        Phrase phrase = new Phrase("Manual scenario");
+        paragraph.add(phrase);
+        paragraph.add(table);
+        paragraph.setSpacingBefore(20f);
+        return paragraph;
+    }
+
+    private Paragraph createScenarioAutomaticStatisticsTable(Statistics statistics) {
 
         ColorThresholdSelector successColors = ColorThresholdSelectors.redOrangeGreenPercent();
         ColorThresholdSelector errorColors = ColorThresholdSelectors.yellowOrangeRedPercent();
 
         PdfPTable table = new PdfPTable(2);
-        int total = statistics.getNbScenario();
+        int total = statistics.getNbScenarioExceptManual();
         appendRow(table, successColors, total, statistics.getNbScenarioSucceeded(), "Success");
         appendRow(table, errorColors, total, statistics.getNbScenarioFailed(), "Failure");
         appendRow(table, errorColors, total, statistics.getNbScenarioPending(), "Pending");
         appendRow(table, errorColors, total, statistics.getNbScenarioSkipped(), "Skipped");
         appendRow(table, errorColors, total, statistics.getNbScenarioOther(), "Other");
         appendTotalRow(table, total, "Total");
-        return table;
+
+        Paragraph paragraph = new Paragraph();
+        Phrase phrase = new Phrase("Automatised scenario");
+        paragraph.add(phrase);
+        paragraph.add(table);
+        paragraph.setSpacingBefore(20f);
+        return paragraph;
     }
 
-    private PdfPTable createStepsStatisticsTable(Statistics statistics) {
+    private Paragraph createStepsAutomaticStatisticsTable(Statistics statistics) {
 
         ColorThresholdSelector successColors = ColorThresholdSelectors.redOrangeGreenPercent();
         ColorThresholdSelector errorColors = ColorThresholdSelectors.yellowOrangeRedPercent();
 
         PdfPTable table = new PdfPTable(2);
 
-        int total = statistics.getNbSteps();
+        int total = statistics.getNbStepsExceptManual();
         appendRow(table, successColors, total, statistics.getNbStepSucceeded(), "Success");
         appendRow(table, errorColors, total, statistics.getNbStepFailed(), "Failure");
         appendRow(table, errorColors, total, statistics.getNbStepPending(), "Pending");
@@ -441,7 +477,28 @@ public class PdfEmitter {
         appendRow(table, errorColors, total, statistics.getNbStepNoMatching(), "No matching");
         appendRow(table, errorColors, total, statistics.getNbStepOther(), "Other");
         appendTotalRow(table, total, "Total");
-        return table;
+
+        Paragraph paragraph = new Paragraph();
+        Phrase phrase = new Phrase("Automatised steps");
+        paragraph.add(phrase);
+        paragraph.add(table);
+        paragraph.setSpacingBefore(20f);
+        return paragraph;
+    }
+
+    private Paragraph createStepsManualStatisticsTable(Statistics statistics) {
+        ColorThresholdSelector errorColors = ColorThresholdSelectors.yellowOrangeRedPercent();
+
+        PdfPTable table = new PdfPTable(2);
+        int total = statistics.getNbSteps();
+        appendRow(table, errorColors, total, statistics.getNbStepManual(), "Manual");
+
+        Paragraph paragraph = new Paragraph();
+        Phrase phrase = new Phrase("Manual steps");
+        paragraph.add(phrase);
+        paragraph.add(table);
+        paragraph.setSpacingBefore(20f);
+        return paragraph;
     }
 
 
@@ -456,7 +513,7 @@ public class PdfEmitter {
 
     private void appendRow(PdfPTable table, ColorThresholdSelector colorSelector, int total, int count, String title) {
         PdfPCell cellTitle = new PdfPCell(new Phrase(title, configuration.defaultStrongFont()));
-        PdfPCell cellValue = new PdfPCell(new Phrase(String.valueOf(count)));
+        PdfPCell cellValue = new PdfPCell(new Phrase(String.format("%d/%d", count, total)));
         cellValue.setHorizontalAlignment(Element.ALIGN_RIGHT);
         cellValue.setCellEvent(new PercentBackgroundEvent(count, total, colorSelector));
         table.addCell(cellTitle);

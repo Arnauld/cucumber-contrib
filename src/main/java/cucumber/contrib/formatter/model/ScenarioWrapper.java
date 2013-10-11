@@ -30,26 +30,7 @@ public class ScenarioWrapper extends StepContainer implements Wrapper, HasCommen
 
     @Override
     public void consolidate(Statistics statistics) {
-        for (StepWrapper step : steps) {
-            step.consolidate(statistics);
-        }
-
-        for (StepWrapper step : steps) {
-            if (step.isFailure()) {
-                statistics.scenarioFailed();
-                return;
-            } else if (step.isSkipped()) {
-                statistics.scenarioSkipped();
-                return;
-            } else if (step.isPending()) {
-                statistics.scenarioPending();
-                return;
-            } else if (!step.isSuccess()) {
-                statistics.scenarioOther();
-                return;
-            }
-        }
-        statistics.scenarioSucceeded();
+        statistics.consolidate(this);
     }
 
     public String getName() {
@@ -62,5 +43,13 @@ public class ScenarioWrapper extends StepContainer implements Wrapper, HasCommen
 
     public String getDescription() {
         return extractDescription(scenario.getDescription(), steps);
+    }
+
+    public boolean hasTag(String searchedTag) {
+        for(Tag tag : getTags()) {
+            if(tag.getName().equalsIgnoreCase(searchedTag))
+                return true;
+        }
+        return false;
     }
 }

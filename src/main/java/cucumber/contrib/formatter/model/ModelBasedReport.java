@@ -6,10 +6,8 @@ public abstract class ModelBasedReport {
 
     private String currentUri;
     private FeatureWrapper currentFeature;
-    private Statistics statistics;
 
     public ModelBasedReport() {
-        this.statistics = new Statistics();
         startReport();
     }
 
@@ -32,7 +30,6 @@ public abstract class ModelBasedReport {
         if (currentFeature == null) {
             return;
         }
-        currentFeature.consolidate(statistics);
         emit(currentFeature);
         currentFeature = null;
     }

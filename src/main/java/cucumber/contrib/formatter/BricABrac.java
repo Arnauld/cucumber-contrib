@@ -14,6 +14,7 @@ public class BricABrac {
     public static final String NL = "\n";
     private static final String COMMENT = "#";
     private static final Pattern COMMENT_PATTERN = compile("^\\s*" + COMMENT);
+    private static final Pattern BLANK_PATTERN = compile("^[\\s\u00A0]*$");
 
     public static boolean areEqualsIgnoringCase(String one, String two) {
         if (one == two) {
@@ -60,5 +61,9 @@ public class BricABrac {
             }
         }
         return b.toString();
+    }
+
+    public static boolean isBlank(String content) {
+        return content == null || BLANK_PATTERN.matcher(content).matches();
     }
 }
