@@ -83,43 +83,62 @@ public class Configuration {
     }
 
     private Font footerFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 10, Font.ITALIC, getPrimaryColor());
+        return FontFactory.getFont(defaultFontName(), 10, Font.ITALIC, getPrimaryColor());
+    }
+
+    private String defaultFontName() {
+        return FontFactory.HELVETICA;
     }
 
     public Font mainTitleFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 32, Font.ITALIC, getPrimaryColor());
+        return FontFactory.getFont(defaultFontName(), 32, Font.ITALIC, getPrimaryColor());
     }
 
     public Font subTitleFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 18, Font.ITALIC, getPrimaryColor());
+        return FontFactory.getFont(defaultFontName(), 18, Font.ITALIC, getPrimaryColor());
     }
 
     public Font versionTitleFont() {
-        return FontFactory.getFont(FontFactory.COURIER, 14, Font.ITALIC, getPrimaryColor());
+        return FontFactory.getFont(defaultMonospaceFontname(), 14, Font.ITALIC, getPrimaryColor());
     }
 
     //
 
     public Font chapterTitleFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD, getPrimaryColor());
+        return FontFactory.getFont(defaultFontName(), 16, Font.BOLD, getPrimaryColor());
     }
 
     public Font sectionTitleFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 14, Font.BOLD, getPrimaryColor());
+        return FontFactory.getFont(defaultFontName(), 14, Font.BOLD, getPrimaryColor());
     }
 
     public Font defaultFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 12, Font.NORMAL, getDefaultColor());
+        return FontFactory.getFont(defaultFontName(), 12, Font.NORMAL, getDefaultColor());
     }
 
     public Font defaultStrongFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 12, Font.BOLD, getDefaultColor());
+        return FontFactory.getFont(defaultFontName(), 12, Font.BOLD, getDefaultColor());
     }
 
     protected Font defaultMetaFont() {
-        return FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, getPrimaryColor());
+        return FontFactory.getFont(defaultFontName(), 8, Font.NORMAL, getPrimaryColor());
     }
 
+    public BaseColor tableHeaderForeground() {
+        return BaseColor.WHITE;
+    }
+
+    public BaseColor tableHeaderBackground() {
+        return Colors.CYAN;
+    }
+
+    public BaseColor tableAlternateBackground() {
+        return Colors.VERY_LIGHT_GRAY;
+    }
+
+    public Font tableHeaderFont() {
+        return FontFactory.getFont(defaultFontName(), 10, Font.NORMAL, tableHeaderForeground());
+    }
 
     public Font featureTitleFont() {
         return chapterTitleFont();
@@ -130,19 +149,23 @@ public class Configuration {
     }
 
     public Font stepKeywordFont() {
-        return FontFactory.getFont(FontFactory.COURIER, 8, Font.BOLD, new CMYKColor(255, 255, 0, 17));
+        return FontFactory.getFont(defaultMonospaceFontname(), 8, Font.BOLD, new CMYKColor(255, 255, 0, 17));
+    }
+
+    private String defaultMonospaceFontname() {
+        return FontFactory.COURIER;
     }
 
     public Font stepDefaultFont() {
-        return FontFactory.getFont(FontFactory.COURIER, 8, Font.NORMAL, new CMYKColor(255, 255, 0, 17));
+        return FontFactory.getFont(defaultMonospaceFontname(), 8, Font.NORMAL, new CMYKColor(255, 255, 0, 17));
     }
 
     public Font tagsFont() {
-        return FontFactory.getFont(FontFactory.COURIER, 8, Font.ITALIC, new CMYKColor(25, 255, 255, 17));
+        return FontFactory.getFont(defaultMonospaceFontname(), 8, Font.ITALIC, new CMYKColor(25, 255, 255, 17));
     }
 
     public Font stepDataTableHeaderFont() {
-        return FontFactory.getFont(FontFactory.COURIER, 8, Font.BOLD, BaseColor.WHITE);
+        return FontFactory.getFont(defaultMonospaceFontname(), 8, Font.BOLD, tableHeaderForeground());
     }
 
     public Font stepDataTableContentFont() {
@@ -150,11 +173,11 @@ public class Configuration {
     }
 
     public BaseColor stepDataTableHeaderBackground() {
-        return Colors.CYAN;
+        return tableHeaderBackground();
     }
 
     public BaseColor stepDataTableRowAlternateBackground() {
-        return Colors.VERY_LIGHT_GRAY;
+        return tableAlternateBackground();
     }
 
     public String getPreambule() {

@@ -6,8 +6,4 @@ public class BackgroundWrapper extends StepContainer implements Wrapper {
 
     public BackgroundWrapper(Background background) {
     }
-
-    @Override
-    public void consolidate(Statistics statistics) {
-    }
 }

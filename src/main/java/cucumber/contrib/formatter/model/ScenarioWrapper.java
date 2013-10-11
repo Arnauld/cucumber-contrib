@@ -28,11 +28,6 @@ public class ScenarioWrapper extends StepContainer implements Wrapper, HasCommen
         return scenario.getComments();
     }
 
-    @Override
-    public void consolidate(Statistics statistics) {
-        statistics.consolidate(this);
-    }
-
     public String getName() {
         return scenario.getName();
     }

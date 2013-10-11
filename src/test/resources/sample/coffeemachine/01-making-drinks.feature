@@ -6,6 +6,11 @@ Feature: Making Drinks
 #
 #  **I want to** implement the logic that translates orders
 #  from customers of the coffee machine to the drink maker
+#
+# <p style="text-align: center;">
+#   <img src="/coffee-800x700.png"/>
+# </p>
+#
 
   @ProtocolOrder
   Scenario: A tea with 1 sugar and a stick

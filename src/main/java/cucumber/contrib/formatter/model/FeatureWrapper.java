@@ -56,18 +56,6 @@ public class FeatureWrapper implements Wrapper {
         return this.scenarios.get(this.scenarios.size() - 1);
     }
 
-    private String featureNameToAnchor(String name) {
-        return "feature-" + name.toLowerCase().replace(' ', '_');
-    }
-
-    @Override
-    public void consolidate(Statistics statistics) {
-        statistics.feature();
-        for (ScenarioWrapper scenario : scenarios) {
-            scenario.consolidate(statistics);
-        }
-    }
-
     public String getName() {
         return feature.getName();
     }

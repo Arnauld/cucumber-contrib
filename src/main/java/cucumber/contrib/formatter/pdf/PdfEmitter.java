@@ -2,6 +2,7 @@ package cucumber.contrib.formatter.pdf;
 
 import static com.google.common.io.Resources.asByteSource;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.ByteSource;
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
@@ -22,6 +23,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 import cucumber.contrib.formatter.FormatterException;
 import cucumber.contrib.formatter.model.FeatureWrapper;
+import cucumber.contrib.formatter.model.RootStatistics;
 import cucumber.contrib.formatter.model.ScenarioWrapper;
 import cucumber.contrib.formatter.model.Statistics;
 import cucumber.contrib.formatter.model.StepWrapper;
@@ -33,14 +35,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class PdfEmitter {
 
     private Document document;
-    private PdfWriter writer;
     private Configuration configuration;
-    private Statistics statistics;
+    private RootStatistics statistics;
     private boolean firstFeature = true;
     private FileOutputStream fileOutputStream;
     private TableOfContents tableOfContents;
@@ -51,7 +54,7 @@ public class PdfEmitter {
     }
 
     private void initStatistics() {
-        this.statistics = new Statistics(new Statistics.Filter() {
+        this.statistics = new RootStatistics(new RootStatistics.Filter() {
             @Override
             public boolean isManual(ScenarioWrapper scenarioWrapper) {
                 return scenarioWrapper.hasTag(configuration.manualTag());
@@ -62,9 +65,9 @@ public class PdfEmitter {
     public void init(File fileDst) throws FileNotFoundException, DocumentException {
         this.document = configuration.createDocument();
         this.fileOutputStream = new FileOutputStream(fileDst);
-        this.writer = PdfWriter.getInstance(document, fileOutputStream);
         this.tableOfContents = new TableOfContents();
         //
+        PdfWriter writer = PdfWriter.getInstance(document, fileOutputStream);
         writer.setBoxSize("art", configuration.getDocumentArtBox());
         writer.setPageEvent(configuration.createHeaderFooter());
         writer.setPageEvent(tableOfContents);
@@ -89,7 +92,7 @@ public class PdfEmitter {
         }
 
         // statistics
-        feature.consolidate(statistics);
+        statistics.consolidate(feature);
 
         //
         // Title
@@ -144,7 +147,7 @@ public class PdfEmitter {
             boolean first = true;
             for (Tag tag : tagList) {
                 String text = tag.getName();
-                if(first) {
+                if (first) {
                     first = false;
                 }
                 else {
@@ -177,7 +180,7 @@ public class PdfEmitter {
             e.printStackTrace();
         }
 
-        Image stepStatus = isManualStep? getManualStepImageOrNull() :getStepStatusAsImageOrNull(step);
+        Image stepStatus = isManualStep ? getManualStepImageOrNull() : getStepStatusAsImageOrNull(step);
         PdfPCell cell;
         if (stepStatus != null) {
             stepStatus.scaleAbsolute(imageWidth, imageHeight);
@@ -315,10 +318,11 @@ public class PdfEmitter {
     }
 
     private int getTableColumnCount(List<DataTableRow> tableRows) {
-        if(!tableRows.isEmpty()) {
+        if (!tableRows.isEmpty()) {
             List<String> cells = tableRows.get(0).getCells();
-            if(cells != null)
+            if (cells != null) {
                 return cells.size();
+            }
         }
         return 1; // weird
     }
@@ -352,7 +356,7 @@ public class PdfEmitter {
         Chunk CONNECT = new Chunk(new LineSeparator(0.5f, 95, configuration.getDefaultColor(), Element.ALIGN_CENTER, -.5f));
         Paragraph paragraph = new Paragraph();
         paragraph.setSpacingBefore(20.0f); // first paragraph only
-        for(TableOfContents.Entry entry : tableOfContents.getEntries()) {
+        for (TableOfContents.Entry entry : tableOfContents.getEntries()) {
             Chunk chunk = new Chunk(entry.getText());
             chunk.setLocalGoto(entry.getAnchorDst());
             paragraph.add(chunk);
@@ -375,11 +379,13 @@ public class PdfEmitter {
 
     private void closeDocumentAndFile() {
         try {
-            if(document != null)
+            if (document != null) {
                 document.close();
+            }
 
-            if(fileOutputStream != null)
+            if (fileOutputStream != null) {
                 fileOutputStream.close();
+            }
         }
         catch (Exception e) {
             throw new FormatterException("Error while flushing report to disk", e);
@@ -395,6 +401,7 @@ public class PdfEmitter {
 
         emitScenarioSummary(summary);
         emitStepsSummary(summary);
+        emitTagsSummary(summary);
 
         try {
             document.add(summary);
@@ -402,6 +409,74 @@ public class PdfEmitter {
         catch (DocumentException e) {
             e.printStackTrace();
         }
+    }
+
+    private void emitTagsSummary(Chapter chapter) {
+        PdfPTable table = new PdfPTable(new float[]{10.f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f});
+
+        PdfPCell cell = createTableHeaderCell("Tags");
+        cell.setRowspan(2);
+        table.addCell(cell);
+
+        PdfPCell cellScenario = createTableHeaderCell("Scenario");
+        cellScenario.setColspan(3);
+        table.addCell(cellScenario);
+
+        PdfPCell cellSteps = createTableHeaderCell("Steps");
+        cellSteps.setColspan(3);
+        table.addCell(cellSteps);
+
+        //
+        table.addCell(createTableHeaderCell("M."));
+        table.addCell(createTableHeaderCell("OK"));
+        table.addCell(createTableHeaderCell("KO"));
+        table.addCell(createTableHeaderCell("M."));
+        table.addCell(createTableHeaderCell("OK"));
+        table.addCell(createTableHeaderCell("KO"));
+
+        ColorThresholdSelector successColors = ColorThresholdSelectors.redOrangeGreenPercent();
+        ColorThresholdSelector errorColors = ColorThresholdSelectors.yellowOrangeRedPercent();
+
+
+        Map<String, Statistics> tagStatistics = statistics.getTagStatistics();
+        List<String> tags = Lists.newArrayList(tagStatistics.keySet());
+        Collections.sort(tags);
+        for (String tag : tags) {
+            Statistics tagStats = tagStatistics.get(tag);
+
+            table.addCell(new PdfPCell(new Phrase(tag)));
+            //
+            addCell(table, errorColors, tagStats.getNbScenario(), tagStats.getNbScenarioManual());
+            addCell(table, successColors, tagStats.getNbScenarioExceptManual(), tagStats.getNbScenarioSucceeded());
+            addCell(table, errorColors, tagStats.getNbScenarioExceptManual(), tagStats.getNbScenarioExceptManual() - tagStats.getNbScenarioSucceeded());
+            //
+            addCell(table, errorColors, tagStats.getNbSteps(), tagStats.getNbStepManual());
+            addCell(table, successColors, tagStats.getNbStepsExceptManual(), tagStats.getNbStepSucceeded());
+            addCell(table, errorColors, tagStats.getNbStepsExceptManual(), tagStats.getNbStepsExceptManual() - tagStats.getNbStepSucceeded());
+        }
+
+
+        Paragraph paragraph = new Paragraph();
+        paragraph.add(table);
+        paragraph.setSpacingBefore(20f);
+        paragraph.setSpacingAfter(20f);
+        Section section = chapter.addSection(20f, new Paragraph("Tags", configuration.sectionTitleFont()));
+        section.add(paragraph);
+    }
+
+    private PdfPCell createTableHeaderCell(String text) {
+        PdfPCell pdfPCell = new PdfPCell(new Phrase(text, configuration.tableHeaderFont()));
+        pdfPCell.setBackgroundColor(configuration.tableHeaderBackground());
+        pdfPCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        pdfPCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        return pdfPCell;
+    }
+
+    private static void addCell(PdfPTable table, ColorThresholdSelector colors, int total, int value) {
+        PdfPCell cell = new PdfPCell(new Phrase("" + value));
+        cell.setCellEvent(new PercentBackgroundEvent(value, total, colors));
+        cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        table.addCell(cell);
     }
 
     private void emitStepsSummary(Chapter chapter) {

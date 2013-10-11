@@ -49,11 +49,6 @@ public class StepWrapper implements Wrapper, HasComments {
         return areEqualsIgnoringCase("failed", result.getStatus());
     }
 
-    @Override
-    public void consolidate(Statistics statistics) {
-        statistics.consolidate(this);
-    }
-
     public List<Comment> getComments() {
         return step.getComments();
     }
