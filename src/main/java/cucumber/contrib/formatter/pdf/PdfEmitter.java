@@ -217,6 +217,14 @@ public class PdfEmitter {
         pdfPCell.setBorder(Rectangle.NO_BORDER);
         return pdfPCell;
     }
+    private static PdfPCell sideBorder(PdfPCell pdfPCell) {
+        return border(pdfPCell, Rectangle.LEFT + Rectangle.RIGHT);
+    }
+
+    private static PdfPCell border(PdfPCell pdfPCell, int side) {
+        pdfPCell.setBorder(side);
+        return pdfPCell;
+    }
 
     private Image getStepStatusAsImageOrNull(StepWrapper step) {
         return getResourceImageOrNull(getStepStatusResourceName(step));
@@ -413,26 +421,28 @@ public class PdfEmitter {
 
     private void emitTagsSummary(Chapter chapter) {
         PdfPTable table = new PdfPTable(new float[]{10.f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f});
+        table.setHeaderRows(2);
+        table.setTableEvent(new AlternatingBackgroundEvent(configuration.tableAlternateBackground()));
 
         PdfPCell cell = createTableHeaderCell("Tags");
         cell.setRowspan(2);
-        table.addCell(cell);
+        table.addCell(border(cell, Rectangle.RIGHT));
 
         PdfPCell cellScenario = createTableHeaderCell("Scenario");
         cellScenario.setColspan(3);
-        table.addCell(cellScenario);
+        table.addCell(sideBorder(cellScenario));
 
         PdfPCell cellSteps = createTableHeaderCell("Steps");
         cellSteps.setColspan(3);
-        table.addCell(cellSteps);
+        table.addCell(sideBorder(cellSteps));
 
         //
-        table.addCell(createTableHeaderCell("M."));
-        table.addCell(createTableHeaderCell("OK"));
-        table.addCell(createTableHeaderCell("KO"));
-        table.addCell(createTableHeaderCell("M."));
-        table.addCell(createTableHeaderCell("OK"));
-        table.addCell(createTableHeaderCell("KO"));
+        table.addCell(sideBorder(createTableHeaderCell("M.")));
+        table.addCell(sideBorder(createTableHeaderCell("OK")));
+        table.addCell(sideBorder(createTableHeaderCell("KO")));
+        table.addCell(sideBorder(createTableHeaderCell("M.")));
+        table.addCell(sideBorder(createTableHeaderCell("OK")));
+        table.addCell(sideBorder(createTableHeaderCell("KO")));
 
         ColorThresholdSelector successColors = ColorThresholdSelectors.redOrangeGreenPercent();
         ColorThresholdSelector errorColors = ColorThresholdSelectors.yellowOrangeRedPercent();
@@ -444,15 +454,15 @@ public class PdfEmitter {
         for (String tag : tags) {
             Statistics tagStats = tagStatistics.get(tag);
 
-            table.addCell(new PdfPCell(new Phrase(tag)));
+            table.addCell(noBorder(new PdfPCell(new Phrase(tag))));
             //
-            addCell(table, errorColors, tagStats.getNbScenario(), tagStats.getNbScenarioManual());
-            addCell(table, successColors, tagStats.getNbScenarioExceptManual(), tagStats.getNbScenarioSucceeded());
-            addCell(table, errorColors, tagStats.getNbScenarioExceptManual(), tagStats.getNbScenarioExceptManual() - tagStats.getNbScenarioSucceeded());
+            table.addCell(sideBorder(addCell(errorColors, tagStats.getNbScenario(), tagStats.getNbScenarioManual())));
+            table.addCell(sideBorder(addCell(successColors, tagStats.getNbScenarioExceptManual(), tagStats.getNbScenarioSucceeded())));
+            table.addCell(sideBorder(addCell(errorColors, tagStats.getNbScenarioExceptManual(), tagStats.getNbScenarioExceptManual() - tagStats.getNbScenarioSucceeded())));
             //
-            addCell(table, errorColors, tagStats.getNbSteps(), tagStats.getNbStepManual());
-            addCell(table, successColors, tagStats.getNbStepsExceptManual(), tagStats.getNbStepSucceeded());
-            addCell(table, errorColors, tagStats.getNbStepsExceptManual(), tagStats.getNbStepsExceptManual() - tagStats.getNbStepSucceeded());
+            table.addCell(sideBorder(addCell(errorColors, tagStats.getNbSteps(), tagStats.getNbStepManual())));
+            table.addCell(sideBorder(addCell(successColors, tagStats.getNbStepsExceptManual(), tagStats.getNbStepSucceeded())));
+            table.addCell(noBorder(addCell(errorColors, tagStats.getNbStepsExceptManual(), tagStats.getNbStepsExceptManual() - tagStats.getNbStepSucceeded())));
         }
 
 
@@ -472,11 +482,11 @@ public class PdfEmitter {
         return pdfPCell;
     }
 
-    private static void addCell(PdfPTable table, ColorThresholdSelector colors, int total, int value) {
+    private static PdfPCell addCell(ColorThresholdSelector colors, int total, int value) {
         PdfPCell cell = new PdfPCell(new Phrase("" + value));
         cell.setCellEvent(new PercentBackgroundEvent(value, total, colors));
-        cell.setHorizontalAlignment(Element.ALIGN_LEFT);
-        table.addCell(cell);
+        cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        return cell;
     }
 
     private void emitStepsSummary(Chapter chapter) {

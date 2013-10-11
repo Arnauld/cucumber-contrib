@@ -16,6 +16,10 @@ from a simple class) that translates orders from customers of the coffee
 machine to the drink maker. Your code will use the drink maker protocol to
 send commands to the drink maker.
 
+<p style="text-align: center;">
+   <img src="/coffee-800x700.png" width="200px"/>
+</p>
+
 
 **Important !**
 

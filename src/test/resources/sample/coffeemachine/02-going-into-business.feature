@@ -1,10 +1,16 @@
 Feature: Going into business
 
+#
 #  **In order to** goes into Business
 #
 #  **As a** shopkeeper
 #
 #  **I want to** ensure The coffee machine is not free anymore!
+#
+# <p style="text-align: right;">
+#   <img src="/coins.jpeg" width="66px"/>
+# </p>
+#
 
   @Payment
   Scenario: A tea with just enough money

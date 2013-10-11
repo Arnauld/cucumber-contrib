@@ -7,9 +7,17 @@ Feature: Making Drinks
 #  **I want to** implement the logic that translates orders
 #  from customers of the coffee machine to the drink maker
 #
-# <p style="text-align: center;">
-#   <img src="/coffee-800x700.png"/>
+# <p style="text-align: right;">
+#   <img src="/coffee-cup.jpeg" width="66px" height="100px"/>
 # </p>
+#
+# The code will use the drink maker protocol (see below) to send commands to the drink maker.
+#
+# The coffee machine can serves 3 type of drinks:
+#
+#  * tea,
+#  * coffee,
+#  * chocolate.
 #
 
   @ProtocolOrder
