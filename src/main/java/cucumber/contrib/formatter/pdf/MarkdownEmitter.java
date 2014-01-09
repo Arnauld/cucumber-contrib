@@ -43,6 +43,7 @@ import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
 import cucumber.contrib.formatter.BricABrac;
 import cucumber.contrib.formatter.FormatterException;
 
+import org.pegdown.Extensions;
 import org.pegdown.PegDownProcessor;
 import java.io.IOException;
 import java.io.Reader;
@@ -57,7 +58,7 @@ public class MarkdownEmitter {
 
     public MarkdownEmitter(Configuration configuration) {
         this.configuration = configuration;
-        markdown = new PegDownProcessor();
+        this.markdown = new PegDownProcessor(Extensions.ALL);
     }
 
     public List<Element> markdownToElements(String markdownText) {

@@ -20,7 +20,6 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.CMYKColor;
 import com.itextpdf.text.pdf.PdfPageEvent;
-import com.itextpdf.text.pdf.draw.LineSeparator;
 import com.itextpdf.tool.xml.pipeline.html.AbstractImageProvider;
 import com.itextpdf.tool.xml.pipeline.html.ImageProvider;
 import cucumber.contrib.formatter.BricABrac;
@@ -53,6 +52,7 @@ public class Configuration {
     // TODO extract to 'TemplateEngine' thus one can plug an other template engine
     private MarkdownEmitter markdownEmitter;
     //
+    private ContentUpdater firstPageContentProvider = new DefaultFirstPageContentProvider();
     private String title;
     private String subject;
     private String version;
@@ -63,6 +63,7 @@ public class Configuration {
     private String preambule;
     private String keywords;
     private String imageRootPath;
+    private Font mainTitleFont;
 
     public Configuration() {
     }
@@ -90,8 +91,15 @@ public class Configuration {
         return FontFactory.HELVETICA;
     }
 
+    public Configuration withMainTitleFont(Font mainTitleFont) {
+        this.mainTitleFont = mainTitleFont;
+        return this;
+    }
+
     public Font mainTitleFont() {
-        return FontFactory.getFont(defaultFontName(), 32, Font.ITALIC, getPrimaryColor());
+        if(mainTitleFont == null)
+            mainTitleFont = FontFactory.getFont(defaultFontName(), 32, Font.ITALIC, getPrimaryColor());
+        return mainTitleFont;
     }
 
     public Font subTitleFont() {
@@ -201,42 +209,8 @@ public class Configuration {
 
 
     public void writeFirstPages(Document document) throws DocumentException {
-        int data = 0;
-        Paragraph preface = new Paragraph();
-        Paragraph lastLine = addEmptyLines(preface, 1);
-        lastLine.setSpacingAfter(200.0f);
-
-        if (!Strings.isNullOrEmpty(title)) {
-            Font font = mainTitleFont();
-            Paragraph paragraph = new Paragraph(title, font);
-            paragraph.setAlignment(Element.ALIGN_RIGHT);
-            paragraph.setSpacingAfter(15.0f);
-            LineSeparator line = new LineSeparator(1, 45, font.getColor(), Element.ALIGN_RIGHT, -10);
-            paragraph.add(line);
-            preface.add(paragraph);
-            data++;
-        }
-
-        if (!Strings.isNullOrEmpty(subject)) {
-            Paragraph paragraph = new Paragraph(subject, subTitleFont());
-            paragraph.setAlignment(Element.ALIGN_RIGHT);
-            paragraph.setSpacingAfter(10.0f);
-            //
-            preface.add(paragraph);
-            data++;
-        }
-
-        if (!Strings.isNullOrEmpty(version)) {
-            Paragraph paragraph = new Paragraph(version, versionTitleFont());
-            paragraph.setAlignment(Element.ALIGN_RIGHT);
-            paragraph.setSpacingAfter(10.0f);
-            preface.add(paragraph);
-            data++;
-        }
-
-        document.add(preface);
-        if (data > 0) {
-            document.newPage();
+        if (firstPageContentProvider != null) {
+            firstPageContentProvider.update(this, document);
         }
     }
 
@@ -269,7 +243,7 @@ public class Configuration {
         return Colors.DARK_RED;
     }
 
-    private Paragraph addEmptyLines(Paragraph owner, int nb) {
+    public static Paragraph addEmptyLines(Paragraph owner, int nb) {
         Paragraph lastLine = null;
         for (int i = 0; i < nb; i++) {
             lastLine = new Paragraph(" ");
@@ -377,6 +351,11 @@ public class Configuration {
         return this;
     }
 
+    public Configuration withFirstPageContentProvider(ContentUpdater firstPageContentProvider) {
+        this.firstPageContentProvider = firstPageContentProvider;
+        return this;
+    }
+
     public Configuration withKeywords(String keywords) {
         this.keywords = keywords;
         return this;
@@ -418,5 +397,17 @@ public class Configuration {
     public Configuration withImageRootPath(String imageRootPath) {
         this.imageRootPath = imageRootPath;
         return this;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public String getVersion() {
+        return version;
     }
 }

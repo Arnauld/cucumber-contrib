@@ -47,6 +47,7 @@ public class PdfEmitter {
     private boolean firstFeature = true;
     private FileOutputStream fileOutputStream;
     private TableOfContents tableOfContents;
+    private File fileDst;
 
     public PdfEmitter(Configuration configuration) {
         this.configuration = configuration;
@@ -63,6 +64,7 @@ public class PdfEmitter {
     }
 
     public void init(File fileDst) throws FileNotFoundException, DocumentException {
+        this.fileDst = fileDst;
         this.document = configuration.createDocument();
         this.fileOutputStream = new FileOutputStream(fileDst);
         this.tableOfContents = new TableOfContents();
@@ -352,7 +354,6 @@ public class PdfEmitter {
     public void done() {
         emitSummary();
         emitTableOfContents();
-        System.out.println("PdfEmitter.done!");
         closeDocumentAndFile();
     }
 
@@ -394,6 +395,8 @@ public class PdfEmitter {
             if (fileOutputStream != null) {
                 fileOutputStream.close();
             }
+
+            System.out.println("PdfEmitter.closeDocumentAndFile(" + fileDst.getAbsolutePath() + ")");
         }
         catch (Exception e) {
             throw new FormatterException("Error while flushing report to disk", e);
