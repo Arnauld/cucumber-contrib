@@ -290,18 +290,16 @@ public class Configuration {
 
         List<Element> elements = getMarkdownEmitter().markdownToElements(preambule);
         for (Element element : elements) {
+            if(element instanceof PdfPTable)
+                extendTableToPage((PdfPTable)element, document);
             document.add(element);
         }
+    }
 
-
-        PdfPTable table = new PdfPTable(3); // 3 columns.
-        PdfPCell cell1 = new PdfPCell(new Paragraph("Cell 1"));
-        PdfPCell cell2 = new PdfPCell(new Paragraph("Cell 2"));
-        PdfPCell cell3 = new PdfPCell(new Paragraph("Cell 3"));
-        table.addCell(cell1);
-        table.addCell(cell2);
-        table.addCell(cell3);
-        document.add(table);
+    private void extendTableToPage(PdfPTable element, Document document) throws DocumentException {
+        float width = document.right() - document.left();
+        element.setTotalWidth(width);
+        element.setWidths(element.getAbsoluteWidths());
     }
 
     private String loadResource(URL resource, Charset charset) {

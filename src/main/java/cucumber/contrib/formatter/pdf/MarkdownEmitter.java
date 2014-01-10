@@ -1,7 +1,6 @@
 package cucumber.contrib.formatter.pdf;
 
 import com.itextpdf.text.Element;
-import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.tool.xml.*;
 import com.itextpdf.tool.xml.css.CssFile;
 import com.itextpdf.tool.xml.css.CssFilesImpl;
@@ -9,7 +8,6 @@ import com.itextpdf.tool.xml.css.StyleAttrCSSResolver;
 import com.itextpdf.tool.xml.html.TagProcessorFactory;
 import com.itextpdf.tool.xml.html.Tags;
 import com.itextpdf.tool.xml.parser.XMLParser;
-import com.itextpdf.tool.xml.pipeline.WritableElement;
 import com.itextpdf.tool.xml.pipeline.css.CssResolverPipeline;
 import com.itextpdf.tool.xml.pipeline.end.ElementHandlerPipeline;
 import com.itextpdf.tool.xml.pipeline.html.AbstractImageProvider;
@@ -20,7 +18,6 @@ import cucumber.contrib.formatter.FormatterException;
 import cucumber.contrib.formatter.pdf.html.H1Processor;
 import cucumber.contrib.formatter.pdf.html.TableDataContentProcessor;
 import cucumber.contrib.formatter.pdf.html.TableDataHeaderProcessor;
-import cucumber.contrib.formatter.pdf.html.TableProcessor;
 import org.pegdown.Extensions;
 import org.pegdown.PegDownProcessor;
 
@@ -68,51 +65,21 @@ public class MarkdownEmitter {
             });
         }
         hpc.setAcceptUnknown(true).autoBookmark(true).setTagFactory(getDefaultTagProcessorFactory());
-        Pipeline<?> pipeline = new CssResolverPipeline(cssResolver,
-                new HtmlPipeline(hpc,
-                        new ElementHandlerPipeline(d, null) {
-                            private void consume(final ProcessObject po) {
-                                if (po.containsWritable()) {
-                                    Writable w = null;
-                                    while (null != (w = po.poll())) {
-                                        System.out.println("MarkdownEmitter.consume~~~~~~> ");
-                                        dump((WritableElement) w);
-                                        System.out.println(d.getClass());
-                                        d.add(w);
-                                    }
-                                }
-                            }
-
-                            private void dump(WritableElement w) {
-                                for (Element e : w.elements()) {
-                                    if (e instanceof PdfPTable)
-                                        ((PdfPTable) e).setWidthPercentage(100);
-                                    System.out.println("MarkdownEmitter.dump:: " + e);
-                                }
-                            }
-
-                            @Override
-                            public Pipeline open(WorkerContext context, Tag t, ProcessObject po) throws PipelineException {
-                                consume(po);
-                                return getNext();
-                            }
-
-                            @Override
-                            public Pipeline close(WorkerContext context, Tag t, ProcessObject po) throws PipelineException {
-                                consume(po);
-                                return getNext();
-                            }
-
-                            @Override
-                            public Pipeline<?> content(WorkerContext ctx, Tag currentTag, String text, ProcessObject po) throws PipelineException {
-                                consume(po);
-                                return getNext();
-                            }
-                        }));
+        Pipeline<?> pipeline =
+                new CssResolverPipeline(cssResolver,
+                        new HtmlPipeline(hpc,
+                                new ElementAdjusterPipeline(d, null)));
         XMLWorker worker = new XMLWorker(pipeline, true);
         XMLParser p = new XMLParser();
         p.addListener(worker);
         p.parse(in);
+    }
+
+    public static class ElementAdjusterPipeline extends ElementHandlerPipeline {
+
+        public ElementAdjusterPipeline(ElementHandler handler, Pipeline next) {
+            super(handler, next);
+        }
     }
 
     private CssFile getDefaultCSS() {
@@ -125,7 +92,6 @@ public class MarkdownEmitter {
         tpf.addProcessor(new com.itextpdf.tool.xml.html.Image(), "img");
         tpf.addProcessor(new TableDataHeaderProcessor(configuration), "th");
         tpf.addProcessor(new TableDataContentProcessor(configuration), "td");
-        tpf.addProcessor(new TableProcessor(configuration), "table");
         return tpf;
     }
 
@@ -137,11 +103,7 @@ public class MarkdownEmitter {
         if (BricABrac.isBlank(text)) {
             return "";
         }
-        String html = markdown.markdownToHtml(text);
-        System.out.println("MarkdownEmitter.formatHtml");
-        System.out.println(html);
-
-        return html;
+        return markdown.markdownToHtml(text);
     }
 
 }

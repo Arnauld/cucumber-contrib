@@ -305,7 +305,6 @@ public class PdfEmitter {
                     }
                 }
 
-
                 int border = 0;
                 if (!firstColumn) {
                     border += Rectangle.LEFT;

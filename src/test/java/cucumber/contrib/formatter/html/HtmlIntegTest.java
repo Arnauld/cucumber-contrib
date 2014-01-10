@@ -38,10 +38,9 @@ public class HtmlIntegTest {
         Document document = pdfEmitter.getDocument();
 
         for(Element element : elementList) {
-            System.out.println("HtmlIntegTest.simpleTable:: " + element);
             if(element instanceof PdfPTable) {
+                //((PdfPTable)element).setTotalWidth(document.right() - document.left());
                 ((PdfPTable)element).setTotalWidth(document.right() - document.left());
-                ((PdfPTable)element).setWidths(new int[] {1,1,1,1,1});
             }
             document.add(element);
         }
