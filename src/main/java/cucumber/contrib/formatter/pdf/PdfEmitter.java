@@ -76,6 +76,10 @@ public class PdfEmitter {
         document.open();
     }
 
+    public Document getDocument() {
+        return document;
+    }
+
     private void writeInitialData() {
         try {
             configuration.writeMetaInformations(document);

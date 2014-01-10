@@ -1,24 +1,13 @@
 package cucumber.contrib.formatter.pdf;
 
-import static com.google.common.io.Resources.asByteSource;
-import static com.google.common.io.Resources.getResource;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteSource;
 import com.google.common.io.CharSource;
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Chapter;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.CMYKColor;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPageEvent;
 import com.itextpdf.tool.xml.pipeline.html.AbstractImageProvider;
 import com.itextpdf.tool.xml.pipeline.html.ImageProvider;
@@ -33,7 +22,11 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
+
+import static com.google.common.io.Resources.asByteSource;
+import static com.google.common.io.Resources.getResource;
 
 /**
  *
@@ -48,7 +41,6 @@ public class Configuration {
     public static final String META_GENERATION_DATE_FORMAT = "generation-date-format";
     public static final Charset UTF8 = Charset.forName("UTF-8");
     private static final String META_IMAGE_ROOT_PATH = "image-root-path";
-
     // TODO extract to 'TemplateEngine' thus one can plug an other template engine
     private MarkdownEmitter markdownEmitter;
     //
@@ -64,8 +56,21 @@ public class Configuration {
     private String keywords;
     private String imageRootPath;
     private Font mainTitleFont;
+    private BaseColor tableHeaderForeground;
+    private BaseColor tableContentForeground;
+    private Font tableHeaderFont;
+    private Font tableContentFont;
 
     public Configuration() {
+    }
+
+    public static Paragraph addEmptyLines(Paragraph owner, int nb) {
+        Paragraph lastLine = null;
+        for (int i = 0; i < nb; i++) {
+            lastLine = new Paragraph(" ");
+            owner.add(lastLine);
+        }
+        return lastLine;
     }
 
     private MarkdownEmitter getMarkdownEmitter() {
@@ -97,7 +102,7 @@ public class Configuration {
     }
 
     public Font mainTitleFont() {
-        if(mainTitleFont == null)
+        if (mainTitleFont == null)
             mainTitleFont = FontFactory.getFont(defaultFontName(), 32, Font.ITALIC, getPrimaryColor());
         return mainTitleFont;
     }
@@ -106,11 +111,11 @@ public class Configuration {
         return FontFactory.getFont(defaultFontName(), 18, Font.ITALIC, getPrimaryColor());
     }
 
+    //
+
     public Font versionTitleFont() {
         return FontFactory.getFont(defaultMonospaceFontname(), 14, Font.ITALIC, getPrimaryColor());
     }
-
-    //
 
     public Font chapterTitleFont() {
         return FontFactory.getFont(defaultFontName(), 16, Font.BOLD, getPrimaryColor());
@@ -132,8 +137,26 @@ public class Configuration {
         return FontFactory.getFont(defaultFontName(), 8, Font.NORMAL, getPrimaryColor());
     }
 
+    public Configuration withTableHeaderForeground(BaseColor tableHeaderForeground) {
+        this.tableHeaderForeground = tableHeaderForeground;
+        return this;
+    }
+
     public BaseColor tableHeaderForeground() {
-        return BaseColor.WHITE;
+        if (tableHeaderForeground == null)
+            tableHeaderForeground = BaseColor.BLACK;
+        return tableHeaderForeground;
+    }
+
+    public Configuration withTableContentForeground(BaseColor tableContentForeground) {
+        this.tableContentForeground = tableContentForeground;
+        return this;
+    }
+
+    public BaseColor tableContentForeground() {
+        if (tableContentForeground == null)
+            tableContentForeground = BaseColor.BLACK;
+        return tableContentForeground;
     }
 
     public BaseColor tableHeaderBackground() {
@@ -144,8 +167,26 @@ public class Configuration {
         return Colors.VERY_LIGHT_GRAY;
     }
 
+    public Configuration withTableContentFont(Font tableContentFont) {
+        this.tableContentFont = tableContentFont;
+        return this;
+    }
+
+    public Font tableContentFont() {
+        if (tableContentFont == null)
+            tableContentFont = FontFactory.getFont(defaultFontName(), 10, Font.NORMAL, tableContentForeground());
+        return tableContentFont;
+    }
+
+    public Configuration withTableHeaderFont(Font tableHeaderFont) {
+        this.tableHeaderFont = tableHeaderFont;
+        return this;
+    }
+
     public Font tableHeaderFont() {
-        return FontFactory.getFont(defaultFontName(), 10, Font.NORMAL, tableHeaderForeground());
+        if (tableHeaderFont == null)
+            tableHeaderFont = FontFactory.getFont(defaultFontName(), 10, Font.BOLD, tableHeaderForeground());
+        return tableHeaderFont;
     }
 
     public Font featureTitleFont() {
@@ -173,7 +214,7 @@ public class Configuration {
     }
 
     public Font stepDataTableHeaderFont() {
-        return FontFactory.getFont(defaultMonospaceFontname(), 8, Font.BOLD, tableHeaderForeground());
+        return FontFactory.getFont(defaultMonospaceFontname(), 8, Font.BOLD, BaseColor.WHITE);
     }
 
     public Font stepDataTableContentFont() {
@@ -207,7 +248,6 @@ public class Configuration {
         }
     }
 
-
     public void writeFirstPages(Document document) throws DocumentException {
         if (firstPageContentProvider != null) {
             firstPageContentProvider.update(this, document);
@@ -230,7 +270,6 @@ public class Configuration {
         return new HeaderFooter(firstPageFooter, pageFooter, getPrimaryColor(), footerFont());
     }
 
-
     private String getFormattedGenerationDate() {
         return new SimpleDateFormat(generationDateFormat).format(new Date());
     }
@@ -243,24 +282,26 @@ public class Configuration {
         return Colors.DARK_RED;
     }
 
-    public static Paragraph addEmptyLines(Paragraph owner, int nb) {
-        Paragraph lastLine = null;
-        for (int i = 0; i < nb; i++) {
-            lastLine = new Paragraph(" ");
-            owner.add(lastLine);
-        }
-        return lastLine;
-    }
-
     public void writePreambule(Document document) throws DocumentException {
         String preambule = getPreambule();
         if (preambule == null) {
             return;
         }
 
-        Paragraph paragraph = new Paragraph();
-        paragraph.addAll(getMarkdownEmitter().markdownToElements(preambule));
-        document.add(paragraph);
+        List<Element> elements = getMarkdownEmitter().markdownToElements(preambule);
+        for (Element element : elements) {
+            document.add(element);
+        }
+
+
+        PdfPTable table = new PdfPTable(3); // 3 columns.
+        PdfPCell cell1 = new PdfPCell(new Paragraph("Cell 1"));
+        PdfPCell cell2 = new PdfPCell(new Paragraph("Cell 2"));
+        PdfPCell cell3 = new PdfPCell(new Paragraph("Cell 3"));
+        table.addCell(cell1);
+        table.addCell(cell2);
+        table.addCell(cell3);
+        document.add(table);
     }
 
     private String loadResource(URL resource, Charset charset) {
@@ -268,11 +309,9 @@ public class Configuration {
             ByteSource source = asByteSource(resource);
             CharSource charSource = source.asCharSource(charset);
             return charSource.read();
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             e.printStackTrace();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
@@ -300,7 +339,6 @@ public class Configuration {
         return this;
     }
 
-
     public Configuration withPreambuleResource(Class<?> contextClass, String resourcePath) {
         URL resource = getResource(contextClass, resourcePath);
         return withPreambule(loadResource(resource, UTF8));
@@ -314,12 +352,10 @@ public class Configuration {
             inputStream = resource.openStream();
             properties.load(new InputStreamReader(inputStream, UTF8));
             return withMetaInformations(properties);
-        }
-        catch (IOException ioe) {
+        } catch (IOException ioe) {
             throw new FormatterException(
                     "Failed to load meta informations from properties (resource: " + resource + ")", ioe);
-        }
-        finally {
+        } finally {
             BricABrac.closeQuietly(inputStream);
         }
     }

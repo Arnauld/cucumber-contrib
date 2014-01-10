@@ -1,40 +1,15 @@
 package cucumber.contrib.formatter.pdf;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Chapter;
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.FontProvider;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.WritableDirectElement;
-import com.itextpdf.text.pdf.CMYKColor;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.tool.xml.ElementHandler;
-import com.itextpdf.tool.xml.ElementList;
-import com.itextpdf.tool.xml.NoCustomContextException;
-import com.itextpdf.tool.xml.Pipeline;
-import com.itextpdf.tool.xml.Tag;
-import com.itextpdf.tool.xml.WorkerContext;
-import com.itextpdf.tool.xml.XMLWorker;
-import com.itextpdf.tool.xml.XMLWorkerHelper;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.tool.xml.*;
 import com.itextpdf.tool.xml.css.CssFile;
 import com.itextpdf.tool.xml.css.CssFilesImpl;
 import com.itextpdf.tool.xml.css.StyleAttrCSSResolver;
-import com.itextpdf.tool.xml.exceptions.RuntimeWorkerException;
-import com.itextpdf.tool.xml.html.AbstractTagProcessor;
-import com.itextpdf.tool.xml.html.Div;
-import com.itextpdf.tool.xml.html.HTML;
-import com.itextpdf.tool.xml.html.NonSanitizedTag;
-import com.itextpdf.tool.xml.html.ParaGraph;
 import com.itextpdf.tool.xml.html.TagProcessorFactory;
 import com.itextpdf.tool.xml.html.Tags;
 import com.itextpdf.tool.xml.parser.XMLParser;
+import com.itextpdf.tool.xml.pipeline.WritableElement;
 import com.itextpdf.tool.xml.pipeline.css.CssResolverPipeline;
 import com.itextpdf.tool.xml.pipeline.end.ElementHandlerPipeline;
 import com.itextpdf.tool.xml.pipeline.html.AbstractImageProvider;
@@ -42,13 +17,16 @@ import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
 import cucumber.contrib.formatter.BricABrac;
 import cucumber.contrib.formatter.FormatterException;
-
+import cucumber.contrib.formatter.pdf.html.H1Processor;
+import cucumber.contrib.formatter.pdf.html.TableDataContentProcessor;
+import cucumber.contrib.formatter.pdf.html.TableDataHeaderProcessor;
+import cucumber.contrib.formatter.pdf.html.TableProcessor;
 import org.pegdown.Extensions;
 import org.pegdown.PegDownProcessor;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
 
 public class MarkdownEmitter {
@@ -66,8 +44,7 @@ public class MarkdownEmitter {
             ElementList elementList = new ElementList();
             parseXHtml(elementList, formatHtmlAsReader(markdownText));
             return elementList;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new FormatterException("Failed to transform markdown content", e);
         }
     }
@@ -91,8 +68,47 @@ public class MarkdownEmitter {
             });
         }
         hpc.setAcceptUnknown(true).autoBookmark(true).setTagFactory(getDefaultTagProcessorFactory());
-        Pipeline<?> pipeline = new CssResolverPipeline(cssResolver, new HtmlPipeline(hpc, new ElementHandlerPipeline(d,
-                null)));
+        Pipeline<?> pipeline = new CssResolverPipeline(cssResolver,
+                new HtmlPipeline(hpc,
+                        new ElementHandlerPipeline(d, null) {
+                            private void consume(final ProcessObject po) {
+                                if (po.containsWritable()) {
+                                    Writable w = null;
+                                    while (null != (w = po.poll())) {
+                                        System.out.println("MarkdownEmitter.consume~~~~~~> ");
+                                        dump((WritableElement) w);
+                                        System.out.println(d.getClass());
+                                        d.add(w);
+                                    }
+                                }
+                            }
+
+                            private void dump(WritableElement w) {
+                                for (Element e : w.elements()) {
+                                    if (e instanceof PdfPTable)
+                                        ((PdfPTable) e).setWidthPercentage(100);
+                                    System.out.println("MarkdownEmitter.dump:: " + e);
+                                }
+                            }
+
+                            @Override
+                            public Pipeline open(WorkerContext context, Tag t, ProcessObject po) throws PipelineException {
+                                consume(po);
+                                return getNext();
+                            }
+
+                            @Override
+                            public Pipeline close(WorkerContext context, Tag t, ProcessObject po) throws PipelineException {
+                                consume(po);
+                                return getNext();
+                            }
+
+                            @Override
+                            public Pipeline<?> content(WorkerContext ctx, Tag currentTag, String text, ProcessObject po) throws PipelineException {
+                                consume(po);
+                                return getNext();
+                            }
+                        }));
         XMLWorker worker = new XMLWorker(pipeline, true);
         XMLParser p = new XMLParser();
         p.addListener(worker);
@@ -107,35 +123,10 @@ public class MarkdownEmitter {
         TagProcessorFactory tpf = Tags.getHtmlTagProcessorFactory();
         tpf.addProcessor(new H1Processor(configuration), "h1");
         tpf.addProcessor(new com.itextpdf.tool.xml.html.Image(), "img");
+        tpf.addProcessor(new TableDataHeaderProcessor(configuration), "th");
+        tpf.addProcessor(new TableDataContentProcessor(configuration), "td");
+        tpf.addProcessor(new TableProcessor(configuration), "table");
         return tpf;
-    }
-
-    private static class H1Processor extends AbstractTagProcessor {
-        private H1Processor(Configuration configuration) {
-            this.configuration = configuration;
-        }
-
-        private Configuration configuration;
-
-        @Override
-        public List<Element> content(WorkerContext ctx, Tag tag, final String content) {
-            ArrayList<Element> list = new ArrayList<Element>(1);
-            list.add(new WritableDirectElement() {
-
-                public void write(final PdfWriter writer, final Document doc) throws DocumentException {
-                    Chapter chapter;
-                    if (BricABrac.isBlank(content)) {
-                        chapter = new Chapter(new Paragraph(" "), 0);
-                        chapter.setNumberDepth(0);
-                    }
-                    else {
-                        chapter = configuration.createTitledChapter(content);
-                    }
-                    doc.add(chapter);
-                }
-            });
-            return list;
-        }
     }
 
     StringReader formatHtmlAsReader(String text) {
@@ -146,7 +137,11 @@ public class MarkdownEmitter {
         if (BricABrac.isBlank(text)) {
             return "";
         }
-        return markdown.markdownToHtml(text);
+        String html = markdown.markdownToHtml(text);
+        System.out.println("MarkdownEmitter.formatHtml");
+        System.out.println(html);
+
+        return html;
     }
 
 }
