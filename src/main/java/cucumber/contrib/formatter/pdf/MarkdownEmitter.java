@@ -111,7 +111,8 @@ public class MarkdownEmitter {
     }
 
     StringReader formatHtmlAsReader(String text) {
-        return new StringReader(formatHtml(text));
+        String html = formatHtml(text);
+        return new StringReader(html);
     }
 
     private String formatHtml(String text) {

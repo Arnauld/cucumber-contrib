@@ -1,6 +1,7 @@
 package cucumber.contrib.formatter.pdf;
 
 import static com.google.common.io.Resources.asByteSource;
+import static cucumber.contrib.formatter.pdf.Configuration.extendTableToWidth;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteSource;
@@ -112,12 +113,17 @@ public class PdfEmitter {
         Paragraph paragraph = new Paragraph("", configuration.defaultFont());
         paragraph.setSpacingBefore(25.0f);
         paragraph.setSpacingAfter(25.0f);
+        paragraph.setIndentationLeft(20.0f);
         configuration.appendMarkdownContent(paragraph, feature.getDescription());
         featureChap.add(paragraph);
 
         // Scenario
         for (ScenarioWrapper scenario : feature.getScenarios()) {
-            emitScenario(featureChap, scenario);
+            try {
+                emitScenario(featureChap, scenario);
+            } catch (DocumentException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
         }
 
         //
@@ -129,12 +135,13 @@ public class PdfEmitter {
         }
     }
 
-    private void emitScenario(Chapter featureChap, ScenarioWrapper scenario) {
+    private void emitScenario(Chapter featureChap, ScenarioWrapper scenario) throws DocumentException {
         Paragraph scenarioTitle = new Paragraph(scenario.getName(), configuration.scenarioTitleFont());
         Section section = featureChap.addSection(scenarioTitle);
+        section.setIndentationLeft(15.0f);
 
         emitScenarioTags(scenario, section);
-        configuration.appendMarkdownContent(section, scenario.getDescription());
+        emitScenarioDescription(scenario, section);
 
         Paragraph steps = new Paragraph("");
         for (StepWrapper step : scenario.getSteps()) {
@@ -144,6 +151,18 @@ public class PdfEmitter {
         steps.setSpacingBefore(25.0f);
         steps.setSpacingAfter(25.0f);
         section.add(steps);
+    }
+
+    private void emitScenarioDescription(ScenarioWrapper scenario, Section section) throws DocumentException {
+        List<Element> elements = configuration.markdownContent(scenario.getDescription());
+        for(Element element : elements) {
+            if(element instanceof PdfPTable)
+                extendTableToWidth((PdfPTable) element, document.right() - document.left() - 25.0f);
+        }
+        Paragraph paragraph = new Paragraph();
+        paragraph.setIndentationLeft(10.0f);
+        paragraph.addAll(elements);
+        section.add(paragraph);
     }
 
     private void emitScenarioTags(ScenarioWrapper scenario, Section section) {
@@ -369,11 +388,11 @@ public class PdfEmitter {
         Paragraph paragraph = new Paragraph();
         paragraph.setSpacingBefore(20.0f); // first paragraph only
         for (TableOfContents.Entry entry : tableOfContents.getEntries()) {
-            Chunk chunk = new Chunk(entry.getText());
+            Chunk chunk = new Chunk(entry.getText(), configuration.tocEntryFont());
             chunk.setLocalGoto(entry.getAnchorDst());
             paragraph.add(chunk);
             paragraph.add(CONNECT);
-            paragraph.add(new Chunk("" + entry.getPage()));
+            paragraph.add(new Chunk("" + entry.getPage(), configuration.tocEntryFont()));
 
             float indent = 10.0f * entry.getLevel();
             paragraph.setIndentationLeft(indent);
@@ -477,6 +496,7 @@ public class PdfEmitter {
         paragraph.setSpacingBefore(20f);
         paragraph.setSpacingAfter(20f);
         Section section = chapter.addSection(20f, new Paragraph("Tags", configuration.sectionTitleFont()));
+        section.setIndentationLeft(20.0f);
         section.add(paragraph);
     }
 
@@ -502,6 +522,7 @@ public class PdfEmitter {
         paragraph.setSpacingAfter(20f);
 
         Section section = chapter.addSection(20f, new Paragraph("Steps", configuration.sectionTitleFont()));
+        section.setIndentationLeft(20.0f);
         section.add(paragraph);
     }
 
@@ -512,6 +533,7 @@ public class PdfEmitter {
         paragraph.setSpacingAfter(20f);
 
         Section section = chapter.addSection(20f, new Paragraph("Scenario", configuration.sectionTitleFont()));
+        section.setIndentationLeft(20.0f);
         section.add(paragraph);
     }
 
@@ -524,7 +546,7 @@ public class PdfEmitter {
         appendRow(table, errorColors, total, statistics.getNbScenarioManual(), "Manual");
 
         Paragraph paragraph = new Paragraph();
-        Phrase phrase = new Phrase("Manual scenario");
+        Phrase phrase = new Phrase("Manual scenario", configuration.subSectionTitleFont());
         paragraph.add(phrase);
         paragraph.add(table);
         paragraph.setSpacingBefore(20f);
@@ -546,7 +568,7 @@ public class PdfEmitter {
         appendTotalRow(table, total, "Total");
 
         Paragraph paragraph = new Paragraph();
-        Phrase phrase = new Phrase("Automatised scenario");
+        Phrase phrase = new Phrase("Automatised scenario", configuration.subSectionTitleFont());
         paragraph.add(phrase);
         paragraph.add(table);
         paragraph.setSpacingBefore(20f);
@@ -570,7 +592,7 @@ public class PdfEmitter {
         appendTotalRow(table, total, "Total");
 
         Paragraph paragraph = new Paragraph();
-        Phrase phrase = new Phrase("Automatised steps");
+        Phrase phrase = new Phrase("Automatised steps", configuration.subSectionTitleFont());
         paragraph.add(phrase);
         paragraph.add(table);
         paragraph.setSpacingBefore(20f);
@@ -585,7 +607,7 @@ public class PdfEmitter {
         appendRow(table, errorColors, total, statistics.getNbStepManual(), "Manual");
 
         Paragraph paragraph = new Paragraph();
-        Phrase phrase = new Phrase("Manual steps");
+        Phrase phrase = new Phrase("Manual steps", configuration.subSectionTitleFont());
         paragraph.add(phrase);
         paragraph.add(table);
         paragraph.setSpacingBefore(20f);

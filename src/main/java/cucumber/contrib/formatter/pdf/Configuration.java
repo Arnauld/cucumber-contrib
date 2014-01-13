@@ -5,10 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.ByteSource;
 import com.google.common.io.CharSource;
 import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.CMYKColor;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfPageEvent;
+import com.itextpdf.text.pdf.*;
 import com.itextpdf.tool.xml.Tag;
 import com.itextpdf.tool.xml.css.CSS;
 import com.itextpdf.tool.xml.css.CssFile;
@@ -48,6 +45,20 @@ public class Configuration {
     private MarkdownEmitter markdownEmitter;
     //
     private ContentUpdater firstPageContentProvider = new DefaultFirstPageContentProvider();
+
+    // Footer
+    private String firstPageFooterTemplateText;
+    private String pageFooterTemplateText;
+    private Phrase pageFooter;
+    private Font pageFooterFont;
+
+    // Header
+    private String firstPageHeaderTemplateText;
+    private String pageHeaderTemplateText;
+    private Phrase pageHeader;
+    private Font pageHeaderFont;
+
+    //
     private String title;
     private String subject;
     private String version;
@@ -58,18 +69,23 @@ public class Configuration {
     private String preambule;
     private String keywords;
     private String imageRootPath;
+    private BaseColor primaryColor;
+    private Font defaultFont;
     private Font mainTitleFont;
+    private Font subTitleFont;
+    private Font chapterTitleFont;
+    private Font sectionTitleFont;
+    private Font subSectionTitleFont;
     private BaseColor tableHeaderForeground;
     private BaseColor tableContentForeground;
     private Font tableHeaderFont;
     private Font tableContentFont;
-    private Font subTitleFont;
-    private Font chapterTitleFont;
-    private Font sectionTitleFont;
+    private Font tocEntryFont;
+    private Font stepDataTableHeaderFont;
+    private Font stepDataTableContentFont;
+    private BaseColor stepDataTableHeaderBackground;
 
-    // TODO create a context
-    private Chapter currentChapter;
-    private Font defaultFont;
+    //
 
     public Configuration() {
     }
@@ -91,25 +107,11 @@ public class Configuration {
     }
 
     public Document createDocument() {
-        Document document = new Document(PageSize.A4, 50, 50, 50, 50);
-        document.addDocListener(new DocListenerAdapter() {
-            @Override
-            public boolean add(Element element) throws DocumentException {
-                if(element instanceof Chapter) {
-                    currentChapter = (Chapter)element;
-                }
-                return false;
-            }
-        });
-        return document;
+        return new Document(PageSize.A4, 50, 50, 50, 50);
     }
 
     public Rectangle getDocumentArtBox() {
         return new Rectangle(50, 50, 545, 792);
-    }
-
-    private Font footerFont() {
-        return FontFactory.getFont(defaultFontName(), 10, Font.ITALIC, getPrimaryColor());
     }
 
     private String defaultFontName() {
@@ -164,6 +166,17 @@ public class Configuration {
         if(sectionTitleFont == null)
             sectionTitleFont = FontFactory.getFont(defaultFontName(), 14, Font.BOLD, getPrimaryColor());
         return sectionTitleFont;
+    }
+
+    public Configuration withSubSectionTitleFont(Font subSectionTitleFont) {
+        this.subSectionTitleFont = subSectionTitleFont;
+        return this;
+    }
+
+    public Font subSectionTitleFont() {
+        if(subSectionTitleFont == null)
+            subSectionTitleFont = FontFactory.getFont(defaultFontName(), 12, Font.BOLD, getPrimaryColor());
+        return subSectionTitleFont;
     }
 
     public Configuration withDefaultFont(Font defaultFont) {
@@ -261,16 +274,37 @@ public class Configuration {
         return FontFactory.getFont(defaultMonospaceFontname(), 8, Font.ITALIC, new CMYKColor(25, 255, 255, 17));
     }
 
+    public Configuration withStepDataTableHeaderFont(Font stepDataTableHeaderFont) {
+        this.stepDataTableHeaderFont = stepDataTableHeaderFont;
+        return this;
+    }
+
     public Font stepDataTableHeaderFont() {
-        return FontFactory.getFont(defaultMonospaceFontname(), 8, Font.BOLD, BaseColor.WHITE);
+        if(stepDataTableHeaderFont == null)
+            stepDataTableHeaderFont = FontFactory.getFont(defaultMonospaceFontname(), 8, Font.BOLD, BaseColor.WHITE);
+        return stepDataTableHeaderFont;
+    }
+
+    public Configuration withStepDataTableContentFont(Font stepDataTableContentFont) {
+        this.stepDataTableContentFont = stepDataTableContentFont;
+        return this;
     }
 
     public Font stepDataTableContentFont() {
-        return stepDefaultFont();
+        if(stepDataTableContentFont == null)
+            stepDataTableContentFont = stepDefaultFont();
+        return stepDataTableContentFont;
+    }
+
+    public Configuration withStepDataTableHeaderBackground(BaseColor stepDataTableHeaderBackground) {
+        this.stepDataTableHeaderBackground = stepDataTableHeaderBackground;
+        return this;
     }
 
     public BaseColor stepDataTableHeaderBackground() {
-        return tableHeaderBackground();
+        if(stepDataTableHeaderBackground == null)
+            stepDataTableHeaderBackground = tableHeaderBackground();
+        return stepDataTableHeaderBackground;
     }
 
     public BaseColor stepDataTableRowAlternateBackground() {
@@ -304,18 +338,27 @@ public class Configuration {
 
     public PdfPageEvent createHeaderFooter() {
 
-        String pageFooter = "";
-        String firstPageFooter = "";
+        String firstPageHeaderTemplateText = this.firstPageHeaderTemplateText;
+        String pageHeaderTemplateText = this.pageHeaderTemplateText;
 
-        if (!Strings.isNullOrEmpty(title)) {
-            pageFooter = title;
-        }
+        String firstPageFooterTemplateText = this.firstPageFooterTemplateText;
+        if(firstPageFooterTemplateText == null && !Strings.isNullOrEmpty(generationDateFormat))
+            firstPageFooterTemplateText = getFormattedGenerationDate();
 
-        if (!Strings.isNullOrEmpty(generationDateFormat)) {
-            firstPageFooter = getFormattedGenerationDate();
-        }
+        String pageFooterTemplateText = this.pageFooterTemplateText;
+        if(pageFooterTemplateText == null)
+            pageFooterTemplateText = title;
 
-        return new HeaderFooter(firstPageFooter, pageFooter, getPrimaryColor(), footerFont());
+        return new HeaderFooter(
+                firstPageHeaderTemplateText,
+                pageHeaderTemplateText,
+                pageHeaderFont(),
+                pageHeader,
+                firstPageFooterTemplateText,
+                pageFooterTemplateText,
+                pageFooterFont(),
+                pageFooter,
+                getPrimaryColor());
     }
 
     private String getFormattedGenerationDate() {
@@ -326,8 +369,15 @@ public class Configuration {
         return BaseColor.BLACK;
     }
 
+    public Configuration withPrimaryColor(BaseColor primaryColor) {
+        this.primaryColor = primaryColor;
+        return this;
+    }
+
     public BaseColor getPrimaryColor() {
-        return Colors.DARK_RED;
+        if(primaryColor == null)
+            primaryColor = Colors.DARK_RED;
+        return primaryColor;
     }
 
     public void writePreambule(Document document) throws DocumentException {
@@ -336,18 +386,37 @@ public class Configuration {
             return;
         }
 
-        List<Element> elements = getMarkdownEmitter().markdownToElements(preambule);
+        List<Element> elements = markdownContent(preambule);
         for (Element element : elements) {
             if(element instanceof PdfPTable)
-                extendTableToPage((PdfPTable) element, document);
+                extendTableToWidth((PdfPTable) element, document.right() - document.left());
             document.add(element);
         }
     }
 
-    private void extendTableToPage(PdfPTable element, Document document) throws DocumentException {
-        float width = document.right() - document.left();
+    public static void extendTableToWidth(PdfPTable element, float width) throws DocumentException {
         element.setTotalWidth(width);
-        element.setWidths(element.getAbsoluteWidths());
+
+        float[] absoluteWidths = element.getAbsoluteWidths();
+        if(element.getNumberOfColumns() < 10) {
+            float sum = sum(absoluteWidths);
+            float minWidth = sum / 10; // at least 10% of the table
+            for(int i=0;i<absoluteWidths.length;i++) {
+                absoluteWidths[i] = Math.max(minWidth, absoluteWidths[i]);
+            }
+        }
+
+        int[] widths = new int[element.getNumberOfColumns()];
+        for(int i=0; i<widths.length; i++)
+            widths[i] = 1;
+        element.setWidths(absoluteWidths);
+    }
+
+    private static float sum(float[] values) {
+        float sum = 0;
+        for(float v : values)
+            sum += v;
+        return sum;
     }
 
     private String loadResource(URL resource, Charset charset) {
@@ -364,7 +433,11 @@ public class Configuration {
     }
 
     public void appendMarkdownContent(final java.util.List<Element> elements, String markdownText) {
-        elements.addAll(getMarkdownEmitter().markdownToElements(markdownText));
+        elements.addAll(markdownContent(markdownText));
+    }
+
+    public List<Element> markdownContent(String markdownText) {
+        return getMarkdownEmitter().markdownToElements(markdownText);
     }
 
     public Chapter createTitledChapter(String title) {
@@ -456,6 +529,65 @@ public class Configuration {
         return this;
     }
 
+    public Configuration withFirstPageFooterTemplateText(String firstPageFooterTemplateText) {
+        this.firstPageFooterTemplateText = firstPageFooterTemplateText;
+        return this;
+    }
+
+    public Configuration withPageFooterTemplateText(String pageFooterTemplateText) {
+        this.pageFooterTemplateText = pageFooterTemplateText;
+        return this;
+    }
+
+    public Configuration withPageFooterFont(Font pageFooterFont) {
+        this.pageFooterFont = pageFooterFont;
+        return this;
+    }
+
+    public Font pageFooterFont() {
+        if(pageFooterFont == null)
+            pageFooterFont = FontFactory.getFont(defaultFontName(), 10, Font.ITALIC, getPrimaryColor());
+        return pageFooterFont;
+    }
+
+    public Configuration withPageFooter(Phrase pageFooter) {
+        this.pageFooter = pageFooter;
+        return this;
+    }
+
+    public Configuration withFirstPageHeaderTemplateText(String firstPageHeaderTemplateText) {
+        this.firstPageHeaderTemplateText = firstPageHeaderTemplateText;
+        return this;
+    }
+
+    public Configuration withPageHeaderTemplateText(String pageHeaderTemplateText) {
+        this.pageHeaderTemplateText = pageHeaderTemplateText;
+        return this;
+    }
+
+    private Font pageHeaderFont() {
+        if(pageHeaderFont == null)
+            pageHeaderFont = FontFactory.getFont(defaultFontName(), 10, Font.ITALIC, getPrimaryColor());
+        return pageHeaderFont;
+    }
+
+    public Configuration withPageHeaderFont(Font pageHeaderFont) {
+        this.pageHeaderFont = pageHeaderFont;
+        return this;
+    }
+
+    public Configuration withPageHeader(Phrase pageHeader) {
+        this.pageHeader = pageHeader;
+        return this;
+    }
+
+
+    public Font tocEntryFont() {
+        if(tocEntryFont == null)
+            tocEntryFont = defaultFont();
+        return tocEntryFont;
+    }
+
     public String manualTag() {
         return "@manual";
     }
@@ -496,10 +628,6 @@ public class Configuration {
         return version;
     }
 
-    public Chapter currentChapter() {
-        return currentChapter;
-    }
-
     public void resolveDefaultStyles(Tag t) {
         t.setCSS(bodyCssStyles());
     }
@@ -509,9 +637,32 @@ public class Configuration {
         cssFile.add(HTML.Tag.BODY, bodyCssStyles());
         cssFile.add(HTML.Tag.H1, h1CssStyles());
         cssFile.add(HTML.Tag.H2, h2CssStyles());
+        cssFile.add(HTML.Tag.UL, ulCssStyles());
+        cssFile.add(HTML.Tag.LI, liCssStyles());
+        cssFile.add(HTML.Tag.P, pCssStyles());
     }
 
-    private Map<String, String> bodyCssStyles() {
+    private Map<String, String> pCssStyles() {
+        Map<String,String> styles = new HashMap<String,String>();
+        styles.put(CSS.Property.TEXT_ALIGN, "justify");
+        return styles;
+    }
+
+    private Map<String, String> liCssStyles() {
+        Map<String,String> styles = new HashMap<String,String>();
+        styles.put(CSS.Property.COLOR, toRGBColor(getDefaultColor()));
+        return styles;
+    }
+
+    protected Map<String, String> ulCssStyles() {
+        Map<String,String> styles = new HashMap<String,String>();
+        styles.put(CSS.Property.COLOR, toRGBColor(getPrimaryColor()));
+        styles.put(CSS.Property.LIST_STYLE_TYPE, "square");
+        styles.put(CSS.Property.LIST_STYLE, "1em");
+        return styles;
+    }
+
+    protected Map<String, String> bodyCssStyles() {
         Map<String,String> styles = new HashMap<String,String>();
         fillCSSProperties(styles, defaultFont());
         return styles;
@@ -538,11 +689,10 @@ public class Configuration {
         if(font.isBold())
             styles.put(CSS.Property.FONT_STYLE, CSS.Value.BOLD);
         styles.put(CSS.Property.FONT_SIZE, font.getSize() + "pt");
-        styles.put(CSS.Property.COLOR, toRGBColor(font));
+        styles.put(CSS.Property.COLOR, toRGBColor(font.getColor()));
     }
 
-    private String toRGBColor(Font font) {
-        BaseColor color = font.getColor();
+    public static String toRGBColor(BaseColor color) {
         return "rgb(" + color.getRed() + ", " + color.getGreen() + ", " + color.getBlue() + ")";
     }
 
