@@ -17,6 +17,14 @@ import java.io.IOException;
  *
  */
 public class HtmlIntegTest {
+    public static final BaseColor PRIMARY_COLOR = new BaseColor(170, 135, 120);
+
+    public static final Font MAIN_TITLE_FONT = FontFactory.getFont("Arial", 16, Font.NORMAL, PRIMARY_COLOR);
+    public static final Font CHAPTER_TITLE_FONT = FontFactory.getFont("Arial", 13, Font.BOLD, PRIMARY_COLOR);
+    public static final Font SECTION_TITLE_FONT = FontFactory.getFont("Arial", 12, Font.NORMAL, PRIMARY_COLOR);
+    public static final Font SUB_TITLE_FONT = FontFactory.getFont("Arial", 20, Font.NORMAL, BaseColor.BLACK);
+    public static final Font TABLE_HEADER_FONT = FontFactory.getFont("Arial", 9, Font.BOLD, BaseColor.BLACK);
+    public static final Font TABLE_CONTENT_FONT = FontFactory.getFont("Arial", 9, Font.NORMAL, BaseColor.BLACK);
 
     private PdfEmitter pdfEmitter;
     private Configuration configuration;
@@ -24,6 +32,8 @@ public class HtmlIntegTest {
     @Before
     public void setUp() {
         configuration = new Configuration()
+                            .withChapterTitleFont(CHAPTER_TITLE_FONT)
+                            .withSectionTitleFont(SECTION_TITLE_FONT)
                             .withTableHeaderFont(FontFactory.getFont("Arial", 9, Font.BOLD, BaseColor.BLACK))
                             .withTableContentFont(FontFactory.getFont("Arial", 9, Font.NORMAL, BaseColor.BLACK));
         pdfEmitter = new PdfEmitter(configuration);

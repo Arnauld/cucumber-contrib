@@ -9,6 +9,10 @@ import com.itextpdf.text.pdf.CMYKColor;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPageEvent;
+import com.itextpdf.tool.xml.Tag;
+import com.itextpdf.tool.xml.css.CSS;
+import com.itextpdf.tool.xml.css.CssFile;
+import com.itextpdf.tool.xml.html.HTML;
 import com.itextpdf.tool.xml.pipeline.html.AbstractImageProvider;
 import com.itextpdf.tool.xml.pipeline.html.ImageProvider;
 import cucumber.contrib.formatter.BricABrac;
@@ -21,9 +25,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
 import java.util.List;
-import java.util.Properties;
 
 import static com.google.common.io.Resources.asByteSource;
 import static com.google.common.io.Resources.getResource;
@@ -60,6 +63,13 @@ public class Configuration {
     private BaseColor tableContentForeground;
     private Font tableHeaderFont;
     private Font tableContentFont;
+    private Font subTitleFont;
+    private Font chapterTitleFont;
+    private Font sectionTitleFont;
+
+    // TODO create a context
+    private Chapter currentChapter;
+    private Font defaultFont;
 
     public Configuration() {
     }
@@ -81,7 +91,17 @@ public class Configuration {
     }
 
     public Document createDocument() {
-        return new Document(PageSize.A4, 50, 50, 50, 50);
+        Document document = new Document(PageSize.A4, 50, 50, 50, 50);
+        document.addDocListener(new DocListenerAdapter() {
+            @Override
+            public boolean add(Element element) throws DocumentException {
+                if(element instanceof Chapter) {
+                    currentChapter = (Chapter)element;
+                }
+                return false;
+            }
+        });
+        return document;
     }
 
     public Rectangle getDocumentArtBox() {
@@ -107,8 +127,15 @@ public class Configuration {
         return mainTitleFont;
     }
 
+    public Configuration withSubTitleFont(Font subTitleFont) {
+        this.subTitleFont = subTitleFont;
+        return this;
+    }
+
     public Font subTitleFont() {
-        return FontFactory.getFont(defaultFontName(), 18, Font.ITALIC, getPrimaryColor());
+        if(subTitleFont == null)
+            subTitleFont = FontFactory.getFont(defaultFontName(), 18, Font.ITALIC, getPrimaryColor());
+        return subTitleFont;
     }
 
     //
@@ -117,16 +144,37 @@ public class Configuration {
         return FontFactory.getFont(defaultMonospaceFontname(), 14, Font.ITALIC, getPrimaryColor());
     }
 
+    public Configuration withChapterTitleFont(Font chapterTitleFont) {
+        this.chapterTitleFont = chapterTitleFont;
+        return this;
+    }
+
     public Font chapterTitleFont() {
-        return FontFactory.getFont(defaultFontName(), 16, Font.BOLD, getPrimaryColor());
+        if(chapterTitleFont == null)
+            chapterTitleFont = FontFactory.getFont(defaultFontName(), 16, Font.BOLD, getPrimaryColor());
+        return chapterTitleFont;
+    }
+
+    public Configuration withSectionTitleFont(Font sectionTitleFont) {
+        this.sectionTitleFont = sectionTitleFont;
+        return this;
     }
 
     public Font sectionTitleFont() {
-        return FontFactory.getFont(defaultFontName(), 14, Font.BOLD, getPrimaryColor());
+        if(sectionTitleFont == null)
+            sectionTitleFont = FontFactory.getFont(defaultFontName(), 14, Font.BOLD, getPrimaryColor());
+        return sectionTitleFont;
+    }
+
+    public Configuration withDefaultFont(Font defaultFont) {
+        this.defaultFont = defaultFont;
+        return this;
     }
 
     public Font defaultFont() {
-        return FontFactory.getFont(defaultFontName(), 12, Font.NORMAL, getDefaultColor());
+        if(defaultFont == null)
+            defaultFont = FontFactory.getFont(defaultFontName(), 12, Font.NORMAL, getDefaultColor());
+        return defaultFont;
     }
 
     public Font defaultStrongFont() {
@@ -291,7 +339,7 @@ public class Configuration {
         List<Element> elements = getMarkdownEmitter().markdownToElements(preambule);
         for (Element element : elements) {
             if(element instanceof PdfPTable)
-                extendTableToPage((PdfPTable)element, document);
+                extendTableToPage((PdfPTable) element, document);
             document.add(element);
         }
     }
@@ -320,7 +368,10 @@ public class Configuration {
     }
 
     public Chapter createTitledChapter(String title) {
-        Paragraph titleParagraph = new Paragraph(title, featureTitleFont());
+        if(title == null)
+            throw new IllegalArgumentException();
+
+        Paragraph titleParagraph = new Paragraph(title, chapterTitleFont());
         titleParagraph.setSpacingBefore(10f);
         titleParagraph.setSpacingAfter(10f);
         Chapter chapter = new Chapter(titleParagraph, ++chapterCount);
@@ -444,4 +495,55 @@ public class Configuration {
     public String getVersion() {
         return version;
     }
+
+    public Chapter currentChapter() {
+        return currentChapter;
+    }
+
+    public void resolveDefaultStyles(Tag t) {
+        t.setCSS(bodyCssStyles());
+    }
+
+    public void fillDefaultHtmlCSS(CssFile cssFile) {
+        cssFile.add(HTML.Tag.BASE, bodyCssStyles());
+        cssFile.add(HTML.Tag.BODY, bodyCssStyles());
+        cssFile.add(HTML.Tag.H1, h1CssStyles());
+        cssFile.add(HTML.Tag.H2, h2CssStyles());
+    }
+
+    private Map<String, String> bodyCssStyles() {
+        Map<String,String> styles = new HashMap<String,String>();
+        fillCSSProperties(styles, defaultFont());
+        return styles;
+    }
+
+    protected Map<String, String> h1CssStyles() {
+        Map<String,String> styles = new HashMap<String,String>();
+        fillCSSProperties(styles, chapterTitleFont());
+        styles.put("page-break-before", "always");
+        styles.put(CSS.Property.PADDING_BOTTOM, "2em");
+        styles.put(CSS.Property.PADDING_TOP, "1em");
+        return styles;
+    }
+
+    protected Map<String, String> h2CssStyles() {
+        Map<String,String> styles = new HashMap<String,String>();
+        fillCSSProperties(styles, sectionTitleFont());
+        styles.put(CSS.Property.PADDING_BOTTOM, "2em");
+        styles.put(CSS.Property.PADDING_TOP, "1em");
+        return styles;
+    }
+
+    private void fillCSSProperties(Map<String, String> styles, Font font) {
+        if(font.isBold())
+            styles.put(CSS.Property.FONT_STYLE, CSS.Value.BOLD);
+        styles.put(CSS.Property.FONT_SIZE, font.getSize() + "pt");
+        styles.put(CSS.Property.COLOR, toRGBColor(font));
+    }
+
+    private String toRGBColor(Font font) {
+        BaseColor color = font.getColor();
+        return "rgb(" + color.getRed() + ", " + color.getGreen() + ", " + color.getBlue() + ")";
+    }
+
 }

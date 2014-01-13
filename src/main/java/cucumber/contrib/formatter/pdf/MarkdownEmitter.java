@@ -3,11 +3,14 @@ package cucumber.contrib.formatter.pdf;
 import com.itextpdf.text.Element;
 import com.itextpdf.tool.xml.*;
 import com.itextpdf.tool.xml.css.CssFile;
+import com.itextpdf.tool.xml.css.CssFileImpl;
 import com.itextpdf.tool.xml.css.CssFilesImpl;
 import com.itextpdf.tool.xml.css.StyleAttrCSSResolver;
+import com.itextpdf.tool.xml.exceptions.CssResolverException;
 import com.itextpdf.tool.xml.html.TagProcessorFactory;
 import com.itextpdf.tool.xml.html.Tags;
 import com.itextpdf.tool.xml.parser.XMLParser;
+import com.itextpdf.tool.xml.pipeline.css.CSSResolver;
 import com.itextpdf.tool.xml.pipeline.css.CssResolverPipeline;
 import com.itextpdf.tool.xml.pipeline.end.ElementHandlerPipeline;
 import com.itextpdf.tool.xml.pipeline.html.AbstractImageProvider;
@@ -15,7 +18,6 @@ import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
 import cucumber.contrib.formatter.BricABrac;
 import cucumber.contrib.formatter.FormatterException;
-import cucumber.contrib.formatter.pdf.html.H1Processor;
 import cucumber.contrib.formatter.pdf.html.TableDataContentProcessor;
 import cucumber.contrib.formatter.pdf.html.TableDataHeaderProcessor;
 import org.pegdown.Extensions;
@@ -50,7 +52,20 @@ public class MarkdownEmitter {
     private void parseXHtml(final ElementHandler d, final Reader in) throws IOException {
         CssFilesImpl cssFiles = new CssFilesImpl();
         cssFiles.add(getDefaultCSS());
-        StyleAttrCSSResolver cssResolver = new StyleAttrCSSResolver(cssFiles);
+        cssFiles.add(getHtmlCSS());
+        StyleAttrCSSResolver cssResolver = new StyleAttrCSSResolver(cssFiles) {
+            @Override
+            public void resolveStyles(Tag t) {
+                configuration.resolveDefaultStyles(t);
+                super.resolveStyles(t);
+            }
+
+            @Override
+            public CSSResolver clear() throws CssResolverException {
+                // prevent css files from being been removed
+                return this;
+            }
+        };
         HtmlPipelineContext hpc = new HtmlPipelineContext(null);
         final String imageRootPath = configuration.getImageRootPath();
         if (imageRootPath != null) {
@@ -68,27 +83,27 @@ public class MarkdownEmitter {
         Pipeline<?> pipeline =
                 new CssResolverPipeline(cssResolver,
                         new HtmlPipeline(hpc,
-                                new ElementAdjusterPipeline(d, null)));
+                                new ElementHandlerPipeline(d, null)));
         XMLWorker worker = new XMLWorker(pipeline, true);
         XMLParser p = new XMLParser();
         p.addListener(worker);
         p.parse(in);
     }
 
-    public static class ElementAdjusterPipeline extends ElementHandlerPipeline {
-
-        public ElementAdjusterPipeline(ElementHandler handler, Pipeline next) {
-            super(handler, next);
-        }
-    }
-
     private CssFile getDefaultCSS() {
         return XMLWorkerHelper.getInstance().getDefaultCSS();
     }
 
+    private CssFile getHtmlCSS() {
+        CssFileImpl cssFile = new CssFileImpl();
+        configuration.fillDefaultHtmlCSS(cssFile);
+        return cssFile;
+    }
+
     private TagProcessorFactory getDefaultTagProcessorFactory() {
         TagProcessorFactory tpf = Tags.getHtmlTagProcessorFactory();
-        tpf.addProcessor(new H1Processor(configuration), "h1");
+        //tpf.addProcessor(new H1Processor(configuration), "h1");
+        //tpf.addProcessor(new H2Processor(configuration), "h2");
         tpf.addProcessor(new com.itextpdf.tool.xml.html.Image(), "img");
         tpf.addProcessor(new TableDataHeaderProcessor(configuration), "th");
         tpf.addProcessor(new TableDataContentProcessor(configuration), "td");
