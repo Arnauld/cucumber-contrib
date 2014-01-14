@@ -384,7 +384,7 @@ public class PdfEmitter {
         toc.setNumberDepth(0);
         toc.add(new Paragraph(""));
 
-        Chunk CONNECT = new Chunk(new LineSeparator(0.5f, 95, configuration.getDefaultColor(), Element.ALIGN_CENTER, -.5f));
+        Chunk CONNECT = new Chunk(new LineSeparator(0.5f, 95, configuration.defaultColor(), Element.ALIGN_CENTER, -.5f));
         Paragraph paragraph = new Paragraph();
         paragraph.setSpacingBefore(20.0f); // first paragraph only
         for (TableOfContents.Entry entry : tableOfContents.getEntries()) {

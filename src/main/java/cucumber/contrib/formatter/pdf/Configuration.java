@@ -84,6 +84,9 @@ public class Configuration {
     private Font stepDataTableHeaderFont;
     private Font stepDataTableContentFont;
     private BaseColor stepDataTableHeaderBackground;
+    private String defaultFontName;
+    private Font versionTitleFont;
+    private BaseColor tableHeaderBackground;
 
     //
 
@@ -114,8 +117,15 @@ public class Configuration {
         return new Rectangle(50, 50, 545, 792);
     }
 
-    private String defaultFontName() {
-        return FontFactory.HELVETICA;
+    public Configuration withDefaultFontName(String fontName) {
+        this.defaultFontName = fontName;
+        return this;
+    }
+
+    public String defaultFontName() {
+        if(defaultFontName == null)
+            defaultFontName = FontFactory.HELVETICA;
+        return defaultFontName;
     }
 
     public Configuration withMainTitleFont(Font mainTitleFont) {
@@ -123,9 +133,13 @@ public class Configuration {
         return this;
     }
 
+    /**
+     * @see #primaryColor()
+     * @see #defaultFontName()
+     */
     public Font mainTitleFont() {
         if (mainTitleFont == null)
-            mainTitleFont = FontFactory.getFont(defaultFontName(), 32, Font.ITALIC, getPrimaryColor());
+            mainTitleFont = FontFactory.getFont(defaultFontName(), 32, Font.ITALIC, primaryColor());
         return mainTitleFont;
     }
 
@@ -134,16 +148,31 @@ public class Configuration {
         return this;
     }
 
+    /**
+     * @see #primaryColor()
+     * @see #defaultFontName()
+     */
     public Font subTitleFont() {
         if(subTitleFont == null)
-            subTitleFont = FontFactory.getFont(defaultFontName(), 18, Font.ITALIC, getPrimaryColor());
+            subTitleFont = FontFactory.getFont(defaultFontName(), 18, Font.ITALIC, primaryColor());
         return subTitleFont;
     }
 
     //
 
+    public Configuration withVersionTitleFont(Font versionTitleFont) {
+        this.versionTitleFont = versionTitleFont;
+        return this;
+    }
+
+    /**
+     * @see #primaryColor()
+     * @see #defaultMonospaceFontname()
+     */
     public Font versionTitleFont() {
-        return FontFactory.getFont(defaultMonospaceFontname(), 14, Font.ITALIC, getPrimaryColor());
+        if(versionTitleFont == null)
+            versionTitleFont = FontFactory.getFont(defaultMonospaceFontname(), 14, Font.ITALIC, primaryColor());
+        return versionTitleFont;
     }
 
     public Configuration withChapterTitleFont(Font chapterTitleFont) {
@@ -151,9 +180,13 @@ public class Configuration {
         return this;
     }
 
+    /**
+     * @see #primaryColor()
+     * @see #defaultFontName()
+     */
     public Font chapterTitleFont() {
         if(chapterTitleFont == null)
-            chapterTitleFont = FontFactory.getFont(defaultFontName(), 16, Font.BOLD, getPrimaryColor());
+            chapterTitleFont = FontFactory.getFont(defaultFontName(), 16, Font.BOLD, primaryColor());
         return chapterTitleFont;
     }
 
@@ -162,9 +195,13 @@ public class Configuration {
         return this;
     }
 
+    /**
+     * @see #primaryColor()
+     * @see #defaultFontName()
+     */
     public Font sectionTitleFont() {
         if(sectionTitleFont == null)
-            sectionTitleFont = FontFactory.getFont(defaultFontName(), 14, Font.BOLD, getPrimaryColor());
+            sectionTitleFont = FontFactory.getFont(defaultFontName(), 14, Font.BOLD, primaryColor());
         return sectionTitleFont;
     }
 
@@ -173,9 +210,13 @@ public class Configuration {
         return this;
     }
 
+    /**
+     * @see #primaryColor()
+     * @see #defaultFontName()
+     */
     public Font subSectionTitleFont() {
         if(subSectionTitleFont == null)
-            subSectionTitleFont = FontFactory.getFont(defaultFontName(), 12, Font.BOLD, getPrimaryColor());
+            subSectionTitleFont = FontFactory.getFont(defaultFontName(), 12, Font.BOLD, primaryColor());
         return subSectionTitleFont;
     }
 
@@ -184,18 +225,30 @@ public class Configuration {
         return this;
     }
 
+    /**
+     * @see #defaultColor()
+     * @see #defaultFontName()
+     */
     public Font defaultFont() {
         if(defaultFont == null)
-            defaultFont = FontFactory.getFont(defaultFontName(), 12, Font.NORMAL, getDefaultColor());
+            defaultFont = FontFactory.getFont(defaultFontName(), 12, Font.NORMAL, defaultColor());
         return defaultFont;
     }
 
+    /**
+     * @see #defaultColor()
+     * @see #defaultFontName()
+     */
     public Font defaultStrongFont() {
-        return FontFactory.getFont(defaultFontName(), 12, Font.BOLD, getDefaultColor());
+        return FontFactory.getFont(defaultFontName(), 12, Font.BOLD, defaultColor());
     }
 
-    protected Font defaultMetaFont() {
-        return FontFactory.getFont(defaultFontName(), 8, Font.NORMAL, getPrimaryColor());
+    /**
+     * @see #primaryColor()
+     * @see #defaultFontName()
+     */
+    public Font defaultMetaFont() {
+        return FontFactory.getFont(defaultFontName(), 8, Font.NORMAL, primaryColor());
     }
 
     public Configuration withTableHeaderForeground(BaseColor tableHeaderForeground) {
@@ -220,8 +273,15 @@ public class Configuration {
         return tableContentForeground;
     }
 
+    public Configuration withTableHeaderBackground(BaseColor tableHeaderBackground) {
+        this.tableHeaderBackground = tableHeaderBackground;
+        return this;
+    }
+
     public BaseColor tableHeaderBackground() {
-        return Colors.CYAN;
+        if(tableHeaderBackground == null)
+            tableHeaderBackground = Colors.CYAN;
+        return tableHeaderBackground;
     }
 
     public BaseColor tableAlternateBackground() {
@@ -358,14 +418,14 @@ public class Configuration {
                 pageFooterTemplateText,
                 pageFooterFont(),
                 pageFooter,
-                getPrimaryColor());
+                primaryColor());
     }
 
     private String getFormattedGenerationDate() {
         return new SimpleDateFormat(generationDateFormat).format(new Date());
     }
 
-    public BaseColor getDefaultColor() {
+    public BaseColor defaultColor() {
         return BaseColor.BLACK;
     }
 
@@ -374,7 +434,7 @@ public class Configuration {
         return this;
     }
 
-    public BaseColor getPrimaryColor() {
+    public BaseColor primaryColor() {
         if(primaryColor == null)
             primaryColor = Colors.DARK_RED;
         return primaryColor;
@@ -546,7 +606,7 @@ public class Configuration {
 
     public Font pageFooterFont() {
         if(pageFooterFont == null)
-            pageFooterFont = FontFactory.getFont(defaultFontName(), 10, Font.ITALIC, getPrimaryColor());
+            pageFooterFont = FontFactory.getFont(defaultFontName(), 10, Font.ITALIC, primaryColor());
         return pageFooterFont;
     }
 
@@ -567,7 +627,7 @@ public class Configuration {
 
     private Font pageHeaderFont() {
         if(pageHeaderFont == null)
-            pageHeaderFont = FontFactory.getFont(defaultFontName(), 10, Font.ITALIC, getPrimaryColor());
+            pageHeaderFont = FontFactory.getFont(defaultFontName(), 10, Font.ITALIC, primaryColor());
         return pageHeaderFont;
     }
 
@@ -650,13 +710,13 @@ public class Configuration {
 
     private Map<String, String> liCssStyles() {
         Map<String,String> styles = new HashMap<String,String>();
-        styles.put(CSS.Property.COLOR, toRGBColor(getDefaultColor()));
+        styles.put(CSS.Property.COLOR, toRGBColor(defaultColor()));
         return styles;
     }
 
     protected Map<String, String> ulCssStyles() {
         Map<String,String> styles = new HashMap<String,String>();
-        styles.put(CSS.Property.COLOR, toRGBColor(getPrimaryColor()));
+        styles.put(CSS.Property.COLOR, toRGBColor(primaryColor()));
         styles.put(CSS.Property.LIST_STYLE_TYPE, "square");
         styles.put(CSS.Property.LIST_STYLE, "1em");
         return styles;
