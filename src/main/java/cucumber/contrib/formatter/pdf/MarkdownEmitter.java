@@ -35,7 +35,7 @@ public class MarkdownEmitter {
 
     public MarkdownEmitter(Configuration configuration) {
         this.configuration = configuration;
-        this.markdown = new PegDownProcessor(Extensions.ALL);
+        this.markdown = new PegDownProcessor(Extensions.TABLES);
     }
 
     public List<Element> markdownToElements(String markdownText) {
@@ -111,6 +111,7 @@ public class MarkdownEmitter {
     }
 
     StringReader formatHtmlAsReader(String text) {
+        System.out.println("MarkdownEmitter.formatHtmlAsReader(" + text + ")");
         String html = formatHtml(text);
         return new StringReader(html);
     }

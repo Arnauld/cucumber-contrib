@@ -80,6 +80,16 @@
         </dependency>
 
         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <!-- Ditaa -->
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+        <dependency>
+            <groupId>ditaa</groupId>
+            <artifactId>ditaa</artifactId>
+            <version>0.9</version>
+        </dependency>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
         <!-- iText -->
         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
@@ -218,6 +228,9 @@
         </plugins>
     </build>
 
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- PROFILES -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <profiles>
         <profile>
             <id>sign-artifacts</id>
@@ -250,4 +263,17 @@
             </build>
         </profile>
     </profiles>
+
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- REPOSITORIES -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <repositories>
+        <!-- embedded repo -->
+        <repository>
+            <id>project.local</id>
+            <name>project</name>
+            <url>file:${project.basedir}/repo</url>
+        </repository>
+    </repositories>
 </project>

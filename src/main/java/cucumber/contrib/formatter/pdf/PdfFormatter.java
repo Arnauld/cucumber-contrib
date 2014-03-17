@@ -57,7 +57,7 @@ public class PdfFormatter implements Formatter, Reporter {
         if (pdfEmitter == null) {
             pdfEmitter = new PdfEmitter(getConfiguration());
             try {
-                pdfEmitter.init(new File(reportDir, "report.pdf"));
+                pdfEmitter.init(new File(reportDir, configuration.getReportFilename()));
             } catch (FileNotFoundException e) {
                 throw new FormatterException("Failed to create report file", e);
             } catch (DocumentException e) {

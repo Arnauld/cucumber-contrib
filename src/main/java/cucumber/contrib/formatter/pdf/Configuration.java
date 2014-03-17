@@ -87,10 +87,21 @@ public class Configuration {
     private String defaultFontName;
     private Font versionTitleFont;
     private BaseColor tableHeaderBackground;
+    private String reportFilename = "report.pdf";
 
     //
 
     public Configuration() {
+    }
+
+
+    public String getReportFilename() {
+        return reportFilename;
+    }
+
+    public Configuration withReportFilename(String reportFilename) {
+        this.reportFilename = reportFilename;
+        return this;
     }
 
     public static Paragraph addEmptyLines(Paragraph owner, int nb) {

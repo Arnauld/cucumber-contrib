@@ -6,6 +6,7 @@
 *.jar
 *.war
 *.ear
+tmp/
 target/
 cucumber-contrib.iml
 .classpath

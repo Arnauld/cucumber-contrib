@@ -26,6 +26,28 @@ public class MarkdownEmitterTest {
     }
 
     @Test
+    public void markdown_with_paragraph__new_lines_are_not_kept() throws IOException {
+        String markdownText = "" +
+                "Once upon a time \n" +
+                "in a kingdom far, \n" +
+                "far away, \n" +
+                "the king and queen\n" +
+                "";
+
+        // html
+        StringReader stringReader = markdownEmitter.formatHtmlAsReader(markdownText);
+        String html = IOUtils.toString(stringReader);
+        assertThat(html).isEqualTo("<p><code>var s = 1; \n" +
+                "s = s + 2; \n" +
+                "</code></pre>");
+
+        // pdf elements
+        List<Element> elements = markdownEmitter.markdownToElements(markdownText);
+        assertThat(elements).isNotEmpty();
+
+    }
+
+    @Test
     public void markdown_with_codeBlock() throws IOException {
         String markdownText = "\n" +
                 "    var s = 1; \n" +
