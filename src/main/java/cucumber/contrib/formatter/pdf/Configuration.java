@@ -5,7 +5,9 @@ import com.google.common.collect.Lists;
 import com.google.common.io.ByteSource;
 import com.google.common.io.CharSource;
 import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.*;
+import com.itextpdf.text.pdf.CMYKColor;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfPageEvent;
 import com.itextpdf.tool.xml.Tag;
 import com.itextpdf.tool.xml.css.CSS;
 import com.itextpdf.tool.xml.css.CssFile;
@@ -33,14 +35,16 @@ import static com.google.common.io.Resources.getResource;
  */
 public class Configuration {
 
+    public static final Charset UTF8 = Charset.forName("UTF-8");
+    //
     public static final String META_AUTHOR = "author";
     public static final String META_TITLE = "title";
     public static final String META_SUBJECT = "subject";
     public static final String META_KEYWORDS = "keywords";
     public static final String META_VERSION = "version";
     public static final String META_GENERATION_DATE_FORMAT = "generation-date-format";
-    public static final Charset UTF8 = Charset.forName("UTF-8");
     private static final String META_IMAGE_ROOT_PATH = "image-root-path";
+
     // TODO extract to 'TemplateEngine' thus one can plug an other template engine
     private MarkdownEmitter markdownEmitter;
     //
@@ -58,6 +62,11 @@ public class Configuration {
     private Phrase pageHeader;
     private Font pageHeaderFont;
 
+    //
+    private Rectangle pageSize = PageSize.A4;
+    private Margin documentMargin = new Margin(50);
+    private Margin descriptionMargin = new Margin(20, 0, 25, 25);
+    private Margin scenarioMargin = new Margin(0, 0, 20, 20);
     //
     private String title;
     private String subject;
@@ -87,7 +96,12 @@ public class Configuration {
     private String defaultFontName;
     private Font versionTitleFont;
     private BaseColor tableHeaderBackground;
+    //
     private String reportFilename = "report.pdf";
+    //
+    private boolean displayUri = true;
+    private boolean displayTags = true;
+    private boolean unbreakableScenario = false;
 
     //
 
@@ -120,12 +134,67 @@ public class Configuration {
         return markdownEmitter;
     }
 
+    public Configuration withDocumentMargin(float margin) {
+        return withDocumentMargin(new Margin(margin));
+    }
+
+    public Configuration withDocumentMargin(float marginLeftRight, float marginTopBottom) {
+        return withDocumentMargin(new Margin(marginLeftRight, marginTopBottom));
+    }
+
+    public Configuration withDocumentMargin(Margin documentMargin) {
+        this.documentMargin = documentMargin;
+        return this;
+    }
+
+    public Margin getDocumentMargin() {
+        return documentMargin;
+    }
+
+    public Configuration withDescriptionMargin(float margin) {
+        return withDescriptionMargin(new Margin(margin));
+    }
+
+    public Configuration withDescriptionMargin(float marginLeft, float marginRight, float marginTop, float marginBottom) {
+        return withDescriptionMargin(new Margin(marginLeft, marginRight, marginTop, marginBottom));
+    }
+
+    public Configuration withDescriptionMargin(Margin descriptionMargin) {
+        this.descriptionMargin = descriptionMargin;
+        return this;
+    }
+
+    public Margin getDescriptionMargin() {
+        return descriptionMargin;
+    }
+
+    public Configuration withScenarioMargin(float marginLeft, float marginRight, float marginTop, float marginBottom) {
+        return withScenarioMargin(new Margin(marginLeft, marginRight, marginTop, marginBottom));
+    }
+
+    public Configuration withScenarioMargin(Margin scenarioMargin) {
+        this.scenarioMargin = scenarioMargin;
+        return this;
+    }
+
+    public Margin getScenarioMargin() {
+        return scenarioMargin;
+    }
+
     public Document createDocument() {
-        return new Document(PageSize.A4, 50, 50, 50, 50);
+        return new Document(pageSize,
+                documentMargin.marginLeft,
+                documentMargin.marginRight,
+                documentMargin.marginTop,
+                documentMargin.marginBottom);
     }
 
     public Rectangle getDocumentArtBox() {
-        return new Rectangle(50, 50, 545, 792);
+        return new Rectangle(
+                documentMargin.marginLeft,
+                documentMargin.marginBottom,
+                pageSize.getWidth() - documentMargin.marginRight,
+                pageSize.getHeight() - documentMargin.marginTop);
     }
 
     public Configuration withDefaultFontName(String fontName) {
@@ -134,7 +203,7 @@ public class Configuration {
     }
 
     public String defaultFontName() {
-        if(defaultFontName == null)
+        if (defaultFontName == null)
             defaultFontName = FontFactory.HELVETICA;
         return defaultFontName;
     }
@@ -164,7 +233,7 @@ public class Configuration {
      * @see #defaultFontName()
      */
     public Font subTitleFont() {
-        if(subTitleFont == null)
+        if (subTitleFont == null)
             subTitleFont = FontFactory.getFont(defaultFontName(), 18, Font.ITALIC, primaryColor());
         return subTitleFont;
     }
@@ -181,7 +250,7 @@ public class Configuration {
      * @see #defaultMonospaceFontname()
      */
     public Font versionTitleFont() {
-        if(versionTitleFont == null)
+        if (versionTitleFont == null)
             versionTitleFont = FontFactory.getFont(defaultMonospaceFontname(), 14, Font.ITALIC, primaryColor());
         return versionTitleFont;
     }
@@ -196,7 +265,7 @@ public class Configuration {
      * @see #defaultFontName()
      */
     public Font chapterTitleFont() {
-        if(chapterTitleFont == null)
+        if (chapterTitleFont == null)
             chapterTitleFont = FontFactory.getFont(defaultFontName(), 16, Font.BOLD, primaryColor());
         return chapterTitleFont;
     }
@@ -211,7 +280,7 @@ public class Configuration {
      * @see #defaultFontName()
      */
     public Font sectionTitleFont() {
-        if(sectionTitleFont == null)
+        if (sectionTitleFont == null)
             sectionTitleFont = FontFactory.getFont(defaultFontName(), 14, Font.BOLD, primaryColor());
         return sectionTitleFont;
     }
@@ -226,7 +295,7 @@ public class Configuration {
      * @see #defaultFontName()
      */
     public Font subSectionTitleFont() {
-        if(subSectionTitleFont == null)
+        if (subSectionTitleFont == null)
             subSectionTitleFont = FontFactory.getFont(defaultFontName(), 12, Font.BOLD, primaryColor());
         return subSectionTitleFont;
     }
@@ -241,7 +310,7 @@ public class Configuration {
      * @see #defaultFontName()
      */
     public Font defaultFont() {
-        if(defaultFont == null)
+        if (defaultFont == null)
             defaultFont = FontFactory.getFont(defaultFontName(), 12, Font.NORMAL, defaultColor());
         return defaultFont;
     }
@@ -290,7 +359,7 @@ public class Configuration {
     }
 
     public BaseColor tableHeaderBackground() {
-        if(tableHeaderBackground == null)
+        if (tableHeaderBackground == null)
             tableHeaderBackground = Colors.CYAN;
         return tableHeaderBackground;
     }
@@ -351,7 +420,7 @@ public class Configuration {
     }
 
     public Font stepDataTableHeaderFont() {
-        if(stepDataTableHeaderFont == null)
+        if (stepDataTableHeaderFont == null)
             stepDataTableHeaderFont = FontFactory.getFont(defaultMonospaceFontname(), 8, Font.BOLD, BaseColor.WHITE);
         return stepDataTableHeaderFont;
     }
@@ -362,7 +431,7 @@ public class Configuration {
     }
 
     public Font stepDataTableContentFont() {
-        if(stepDataTableContentFont == null)
+        if (stepDataTableContentFont == null)
             stepDataTableContentFont = stepDefaultFont();
         return stepDataTableContentFont;
     }
@@ -373,7 +442,7 @@ public class Configuration {
     }
 
     public BaseColor stepDataTableHeaderBackground() {
-        if(stepDataTableHeaderBackground == null)
+        if (stepDataTableHeaderBackground == null)
             stepDataTableHeaderBackground = tableHeaderBackground();
         return stepDataTableHeaderBackground;
     }
@@ -413,11 +482,11 @@ public class Configuration {
         String pageHeaderTemplateText = this.pageHeaderTemplateText;
 
         String firstPageFooterTemplateText = this.firstPageFooterTemplateText;
-        if(firstPageFooterTemplateText == null && !Strings.isNullOrEmpty(generationDateFormat))
+        if (firstPageFooterTemplateText == null && !Strings.isNullOrEmpty(generationDateFormat))
             firstPageFooterTemplateText = getFormattedGenerationDate();
 
         String pageFooterTemplateText = this.pageFooterTemplateText;
-        if(pageFooterTemplateText == null)
+        if (pageFooterTemplateText == null)
             pageFooterTemplateText = title;
 
         return new HeaderFooter(
@@ -446,7 +515,7 @@ public class Configuration {
     }
 
     public BaseColor primaryColor() {
-        if(primaryColor == null)
+        if (primaryColor == null)
             primaryColor = Colors.DARK_RED;
         return primaryColor;
     }
@@ -459,7 +528,7 @@ public class Configuration {
 
         List<Element> elements = markdownContent(preambule);
         for (Element element : elements) {
-            if(element instanceof PdfPTable)
+            if (element instanceof PdfPTable)
                 extendTableToWidth((PdfPTable) element, document.right() - document.left());
             document.add(element);
         }
@@ -469,23 +538,23 @@ public class Configuration {
         element.setTotalWidth(width);
 
         float[] absoluteWidths = element.getAbsoluteWidths();
-        if(element.getNumberOfColumns() < 10) {
+        if (element.getNumberOfColumns() < 10) {
             float sum = sum(absoluteWidths);
             float minWidth = sum / 10; // at least 10% of the table
-            for(int i=0;i<absoluteWidths.length;i++) {
+            for (int i = 0; i < absoluteWidths.length; i++) {
                 absoluteWidths[i] = Math.max(minWidth, absoluteWidths[i]);
             }
         }
 
         int[] widths = new int[element.getNumberOfColumns()];
-        for(int i=0; i<widths.length; i++)
+        for (int i = 0; i < widths.length; i++)
             widths[i] = 1;
         element.setWidths(absoluteWidths);
     }
 
     private static float sum(float[] values) {
         float sum = 0;
-        for(float v : values)
+        for (float v : values)
             sum += v;
         return sum;
     }
@@ -512,7 +581,7 @@ public class Configuration {
     }
 
     public Chapter createTitledChapter(String title) {
-        if(title == null)
+        if (title == null)
             throw new IllegalArgumentException();
 
         Paragraph titleParagraph = new Paragraph(title, chapterTitleFont());
@@ -616,7 +685,7 @@ public class Configuration {
     }
 
     public Font pageFooterFont() {
-        if(pageFooterFont == null)
+        if (pageFooterFont == null)
             pageFooterFont = FontFactory.getFont(defaultFontName(), 10, Font.ITALIC, primaryColor());
         return pageFooterFont;
     }
@@ -637,7 +706,7 @@ public class Configuration {
     }
 
     private Font pageHeaderFont() {
-        if(pageHeaderFont == null)
+        if (pageHeaderFont == null)
             pageHeaderFont = FontFactory.getFont(defaultFontName(), 10, Font.ITALIC, primaryColor());
         return pageHeaderFont;
     }
@@ -654,7 +723,7 @@ public class Configuration {
 
 
     public Font tocEntryFont() {
-        if(tocEntryFont == null)
+        if (tocEntryFont == null)
             tocEntryFont = defaultFont();
         return tocEntryFont;
     }
@@ -714,19 +783,19 @@ public class Configuration {
     }
 
     private Map<String, String> pCssStyles() {
-        Map<String,String> styles = new HashMap<String,String>();
+        Map<String, String> styles = new HashMap<String, String>();
         styles.put(CSS.Property.TEXT_ALIGN, "justify");
         return styles;
     }
 
     private Map<String, String> liCssStyles() {
-        Map<String,String> styles = new HashMap<String,String>();
+        Map<String, String> styles = new HashMap<String, String>();
         styles.put(CSS.Property.COLOR, toRGBColor(defaultColor()));
         return styles;
     }
 
     protected Map<String, String> ulCssStyles() {
-        Map<String,String> styles = new HashMap<String,String>();
+        Map<String, String> styles = new HashMap<String, String>();
         styles.put(CSS.Property.COLOR, toRGBColor(primaryColor()));
         styles.put(CSS.Property.LIST_STYLE_TYPE, "square");
         styles.put(CSS.Property.LIST_STYLE, "1em");
@@ -734,13 +803,13 @@ public class Configuration {
     }
 
     protected Map<String, String> bodyCssStyles() {
-        Map<String,String> styles = new HashMap<String,String>();
+        Map<String, String> styles = new HashMap<String, String>();
         fillCSSProperties(styles, defaultFont());
         return styles;
     }
 
     protected Map<String, String> h1CssStyles() {
-        Map<String,String> styles = new HashMap<String,String>();
+        Map<String, String> styles = new HashMap<String, String>();
         fillCSSProperties(styles, chapterTitleFont());
         styles.put("page-break-before", "always");
         styles.put(CSS.Property.PADDING_BOTTOM, "2em");
@@ -749,7 +818,7 @@ public class Configuration {
     }
 
     protected Map<String, String> h2CssStyles() {
-        Map<String,String> styles = new HashMap<String,String>();
+        Map<String, String> styles = new HashMap<String, String>();
         fillCSSProperties(styles, sectionTitleFont());
         styles.put(CSS.Property.PADDING_BOTTOM, "2em");
         styles.put(CSS.Property.PADDING_TOP, "1em");
@@ -757,7 +826,7 @@ public class Configuration {
     }
 
     private void fillCSSProperties(Map<String, String> styles, Font font) {
-        if(font.isBold())
+        if (font.isBold())
             styles.put(CSS.Property.FONT_STYLE, CSS.Value.BOLD);
         styles.put(CSS.Property.FONT_SIZE, font.getSize() + "pt");
         styles.put(CSS.Property.COLOR, toRGBColor(font.getColor()));
@@ -767,4 +836,31 @@ public class Configuration {
         return "rgb(" + color.getRed() + ", " + color.getGreen() + ", " + color.getBlue() + ")";
     }
 
+    public boolean shouldDisplayUri() {
+        return displayUri;
+    }
+
+    public Configuration displayUri(boolean displayUri) {
+        this.displayUri = displayUri;
+        return this;
+    }
+
+    public boolean shouldDisplayTags() {
+        return displayTags;
+    }
+
+
+    public Configuration displayTags(boolean displayTags) {
+        this.displayTags = displayTags;
+        return this;
+    }
+
+    public Configuration unbreakableScenario(boolean unbreakableScenario) {
+        this.unbreakableScenario = unbreakableScenario;
+        return this;
+    }
+
+    public boolean shouldKeepScenarioUnbreakable() {
+        return unbreakableScenario;
+    }
 }

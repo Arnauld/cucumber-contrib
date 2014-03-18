@@ -18,9 +18,16 @@ public class RunCucumberTest {
             super(reportDir, defaultConfiguration()
                     .withMetaInformationsResources(RunCucumberTest.class, "00-meta.properties")
                     // override some of the previous meta infomations
+                    .withReportFilename("coffee-machine-specs.pdf")
                     .withAuthor("Arnauld")
                     .withTitle("Coffee Machine Specification")
-                    .withPreambuleResource(RunCucumberTest.class, "00-preambule.md"));
+                    .withPreambuleResource(RunCucumberTest.class, "00-preambule.md")
+                    .withDocumentMargin(10, 40)
+                    .withDescriptionMargin(20, 0, 20, 0)
+                    .withScenarioMargin(0, 0, 2, 5)
+                    .displayUri(false)
+                    .displayTags(false)
+            );
         }
     }
 }

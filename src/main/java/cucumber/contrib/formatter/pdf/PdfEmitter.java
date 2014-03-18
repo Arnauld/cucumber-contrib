@@ -22,6 +22,7 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.draw.LineSeparator;
+import cucumber.contrib.formatter.BricABrac;
 import cucumber.contrib.formatter.FormatterException;
 import cucumber.contrib.formatter.model.FeatureWrapper;
 import cucumber.contrib.formatter.model.RootStatistics;
@@ -106,16 +107,23 @@ public class PdfEmitter {
         Chapter featureChap = configuration.createTitledChapter(feature.getName());
 
         // Uri
-        Paragraph uri = new Paragraph("Uri: " + feature.getUri(), configuration.defaultMetaFont());
-        featureChap.add(uri);
+        if(configuration.shouldDisplayUri()) {
+            Paragraph uri = new Paragraph("Uri: " + feature.getUri(), configuration.defaultMetaFont());
+            featureChap.add(uri);
+        }
 
         // Description
-        Paragraph paragraph = new Paragraph("", configuration.defaultFont());
-        paragraph.setSpacingBefore(25.0f);
-        paragraph.setSpacingAfter(25.0f);
-        paragraph.setIndentationLeft(20.0f);
-        configuration.appendMarkdownContent(paragraph, feature.getDescription());
-        featureChap.add(paragraph);
+        String description = feature.getDescription();
+        if(BricABrac.isBlank(description)) {
+            Margin descriptionMargin = configuration.getDescriptionMargin();
+            Paragraph paragraph = new Paragraph("", configuration.defaultFont());
+            paragraph.setSpacingBefore(descriptionMargin.marginTop);
+            paragraph.setSpacingAfter(descriptionMargin.marginBottom);
+            paragraph.setIndentationLeft(descriptionMargin.marginLeft);
+            configuration.appendMarkdownContent(paragraph, description);
+            featureChap.add(paragraph);
+        }
+
 
         // Scenario
         for (ScenarioWrapper scenario : feature.getScenarios()) {
@@ -138,30 +146,45 @@ public class PdfEmitter {
     private void emitScenario(Chapter featureChap, ScenarioWrapper scenario) throws DocumentException {
         Paragraph scenarioTitle = new Paragraph(scenario.getName(), configuration.scenarioTitleFont());
         Section section = featureChap.addSection(scenarioTitle);
-        section.setIndentationLeft(15.0f);
 
-        emitScenarioTags(scenario, section);
+        Margin margin = configuration.getScenarioMargin();
+        section.setIndentationLeft(margin.marginLeft);
+
+        if(configuration.shouldDisplayTags()) {
+            emitScenarioTags(scenario, section);
+        }
         emitScenarioDescription(scenario, section);
 
         Paragraph steps = new Paragraph("");
+        steps.setKeepTogether(configuration.shouldKeepScenarioUnbreakable());
         for (StepWrapper step : scenario.getSteps()) {
             emitStep(scenario, steps, step);
         }
-        // steps.setIndentationLeft(25.0f);
-        steps.setSpacingBefore(25.0f);
-        steps.setSpacingAfter(25.0f);
+        steps.setSpacingBefore(margin.marginTop);
+        steps.setSpacingAfter(margin.marginBottom);
         section.add(steps);
     }
 
     private void emitScenarioDescription(ScenarioWrapper scenario, Section section) throws DocumentException {
-        List<Element> elements = configuration.markdownContent(scenario.getDescription());
+        String description = scenario.getDescription();
+        if(BricABrac.isBlank(description))
+            return;
+
+        List<Element> elements = configuration.markdownContent(description);
         for(Element element : elements) {
             if(element instanceof PdfPTable)
                 extendTableToWidth((PdfPTable) element, document.right() - document.left() - 25.0f);
         }
+
         Paragraph paragraph = new Paragraph();
-        paragraph.setIndentationLeft(10.0f);
         paragraph.addAll(elements);
+
+        Margin margin = configuration.getScenarioMargin();
+        paragraph.setIndentationLeft(margin.marginLeft);
+        paragraph.setSpacingBefore(margin.marginTop);
+        paragraph.setSpacingAfter(margin.marginBottom);
+
+
         section.add(paragraph);
     }
 
