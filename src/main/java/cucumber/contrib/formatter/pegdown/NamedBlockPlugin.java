@@ -26,7 +26,7 @@ public class NamedBlockPlugin extends Parser implements BlockPluginParser {
                 BlockBeginMarker(),
                 OneOrMore(TestNot(Newline(), BlockEndMarker()), BaseParser.ANY, text.append(matchedChar())),
                 Newline(),
-                ((NamedBlockPluginNode)peek()).appendBody(text.getString()),
+                ((NamedBlockPluginNode) peek()).appendBody(text.getString()),
                 BlockEndMarker()
         );
     }
@@ -34,8 +34,10 @@ public class NamedBlockPlugin extends Parser implements BlockPluginParser {
     public Rule BlockBeginMarker() {
         StringBuilderVar text = new StringBuilderVar();
         return NodeSequence(
+                Sp(),
                 "{%",
                 OneOrMore(TestNot("%}"), BaseParser.ANY, text.append(matchedChar())),
+                Sp(),
                 "%}",
                 push(new NamedBlockPluginNode(text.getString())),
                 Newline());
@@ -46,11 +48,13 @@ public class NamedBlockPlugin extends Parser implements BlockPluginParser {
         StringBuilderVar text = new StringBuilderVar();
         //((NamedBlockPluginNode)peek()).getHeaderTag(),
         return Sequence(
-                        "{%",
-                        OneOrMore(TestNot("%}"), BaseParser.ANY, text.append(matchedChar())),
-                        "%}",
-                        ((NamedBlockPluginNode)peek()).endTag(text.getString()),
-                        Newline());
+                Sp(),
+                "{%",
+                OneOrMore(TestNot("%}"), BaseParser.ANY, text.append(matchedChar())),
+                "%}",
+                Sp(),
+                ((NamedBlockPluginNode) peek()).endTag(text.getString()),
+                Newline());
     }
 
 }

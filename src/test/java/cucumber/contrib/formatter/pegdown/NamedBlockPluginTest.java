@@ -43,7 +43,21 @@ public class NamedBlockPluginTest {
                 "+-------/     +-------+\n" + //
                 "{% asciidiag %}"; //
         RootNode s = processor.parseMarkdown(text.toCharArray());
-        s.accept(newVisitor());
+        s.accept(Visitors.dump());
+    }
+
+    @Test
+    public void parse_with_trailing_whitespaces() {
+        String text = "" + //
+                "# Title\n" + //
+                "\n" + //
+                "  {% asciidiag %}\n" + //
+                "  /-------+     +-------+\n" + //
+                "  |  REQ  |<--->|  REP  |\n" + //
+                "  +-------/     +-------+\n" + //
+                "  {% asciidiag %}"; //
+        RootNode s = processor.parseMarkdown(text.toCharArray());
+        s.accept(Visitors.dump());
     }
 
     @Test
@@ -77,42 +91,8 @@ public class NamedBlockPluginTest {
                 "+--------/  +--------/  +--------/\n" + //
                 "{% asciidiag %}"; //
         RootNode s = processor.parseMarkdown(text.toCharArray());
-        s.accept(newVisitor());
+        s.accept(Visitors.dump());
     }
 
-    public static Visitor newVisitor() {
-        final AtomicReference<Visitor> selfRef = new AtomicReference<Visitor>();
 
-        Visitor visitor = (Visitor) Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{Visitor.class}, new InvocationHandler() {
-            int indent;
-
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                System.out.println("NamedBlockPluginTest.invoke::" + indent() + method.getName() + ":: " + Arrays.toString(args));
-                Object o = args[0];
-                if (o instanceof SuperNode) {
-                    indent++;
-                    visitChildren((SuperNode) o);
-                    indent--;
-                }
-                return null;
-            }
-
-            private String indent() {
-                StringBuilder b = new StringBuilder();
-                for (int i = 0; i < indent; i++)
-                    b.append("  ");
-                return b.toString();
-            }
-
-            protected void visitChildren(SuperNode node) {
-                for (Node child : node.getChildren()) {
-                    child.accept(selfRef.get());
-                }
-
-            }
-        });
-        selfRef.set(visitor);
-        return visitor;
-    }
 }

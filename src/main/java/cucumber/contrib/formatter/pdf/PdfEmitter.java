@@ -32,6 +32,8 @@ import cucumber.contrib.formatter.model.StepWrapper;
 import gherkin.formatter.model.DataTableRow;
 import gherkin.formatter.model.Row;
 import gherkin.formatter.model.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -42,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 
 public class PdfEmitter {
+
+    private Logger log = LoggerFactory.getLogger(PdfEmitter.class);
 
     private Document document;
     private Configuration configuration;
@@ -441,7 +445,7 @@ public class PdfEmitter {
                 fileOutputStream.close();
             }
 
-            System.out.println("PdfEmitter.closeDocumentAndFile(" + fileDst.getAbsolutePath() + ")");
+            log.info("Report generated {}", fileDst.getAbsolutePath());
         }
         catch (Exception e) {
             throw new FormatterException("Error while flushing report to disk", e);

@@ -79,4 +79,25 @@ public class MarkdownEmitterTest {
         List<Element> elements = markdownEmitter.markdownToElements(markdownText);
         assertThat(elements).isNotEmpty();
     }
+
+    @Test
+    public void markdown_with_asciidiag() throws IOException {
+        String markdownText = "" + //
+                        "# Title\n" + //
+                        "\n" + //
+                        "{% asciidiag %}\n" + //
+                        "/-------+     +-------+\n" + //
+                        "|  REQ  |<--->|  REP  |\n" + //
+                        "+-------/     +-------+\n" + //
+                        "{% asciidiag %}"; //
+
+        // html
+        StringReader stringReader = markdownEmitter.formatHtmlAsReader(markdownText);
+        String html = IOUtils.toString(stringReader);
+        assertThat(html).isEqualTo("<h1>Title</h1><p><img src=\"/customer.jpeg\"  alt=\"Alt text\"/></p>");
+
+        // pdf elements
+        List<Element> elements = markdownEmitter.markdownToElements(markdownText);
+        assertThat(elements).isNotEmpty();
+    }
 }

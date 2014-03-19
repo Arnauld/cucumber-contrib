@@ -7,12 +7,16 @@ import cucumber.contrib.formatter.model.ModelBasedReport;
 import gherkin.formatter.Formatter;
 import gherkin.formatter.Reporter;
 import gherkin.formatter.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 
 public class PdfFormatter implements Formatter, Reporter {
+
+    private Logger log = LoggerFactory.getLogger(PdfFormatter.class);
 
     private final File reportDir;
     private ModelBasedReport report;
@@ -109,18 +113,18 @@ public class PdfFormatter implements Formatter, Reporter {
 
     @Override
     public void eof() {
-        System.out.println("PdfFormatter.eof");
+        log.info("EOF");
     }
 
     @Override
     public void done() {
-        System.out.println("PdfFormatter.done");
+        log.info("Done");
         getReport().done();
     }
 
     @Override
     public void close() {
-        System.out.println("PdfFormatter.close");
+        log.info("Close");
         getPdfEmitter().done();
     }
 

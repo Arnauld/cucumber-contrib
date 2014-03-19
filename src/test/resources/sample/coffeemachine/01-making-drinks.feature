@@ -19,6 +19,12 @@ Feature: Making Drinks
 #  * coffee,
 #  * chocolate.
 #
+#  {% asciidiag %}
+#  /---------+     +------------+
+#  |  Order  |---->|  Protocol  |
+#  +---------/     +------------+
+#  {% asciidiag %}
+#
 
   @ProtocolOrder
   Scenario: A tea with 1 sugar and a stick

@@ -16,7 +16,16 @@ import com.itextpdf.tool.xml.pipeline.html.AbstractImageProvider;
 import com.itextpdf.tool.xml.pipeline.html.ImageProvider;
 import cucumber.contrib.formatter.BricABrac;
 import cucumber.contrib.formatter.FormatterException;
+import cucumber.contrib.formatter.pdf.html.AsciiDiagToHtmlPlugin;
+import cucumber.contrib.formatter.pegdown.NamedBlockPlugin;
+import org.pegdown.Extensions;
+import org.pegdown.PegDownProcessor;
+import org.pegdown.plugins.PegDownPlugins;
+import org.pegdown.plugins.ToHtmlSerializerPlugin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,9 +40,13 @@ import static com.google.common.io.Resources.asByteSource;
 import static com.google.common.io.Resources.getResource;
 
 /**
+ * All-in-one class for the overall settings and configuration.
  *
  */
+@SuppressWarnings("UnusedDeclaration")
 public class Configuration {
+
+    public static final Logger LOG = LoggerFactory.getLogger(Configuration.class);
 
     public static final Charset UTF8 = Charset.forName("UTF-8");
     //
@@ -43,7 +56,9 @@ public class Configuration {
     public static final String META_KEYWORDS = "keywords";
     public static final String META_VERSION = "version";
     public static final String META_GENERATION_DATE_FORMAT = "generation-date-format";
-    private static final String META_IMAGE_ROOT_PATH = "image-root-path";
+    public static final String META_IMAGE_ROOT_PATH = "image-root-path";
+    public static final String REPORT_FILENAME = "report-filename";
+    public static final String WORKING_DIR = "working-dir";
 
     // TODO extract to 'TemplateEngine' thus one can plug an other template engine
     private MarkdownEmitter markdownEmitter;
@@ -102,6 +117,8 @@ public class Configuration {
     private boolean displayUri = true;
     private boolean displayTags = true;
     private boolean unbreakableScenario = false;
+    private PegDownProcessor markdownProcessor;
+    private File workingDir;
 
     //
 
@@ -565,9 +582,9 @@ public class Configuration {
             CharSource charSource = source.asCharSource(charset);
             return charSource.read();
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            LOG.warn("Failed to load resource {}", resource, e);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.warn("Failed to load resource {}", resource, e);
         }
         return null;
     }
@@ -613,7 +630,7 @@ public class Configuration {
             Properties properties = new Properties();
             inputStream = resource.openStream();
             properties.load(new InputStreamReader(inputStream, UTF8));
-            return withMetaInformations(properties);
+            return withProperties(properties);
         } catch (IOException ioe) {
             throw new FormatterException(
                     "Failed to load meta informations from properties (resource: " + resource + ")", ioe);
@@ -622,14 +639,24 @@ public class Configuration {
         }
     }
 
+    /**
+     * @deprecated use {@link #withProperties(java.util.Properties)} instead.
+     */
     public Configuration withMetaInformations(Properties properties) {
+        return withProperties(properties);
+    }
+
+    public Configuration withProperties(Properties properties) {
         return withAuthor(properties.getProperty(META_AUTHOR))
                 .withTitle(properties.getProperty(META_TITLE, title))
                 .withKeywords(properties.getProperty(META_KEYWORDS, keywords))
                 .withSubject(properties.getProperty(META_SUBJECT, subject))
                 .withVersion(properties.getProperty(META_VERSION, version))
                 .withImageRootPath(properties.getProperty(META_IMAGE_ROOT_PATH, imageRootPath))
-                .withGenerationDateFormat(properties.getProperty(META_GENERATION_DATE_FORMAT, generationDateFormat));
+                .withGenerationDateFormat(properties.getProperty(META_GENERATION_DATE_FORMAT, generationDateFormat))
+                .withReportFilename(properties.getProperty(REPORT_FILENAME, reportFilename))
+                .withWorkingDir(properties.getProperty(WORKING_DIR));
+
     }
 
     private Configuration withGenerationDateFormat(String generationDateFormat) {
@@ -862,5 +889,53 @@ public class Configuration {
 
     public boolean shouldKeepScenarioUnbreakable() {
         return unbreakableScenario;
+    }
+
+
+    public Configuration withMarkdownProcessor(PegDownProcessor processor) {
+        this.markdownProcessor = processor;
+        return this;
+    }
+
+    public PegDownProcessor getMarkdownProcessor() {
+        if (markdownProcessor == null) {
+            PegDownPlugins plugins = PegDownPlugins
+                    .builder()
+                    .withPlugin(NamedBlockPlugin.class)
+                    .build();
+            markdownProcessor = new PegDownProcessor(Extensions.TABLES, plugins);
+        }
+        return markdownProcessor;
+    }
+
+    public List<ToHtmlSerializerPlugin> htmlSerializerPlugins() {
+        return Arrays.<ToHtmlSerializerPlugin>asList(new AsciiDiagToHtmlPlugin(getWorkingDir()));
+    }
+
+    public Configuration withWorkingDir(String dir) {
+        if (dir == null)
+            return this;
+        else
+            return withWorkingDir(new File(dir));
+    }
+
+    public Configuration withWorkingDir(File dir) {
+        this.workingDir = dir;
+        return this;
+    }
+
+    private File getWorkingDir() {
+        if (workingDir == null) {
+            try {
+                workingDir = File.createTempFile("tmp", "tmp").getParentFile();
+            } catch (IOException e) {
+                LOG.warn("Failed to rely on temporary directory: {}", e.getMessage());
+                workingDir = new File("", "workingDir");
+                if (!workingDir.exists() && !workingDir.mkdirs())
+                    throw new FormatterException("Failed to create working dir: " + workingDir.getAbsolutePath());
+            }
+            LOG.info("Working dir: " + workingDir.getAbsolutePath());
+        }
+        return workingDir;
     }
 }

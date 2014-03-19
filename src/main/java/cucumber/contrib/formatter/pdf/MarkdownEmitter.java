@@ -18,10 +18,15 @@ import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
 import cucumber.contrib.formatter.BricABrac;
 import cucumber.contrib.formatter.FormatterException;
+import cucumber.contrib.formatter.pdf.html.ImageProcessor;
 import cucumber.contrib.formatter.pdf.html.TableDataContentProcessor;
 import cucumber.contrib.formatter.pdf.html.TableDataHeaderProcessor;
-import org.pegdown.Extensions;
+import cucumber.contrib.formatter.pegdown.Visitors;
+import org.pegdown.LinkRenderer;
 import org.pegdown.PegDownProcessor;
+import org.pegdown.ToHtmlSerializer;
+import org.pegdown.ast.RootNode;
+import org.pegdown.plugins.ToHtmlSerializerPlugin;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -30,12 +35,10 @@ import java.util.List;
 
 public class MarkdownEmitter {
 
-    private PegDownProcessor markdown;
     private Configuration configuration;
 
     public MarkdownEmitter(Configuration configuration) {
         this.configuration = configuration;
-        this.markdown = new PegDownProcessor(Extensions.TABLES);
     }
 
     public List<Element> markdownToElements(String markdownText) {
@@ -104,23 +107,30 @@ public class MarkdownEmitter {
         TagProcessorFactory tpf = Tags.getHtmlTagProcessorFactory();
         //tpf.addProcessor(new H1Processor(configuration), "h1");
         //tpf.addProcessor(new H2Processor(configuration), "h2");
-        tpf.addProcessor(new com.itextpdf.tool.xml.html.Image(), "img");
+        tpf.addProcessor(new ImageProcessor(), "img");
         tpf.addProcessor(new TableDataHeaderProcessor(configuration), "th");
         tpf.addProcessor(new TableDataContentProcessor(configuration), "td");
         return tpf;
     }
 
     StringReader formatHtmlAsReader(String text) {
-        System.out.println("MarkdownEmitter.formatHtmlAsReader(" + text + ")");
         String html = formatHtml(text);
         return new StringReader(html);
     }
 
     private String formatHtml(String text) {
+        System.out.println("MarkdownEmitter.formatHtml(" + text + ")");
         if (BricABrac.isBlank(text)) {
             return "";
         }
-        return markdown.markdownToHtml(text);
+        PegDownProcessor markdownProcessor = configuration.getMarkdownProcessor();
+        RootNode astRoot = markdownProcessor.parseMarkdown(text.toCharArray());
+
+        astRoot.accept(Visitors.dump());
+
+        List<ToHtmlSerializerPlugin> htmlPlugins = configuration.htmlSerializerPlugins();
+        ToHtmlSerializer htmlSerializer = new ToHtmlSerializer(new LinkRenderer(), htmlPlugins);
+        return htmlSerializer.toHtml(astRoot);
     }
 
 }

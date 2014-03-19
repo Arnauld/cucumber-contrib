@@ -38,11 +38,11 @@ Iterations
 This project starts simple and will grow in added features through the iterations.
 
 
- 1. First iteration: Making Drinks (*~30 minutes*)
- 2. Second iteration: Going into business (*~20 minutes*)
- 3. Third iteration: Extra hot (*~20 minutes*)
- 4. Fourth iteration: Making money (*~20 minutes*)
- 5. Fifth iteration: Running out (*~20 minutes*)
+ 1. First iteration: Making Drinks ( *~30minutes* )
+ 2. Second iteration: Going into business ( *~20minutes* )
+ 3. Third iteration: Extra hot ( *~20minutes* )
+ 4. Fourth iteration: Making money ( *~20minutes* )
+ 5. Fifth iteration: Running out ( *~20minutes* )
 
 
 Ready ?
@@ -55,3 +55,9 @@ Ready ?
  * A mocking framework (`mockito`, ...)
  * A passion for tested code ;)
 
+
+{% asciidiag %}
+  /---------+     +------------+
+  |  Order  |---->|  Protocol  |
+  +---------/     +------------+
+{% asciidiag %}

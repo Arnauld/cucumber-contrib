@@ -1,6 +1,7 @@
 *.class
 
 *.pdf
+.DS_Store
 
 # Package Files #
 *.jar
