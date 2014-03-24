@@ -23,7 +23,7 @@ public class RunCucumberTest {
                     .withTitle("Coffee Machine Specification")
                     .withPreambuleResource(RunCucumberTest.class, "00-preambule.md")
                     .withDocumentMargin(10, 40)
-                    .withDescriptionMargin(20, 0, 20, 0)
+                    .withDescriptionMargin(0, 0, 5, 5)
                     .withScenarioMargin(0, 0, 2, 5)
                     .displayUri(false)
                     .displayTags(false)

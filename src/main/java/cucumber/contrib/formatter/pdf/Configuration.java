@@ -119,6 +119,7 @@ public class Configuration {
     private boolean unbreakableScenario = false;
     private PegDownProcessor markdownProcessor;
     private File workingDir;
+    private PageNumber pageNumber = new PageNumber();
 
     //
 
@@ -493,7 +494,7 @@ public class Configuration {
         }
     }
 
-    public PdfPageEvent createHeaderFooter() {
+    public HeaderFooter createHeaderFooter() {
 
         String firstPageHeaderTemplateText = this.firstPageHeaderTemplateText;
         String pageHeaderTemplateText = this.pageHeaderTemplateText;
@@ -507,6 +508,7 @@ public class Configuration {
             pageFooterTemplateText = title;
 
         return new HeaderFooter(
+                pageNumber,
                 firstPageHeaderTemplateText,
                 pageHeaderTemplateText,
                 pageHeaderFont(),
@@ -937,5 +939,14 @@ public class Configuration {
             LOG.info("Working dir: " + workingDir.getAbsolutePath());
         }
         return workingDir;
+    }
+
+    public PageNumber getPageNumber() {
+        return pageNumber;
+    }
+
+    public Configuration withPageNumber(PageNumber pageNumber) {
+        this.pageNumber = pageNumber;
+        return this;
     }
 }

@@ -5,7 +5,6 @@ import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.PdfPageEvent;
 import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
 
@@ -15,15 +14,17 @@ import java.util.List;
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
 public class TableOfContents extends PdfPageEventHelper {
+    private final PageNumber pageNumber;
     private List<Entry> entries;
-    private int page;
+    private int currentPage;
     private int anchorId = 0;
 
-    public TableOfContents() {
+    public TableOfContents(PageNumber pageNumber) {
+        this.pageNumber = pageNumber;
         this.entries = Lists.newArrayList();
     }
 
-    public void addEntry(String text, int level, int page, String anchorDst) {
+    public void addEntry(String text, int level, String page, String anchorDst) {
         entries.add(new Entry(text, level, page, anchorDst));
     }
 
@@ -33,7 +34,7 @@ public class TableOfContents extends PdfPageEventHelper {
 
     @Override
     public void onStartPage(PdfWriter writer, Document document) {
-        page++;
+        pageNumber.notifyPageChange(currentPage++);
     }
 
     /**
@@ -52,7 +53,7 @@ public class TableOfContents extends PdfPageEventHelper {
     public void onSection(PdfWriter writer, Document document, float paragraphPosition, int depth, Paragraph title) {
         String anchorDst = "w" + (anchorId++);
         defineLocalDestinationOnFirstChunk(title, anchorDst);
-        addEntry(title.getContent(), 2, page, anchorDst);
+        addEntry(title.getContent(), 2, pageNumber.formatPageNumber(), anchorDst);
     }
 
     /**
@@ -70,7 +71,7 @@ public class TableOfContents extends PdfPageEventHelper {
     public void onChapter(PdfWriter writer, Document document, float paragraphPosition, Paragraph title) {
         String anchorDst = "w" + (anchorId++);
         defineLocalDestinationOnFirstChunk(title, anchorDst);
-        addEntry(title.getContent(), 1, page, anchorDst);
+        addEntry(title.getContent(), 1, pageNumber.formatPageNumber(), anchorDst);
     }
 
     private void defineLocalDestinationOnFirstChunk(Paragraph p, String anchor) {
@@ -87,10 +88,10 @@ public class TableOfContents extends PdfPageEventHelper {
     public static class Entry {
         private final String text;
         private final int level;
-        private final int page;
+        private final String page;
         private final String anchorDst;
 
-        public Entry(String text, int level, int page, String anchorDst) {
+        public Entry(String text, int level, String page, String anchorDst) {
             this.text = text;
             this.level = level;
             this.page = page;
@@ -109,7 +110,7 @@ public class TableOfContents extends PdfPageEventHelper {
             return level;
         }
 
-        public int getPage() {
+        public String getPage() {
             return page;
         }
     }

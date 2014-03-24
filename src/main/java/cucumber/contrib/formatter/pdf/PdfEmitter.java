@@ -54,6 +54,8 @@ public class PdfEmitter {
     private FileOutputStream fileOutputStream;
     private TableOfContents tableOfContents;
     private File fileDst;
+    private HeaderFooter headerFooter;
+    private PageNumber pageNumber;
 
     public PdfEmitter(Configuration configuration) {
         this.configuration = configuration;
@@ -73,11 +75,14 @@ public class PdfEmitter {
         this.fileDst = fileDst;
         this.document = configuration.createDocument();
         this.fileOutputStream = new FileOutputStream(fileDst);
-        this.tableOfContents = new TableOfContents();
+        this.pageNumber = configuration.getPageNumber();
+        this.tableOfContents = new TableOfContents(pageNumber);
+        this.headerFooter = configuration.createHeaderFooter();
+
         //
         PdfWriter writer = PdfWriter.getInstance(document, fileOutputStream);
         writer.setBoxSize("art", configuration.getDocumentArtBox());
-        writer.setPageEvent(configuration.createHeaderFooter());
+        writer.setPageEvent(headerFooter);
         writer.setPageEvent(tableOfContents);
         document.open();
     }
@@ -88,9 +93,11 @@ public class PdfEmitter {
 
     private void writeInitialData() {
         try {
+            pageNumber.startExtra();
             configuration.writeMetaInformations(document);
             configuration.writeFirstPages(document);
             configuration.writePreambule(document);
+            pageNumber.startContent();
         }
         catch (DocumentException e) {
             e.printStackTrace();
@@ -118,7 +125,7 @@ public class PdfEmitter {
 
         // Description
         String description = feature.getDescription();
-        if(BricABrac.isBlank(description)) {
+        if(BricABrac.isNotBlank(description)) {
             Margin descriptionMargin = configuration.getDescriptionMargin();
             Paragraph paragraph = new Paragraph("", configuration.defaultFont());
             paragraph.setSpacingBefore(descriptionMargin.marginTop);
@@ -134,7 +141,7 @@ public class PdfEmitter {
             try {
                 emitScenario(featureChap, scenario);
             } catch (DocumentException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                log.warn("Failed to emit scenario '{}'", scenario.getName(), e);
             }
         }
 
@@ -143,7 +150,7 @@ public class PdfEmitter {
             document.add(featureChap);
         }
         catch (DocumentException e) {
-            e.printStackTrace();
+            log.warn("Failed to emit feature '{}'", feature.getName(), e);
         }
     }
 
@@ -223,13 +230,14 @@ public class PdfEmitter {
         float imageHeight = 10.5f;
 
         PdfPTable stepAsTable = new PdfPTable(2);
+        stepAsTable.setWidthPercentage(100);
+        stepAsTable.setKeepTogether(true);
         try {
             float imageCellWidth = imageWidth + 5f;
             stepAsTable.setTotalWidth(new float[]{imageCellWidth, documentContentWidth() - imageCellWidth});
         }
         catch (DocumentException e) {
-            // ignore?
-            e.printStackTrace();
+            log.warn("Step table issue", e);
         }
 
         Image stepStatus = isManualStep ? getManualStepImageOrNull() : getStepStatusAsImageOrNull(step);
@@ -401,13 +409,16 @@ public class PdfEmitter {
     }
 
     public void done() {
+        pageNumber.continueExtra();
         emitSummary();
         emitTableOfContents();
         closeDocumentAndFile();
     }
 
     private void emitTableOfContents() {
+
         Chapter toc = new Chapter(new Paragraph("Table of content", configuration.chapterTitleFont()), -1);
+        toc.setChapterNumber(0);
         toc.setNumberDepth(0);
         toc.add(new Paragraph(""));
 
@@ -431,8 +442,9 @@ public class PdfEmitter {
             document.add(toc);
         }
         catch (DocumentException e) {
-            e.printStackTrace();
+            log.warn("Failed to add table of content", e);
         }
+
     }
 
     private void closeDocumentAndFile() {
@@ -467,7 +479,7 @@ public class PdfEmitter {
             document.add(summary);
         }
         catch (DocumentException e) {
-            e.printStackTrace();
+            log.warn("Failed to add summary", e);
         }
     }
 

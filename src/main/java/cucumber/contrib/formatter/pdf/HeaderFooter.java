@@ -1,23 +1,18 @@
 package cucumber.contrib.formatter.pdf;
 
-import static com.itextpdf.text.pdf.ColumnText.showTextAligned;
-
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
+
+import static com.itextpdf.text.pdf.ColumnText.showTextAligned;
 
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
 public class HeaderFooter extends PdfPageEventHelper {
 
+    private final PageNumber pageNumber;
     private final String firstPageHeaderTemplateText;
     private final String pageHeaderTemplateText;
     private final Font headerFont;
@@ -28,9 +23,11 @@ public class HeaderFooter extends PdfPageEventHelper {
     private final Phrase pageFooter;
     private final BaseColor lineColor;
 
-    private int pagenumber;
+    private int currentPage = 0;
 
-    public HeaderFooter(String firstPageHeaderTemplateText,
+
+    public HeaderFooter(PageNumber pageNumber,
+                        String firstPageHeaderTemplateText,
                         String pageHeaderTemplateText,
                         Font headerFont,
                         Phrase pageHeader,
@@ -39,6 +36,7 @@ public class HeaderFooter extends PdfPageEventHelper {
                         Font footerFont,
                         Phrase pageFooter,
                         BaseColor lineColor) {
+        this.pageNumber = pageNumber;
         this.firstPageHeaderTemplateText = firstPageHeaderTemplateText;
         this.pageHeaderTemplateText = pageHeaderTemplateText;
         this.headerFont = headerFont;
@@ -57,7 +55,7 @@ public class HeaderFooter extends PdfPageEventHelper {
     }
 
     public void onStartPage(PdfWriter writer, Document document) {
-        pagenumber++;
+        pageNumber.notifyPageChange(currentPage++);
     }
 
     public void onEndPage(PdfWriter writer, Document document) {
@@ -65,7 +63,7 @@ public class HeaderFooter extends PdfPageEventHelper {
         float top = rect.getTop() + 20;
         float bottom = rect.getBottom() - 20;
 
-        if(lineColor != null) {
+        if (lineColor != null) {
             PdfContentByte canvas = writer.getDirectContentUnder();
             canvas.saveState();
             canvas.setColorStroke(lineColor);
@@ -78,27 +76,26 @@ public class HeaderFooter extends PdfPageEventHelper {
 
         Phrase header = null;
         Phrase footer = null;
-        if (pagenumber == 1) {
-            if(firstPageHeaderTemplateText != null)
+        if (currentPage == 1) {
+            if (firstPageHeaderTemplateText != null)
                 header = new Phrase(firstPageHeaderTemplateText, headerFont);
-            if(firstPageFooterTemplateText != null)
+            if (firstPageFooterTemplateText != null)
                 footer = new Phrase(firstPageFooterTemplateText, footerFont);
-        }
-        else {
-            if(pageHeader != null)
+        } else {
+            if (pageHeader != null)
                 header = pageHeader;
-            else if(pageHeaderTemplateText != null)
+            else if (pageHeaderTemplateText != null)
                 header = new Phrase(pageHeaderTemplateText, headerFont);
 
-            if(pageFooter != null)
+            if (pageFooter != null)
                 footer = pageFooter;
-            else if(pageFooterTemplateText != null)
+            else if (pageFooterTemplateText != null)
                 footer = new Phrase(pageFooterTemplateText, footerFont);
         }
 
-        showTextAligned(writer.getDirectContent(), Element.ALIGN_CENTER, header, (rect.getLeft() + rect.getRight())/2 , top, 0);
+        showTextAligned(writer.getDirectContent(), Element.ALIGN_CENTER, header, (rect.getLeft() + rect.getRight()) / 2, top, 0);
 
-        Phrase page = new Phrase(String.format("%d", pagenumber), footerFont);
+        Phrase page = new Phrase(pageNumber.formatPageNumber(), footerFont);
         showTextAligned(writer.getDirectContent(), Element.ALIGN_LEFT, footer, rect.getLeft(), bottom, 0);
         showTextAligned(writer.getDirectContent(), Element.ALIGN_RIGHT, page, rect.getRight(), bottom, 0);
     }

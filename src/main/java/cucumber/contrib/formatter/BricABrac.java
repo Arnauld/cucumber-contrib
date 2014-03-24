@@ -66,4 +66,8 @@ public class BricABrac {
     public static boolean isBlank(String content) {
         return content == null || BLANK_PATTERN.matcher(content).matches();
     }
+
+    public static boolean isNotBlank(String content) {
+        return !isBlank(content);
+    }
 }
