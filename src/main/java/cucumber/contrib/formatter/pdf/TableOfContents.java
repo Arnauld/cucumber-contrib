@@ -24,8 +24,8 @@ public class TableOfContents extends PdfPageEventHelper {
         this.entries = Lists.newArrayList();
     }
 
-    public void addEntry(String text, int level, String page, String anchorDst) {
-        entries.add(new Entry(text, level, page, anchorDst));
+    public void addEntry(String text, int level, PageInfos pageInfos, String anchorDst) {
+        entries.add(new Entry(text, level, pageInfos, anchorDst));
     }
 
     public List<Entry> getEntries() {
@@ -53,7 +53,7 @@ public class TableOfContents extends PdfPageEventHelper {
     public void onSection(PdfWriter writer, Document document, float paragraphPosition, int depth, Paragraph title) {
         String anchorDst = "w" + (anchorId++);
         defineLocalDestinationOnFirstChunk(title, anchorDst);
-        addEntry(title.getContent(), 2, pageNumber.formatPageNumber(), anchorDst);
+        addEntry(title.getContent(), 2, pageNumber.pageInfos(), anchorDst);
     }
 
     /**
@@ -71,7 +71,7 @@ public class TableOfContents extends PdfPageEventHelper {
     public void onChapter(PdfWriter writer, Document document, float paragraphPosition, Paragraph title) {
         String anchorDst = "w" + (anchorId++);
         defineLocalDestinationOnFirstChunk(title, anchorDst);
-        addEntry(title.getContent(), 1, pageNumber.formatPageNumber(), anchorDst);
+        addEntry(title.getContent(), 1, pageNumber.pageInfos(), anchorDst);
     }
 
     private void defineLocalDestinationOnFirstChunk(Paragraph p, String anchor) {
@@ -88,13 +88,13 @@ public class TableOfContents extends PdfPageEventHelper {
     public static class Entry {
         private final String text;
         private final int level;
-        private final String page;
+        private final PageInfos pageInfos;
         private final String anchorDst;
 
-        public Entry(String text, int level, String page, String anchorDst) {
+        public Entry(String text, int level, PageInfos pageInfos, String anchorDst) {
             this.text = text;
             this.level = level;
-            this.page = page;
+            this.pageInfos = pageInfos;
             this.anchorDst = anchorDst;
         }
 
@@ -110,8 +110,25 @@ public class TableOfContents extends PdfPageEventHelper {
             return level;
         }
 
-        public String getPage() {
-            return page;
+        public String getFormattedPageNumber() {
+            return pageInfos.getFormattedPageNumber();
+        }
+
+        public boolean isExtra() {
+            return pageInfos.isExtra();
+        }
+
+        public int getRawPageNumber() {
+            return pageInfos.getRawPageNumber();
+        }
+
+        @Override
+        public String toString() {
+            return "Entry{" +
+                    "pageInfos=" + pageInfos +
+                    ", level=" + level +
+                    ", text='" + text + '\'' +
+                    '}';
         }
     }
 }

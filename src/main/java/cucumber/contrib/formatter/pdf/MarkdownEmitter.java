@@ -119,14 +119,13 @@ public class MarkdownEmitter {
     }
 
     private String formatHtml(String text) {
-        System.out.println("MarkdownEmitter.formatHtml(" + text + ")");
         if (BricABrac.isBlank(text)) {
             return "";
         }
         PegDownProcessor markdownProcessor = configuration.getMarkdownProcessor();
         RootNode astRoot = markdownProcessor.parseMarkdown(text.toCharArray());
 
-        astRoot.accept(Visitors.dump());
+        //astRoot.accept(Visitors.dump());
 
         List<ToHtmlSerializerPlugin> htmlPlugins = configuration.htmlSerializerPlugins();
         ToHtmlSerializer htmlSerializer = new ToHtmlSerializer(new LinkRenderer(), htmlPlugins);

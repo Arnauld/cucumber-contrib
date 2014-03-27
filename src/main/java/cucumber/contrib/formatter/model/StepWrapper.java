@@ -2,6 +2,7 @@ package cucumber.contrib.formatter.model;
 
 import gherkin.formatter.model.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -9,7 +10,10 @@ import static cucumber.contrib.formatter.BricABrac.areEqualsIgnoringCase;
 import static cucumber.contrib.formatter.BricABrac.isEmpty;
 
 public class StepWrapper implements Wrapper, HasComments {
+
     private final Step step;
+
+    private List<Embedding> embeddings = new ArrayList<Embedding>();
     private Result result;
     private Match match;
 
@@ -68,5 +72,13 @@ public class StepWrapper implements Wrapper, HasComments {
 
     public List<DataTableRow> getTableRows() {
         return step.getRows();
+    }
+
+    public void embedding(Embedding embedding) {
+        embeddings.add(embedding);
+    }
+
+    public List<Embedding> getEmbeddings() {
+        return embeddings;
     }
 }

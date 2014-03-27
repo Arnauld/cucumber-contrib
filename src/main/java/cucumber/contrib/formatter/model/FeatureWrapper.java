@@ -35,6 +35,11 @@ public class FeatureWrapper implements Wrapper {
         currentStepContainer().match(match);
     }
 
+    public void embedding(String mimeType, byte[] bytes) {
+        Embedding embedding = new Embedding(mimeType, bytes);
+        currentStepContainer().embedding(embedding);
+    }
+
     public void step(Step step) {
         currentStepContainer().step(step);
     }

@@ -7,21 +7,24 @@ import cucumber.contrib.formatter.util.RomanNumeral;
  */
 public class PageNumber {
 
-    private int pagenumber;
+    private int pageNumber;
     private Sequence pnContent = new Sequence();
     private Sequence pnExtra = new Sequence(0, true);
     private Sequence pnCurrent = pnExtra;
 
-    public void notifyPageChange(int pagenumber) {
-        if(this.pagenumber == pagenumber)
+    public void notifyPageChange(int newPageNumber) {
+        if(pageNumber == newPageNumber)
             return; // already notified
 
-        this.pagenumber = pagenumber;
+        pageNumber = newPageNumber;
         pnCurrent = pnCurrent.next();
     }
 
-    public String formatPageNumber() {
-        return pnCurrent.formatPageNumber();
+    public PageInfos pageInfos() {
+        return new PageInfos(
+                pageNumber,
+                pnCurrent.formatPageNumber(),
+                pnCurrent == pnExtra);
     }
 
     public void continueExtra() {
@@ -34,6 +37,10 @@ public class PageNumber {
 
     public void startContent() {
         pnCurrent.next = pnContent;
+    }
+
+    public int rawPageNumber() {
+        return pageNumber;
     }
 
     private static class Sequence {

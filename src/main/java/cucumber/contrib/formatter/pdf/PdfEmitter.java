@@ -1,47 +1,27 @@
 package cucumber.contrib.formatter.pdf;
 
-import static com.google.common.io.Resources.asByteSource;
-import static cucumber.contrib.formatter.pdf.Configuration.extendTableToWidth;
-
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteSource;
-import com.itextpdf.text.BadElementException;
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Chapter;
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.Section;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 import cucumber.contrib.formatter.BricABrac;
 import cucumber.contrib.formatter.FormatterException;
-import cucumber.contrib.formatter.model.FeatureWrapper;
-import cucumber.contrib.formatter.model.RootStatistics;
-import cucumber.contrib.formatter.model.ScenarioWrapper;
-import cucumber.contrib.formatter.model.Statistics;
-import cucumber.contrib.formatter.model.StepWrapper;
+import cucumber.contrib.formatter.model.*;
 import gherkin.formatter.model.DataTableRow;
 import gherkin.formatter.model.Row;
 import gherkin.formatter.model.Tag;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static com.google.common.io.Resources.asByteSource;
+import static cucumber.contrib.formatter.pdf.Configuration.extendTableToWidth;
 
 public class PdfEmitter {
 
@@ -51,10 +31,14 @@ public class PdfEmitter {
     private Configuration configuration;
     private RootStatistics statistics;
     private boolean firstFeature = true;
-    private FileOutputStream fileOutputStream;
-    private TableOfContents tableOfContents;
+    //
+    private File fileTmp;
     private File fileDst;
+    private PdfWriter pdfWriter;
+    private FileOutputStream fileOutputStream;
+    //
     private HeaderFooter headerFooter;
+    private TableOfContents tableOfContents;
     private PageNumber pageNumber;
 
     public PdfEmitter(Configuration configuration) {
@@ -73,17 +57,18 @@ public class PdfEmitter {
 
     public void init(File fileDst) throws FileNotFoundException, DocumentException {
         this.fileDst = fileDst;
+        this.fileTmp = new File(fileDst.getParentFile(), fileDst.getName() + ".tmp");
         this.document = configuration.createDocument();
-        this.fileOutputStream = new FileOutputStream(fileDst);
+        this.fileOutputStream = new FileOutputStream(fileTmp);
         this.pageNumber = configuration.getPageNumber();
         this.tableOfContents = new TableOfContents(pageNumber);
         this.headerFooter = configuration.createHeaderFooter();
 
         //
-        PdfWriter writer = PdfWriter.getInstance(document, fileOutputStream);
-        writer.setBoxSize("art", configuration.getDocumentArtBox());
-        writer.setPageEvent(headerFooter);
-        writer.setPageEvent(tableOfContents);
+        pdfWriter = PdfWriter.getInstance(document, fileOutputStream);
+        pdfWriter.setBoxSize("art", configuration.getDocumentArtBox());
+        pdfWriter.setPageEvent(headerFooter);
+        pdfWriter.setPageEvent(tableOfContents);
         document.open();
     }
 
@@ -93,14 +78,12 @@ public class PdfEmitter {
 
     private void writeInitialData() {
         try {
-            pageNumber.startExtra();
+            pageNumber.startContent();
             configuration.writeMetaInformations(document);
             configuration.writeFirstPages(document);
             configuration.writePreambule(document);
-            pageNumber.startContent();
-        }
-        catch (DocumentException e) {
-            e.printStackTrace();
+        } catch (DocumentException e) {
+            log.warn("Error while writing initial data", e);
         }
     }
 
@@ -118,14 +101,14 @@ public class PdfEmitter {
         Chapter featureChap = configuration.createTitledChapter(feature.getName());
 
         // Uri
-        if(configuration.shouldDisplayUri()) {
+        if (configuration.shouldDisplayUri()) {
             Paragraph uri = new Paragraph("Uri: " + feature.getUri(), configuration.defaultMetaFont());
             featureChap.add(uri);
         }
 
         // Description
         String description = feature.getDescription();
-        if(BricABrac.isNotBlank(description)) {
+        if (BricABrac.isNotBlank(description)) {
             Margin descriptionMargin = configuration.getDescriptionMargin();
             Paragraph paragraph = new Paragraph("", configuration.defaultFont());
             paragraph.setSpacingBefore(descriptionMargin.marginTop);
@@ -148,8 +131,7 @@ public class PdfEmitter {
         //
         try {
             document.add(featureChap);
-        }
-        catch (DocumentException e) {
+        } catch (DocumentException e) {
             log.warn("Failed to emit feature '{}'", feature.getName(), e);
         }
     }
@@ -161,7 +143,7 @@ public class PdfEmitter {
         Margin margin = configuration.getScenarioMargin();
         section.setIndentationLeft(margin.marginLeft);
 
-        if(configuration.shouldDisplayTags()) {
+        if (configuration.shouldDisplayTags()) {
             emitScenarioTags(scenario, section);
         }
         emitScenarioDescription(scenario, section);
@@ -178,12 +160,12 @@ public class PdfEmitter {
 
     private void emitScenarioDescription(ScenarioWrapper scenario, Section section) throws DocumentException {
         String description = scenario.getDescription();
-        if(BricABrac.isBlank(description))
+        if (BricABrac.isBlank(description))
             return;
 
         List<Element> elements = configuration.markdownContent(description);
-        for(Element element : elements) {
-            if(element instanceof PdfPTable)
+        for (Element element : elements) {
+            if (element instanceof PdfPTable)
                 extendTableToWidth((PdfPTable) element, document.right() - document.left() - 25.0f);
         }
 
@@ -208,8 +190,7 @@ public class PdfEmitter {
                 String text = tag.getName();
                 if (first) {
                     first = false;
-                }
-                else {
+                } else {
                     text = ", " + tag.getName();
                 }
                 tags.add(new Chunk(text, configuration.tagsFont()));
@@ -235,8 +216,7 @@ public class PdfEmitter {
         try {
             float imageCellWidth = imageWidth + 5f;
             stepAsTable.setTotalWidth(new float[]{imageCellWidth, documentContentWidth() - imageCellWidth});
-        }
-        catch (DocumentException e) {
+        } catch (DocumentException e) {
             log.warn("Step table issue", e);
         }
 
@@ -246,8 +226,7 @@ public class PdfEmitter {
             stepStatus.scaleAbsolute(imageWidth, imageHeight);
             cell = new PdfPCell(stepStatus);
             cell.setPaddingTop(2.0f);
-        }
-        else {
+        } else {
             cell = new PdfPCell(new Phrase(""));
         }
 
@@ -271,12 +250,17 @@ public class PdfEmitter {
         }
 
         steps.add(stepAsTable);
+
+        for (Embedding embedding : step.getEmbeddings()) {
+            steps.add(new Paragraph(embedding.getDataAsUTF8()));
+        }
     }
 
     private static PdfPCell noBorder(PdfPCell pdfPCell) {
         pdfPCell.setBorder(Rectangle.NO_BORDER);
         return pdfPCell;
     }
+
     private static PdfPCell sideBorder(PdfPCell pdfPCell) {
         return border(pdfPCell, Rectangle.LEFT + Rectangle.RIGHT);
     }
@@ -299,11 +283,9 @@ public class PdfEmitter {
             ByteSource byteSource = asByteSource(getClass().getResource(resourceName));
             byte[] bytes = byteSource.read();
             return Image.getInstance(bytes);
-        }
-        catch (BadElementException e) {
+        } catch (BadElementException e) {
             throw new RuntimeException(e);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -311,17 +293,13 @@ public class PdfEmitter {
     private String getStepStatusResourceName(StepWrapper step) {
         if (step.isSuccess()) {
             return "images/ok-icon.PNG";
-        }
-        else if (step.isPending()) {
+        } else if (step.isPending()) {
             return "images/pending-icon.PNG";
-        }
-        else if (step.isFailure()) {
+        } else if (step.isFailure()) {
             return "images/ko-icon.PNG";
-        }
-        else if (step.isSkipped()) {
+        } else if (step.isSkipped()) {
             return "images/skipped-icon.PNG";
-        }
-        else {
+        } else {
             return "images/unknown-icon.PNG";
         }
     }
@@ -329,8 +307,7 @@ public class PdfEmitter {
     private Font getTableFont(boolean firstRow) {
         if (firstRow) {
             return configuration.stepDataTableHeaderFont();
-        }
-        else {
+        } else {
             return configuration.stepDataTableContentFont();
         }
     }
@@ -377,8 +354,7 @@ public class PdfEmitter {
         try {
             int[] columnMaxSizes = getTableColumnsContentMaxLength(tableRows);
             table.setWidths(columnMaxSizes);
-        }
-        catch (DocumentException e) {
+        } catch (DocumentException e) {
             // Should not append since columnMaxSizes comes from tableRows.
         }
         return table;
@@ -413,9 +389,20 @@ public class PdfEmitter {
         emitSummary();
         emitTableOfContents();
         closeDocumentAndFile();
+
+        // 2nd pass
+        postProcessFile();
     }
 
     private void emitTableOfContents() {
+        try {
+            document.add(generateTableOfContents());
+        } catch (DocumentException e) {
+            log.warn("Failed to add table of content", e);
+        }
+    }
+
+    private Chapter generateTableOfContents() {
 
         Chapter toc = new Chapter(new Paragraph("Table of content", configuration.chapterTitleFont()), -1);
         toc.setChapterNumber(0);
@@ -430,7 +417,7 @@ public class PdfEmitter {
             chunk.setLocalGoto(entry.getAnchorDst());
             paragraph.add(chunk);
             paragraph.add(CONNECT);
-            paragraph.add(new Chunk("" + entry.getPage(), configuration.tocEntryFont()));
+            paragraph.add(new Chunk("" + entry.getFormattedPageNumber(), configuration.tocEntryFont()));
 
             float indent = 10.0f * entry.getLevel();
             paragraph.setIndentationLeft(indent);
@@ -438,12 +425,7 @@ public class PdfEmitter {
             toc.add(paragraph);
             paragraph = new Paragraph();
         }
-        try {
-            document.add(toc);
-        }
-        catch (DocumentException e) {
-            log.warn("Failed to add table of content", e);
-        }
+        return toc;
 
     }
 
@@ -457,10 +439,85 @@ public class PdfEmitter {
                 fileOutputStream.close();
             }
 
-            log.info("Report generated {}", fileDst.getAbsolutePath());
-        }
-        catch (Exception e) {
+            log.info("Report generated {}", fileTmp.getAbsolutePath());
+        } catch (Exception e) {
             throw new FormatterException("Error while flushing report to disk", e);
+        }
+    }
+
+    /**
+     * 2nd pass post-processing
+     */
+    private void postProcessFile() {
+
+        FileInputStream in = null;
+        FileOutputStream out = null;
+
+        try {
+            in = new FileInputStream(fileTmp);
+            out = new FileOutputStream(fileDst);
+
+            Chapter toc = new Chapter(new Paragraph("Table of content", configuration.chapterTitleFont()), -1);
+            toc.setChapterNumber(0);
+            toc.setNumberDepth(0);
+            toc.add(new Paragraph(""));
+
+            Chunk CONNECT = new Chunk(new LineSeparator(0.5f, 95, configuration.defaultColor(), Element.ALIGN_CENTER, -.5f));
+            Paragraph paragraph = new Paragraph();
+            paragraph.setSpacingBefore(20.0f); // first paragraph only
+
+            ColumnText ct = new ColumnText(null);
+
+            int startPage = -1;
+            for (TableOfContents.Entry entry : tableOfContents.getEntries()) {
+                System.out.println("PdfEmitter.postProcessFile(" + entry + ")");
+                startPage = entry.getRawPageNumber();
+                if (!entry.isExtra()) {
+                    startPage--;
+                    break;
+                }
+            }
+            for (TableOfContents.Entry entry : tableOfContents.getEntries()) {
+                if (entry.isExtra())
+                    continue;
+
+                Chunk chunk = new Chunk(entry.getText(), configuration.tocEntryFont());
+                //chunk.setLocalGoto(entry.getAnchorDst());
+                paragraph.add(chunk);
+                paragraph.add(CONNECT);
+                paragraph.add(new Chunk("" + entry.getFormattedPageNumber(), configuration.tocEntryFont()));
+
+                float indent = 10.0f * entry.getLevel();
+                paragraph.setIndentationLeft(indent);
+
+                ct.addElement(paragraph);
+                paragraph = new Paragraph();
+            }
+
+            System.out.println("PdfEmitter.postProcessFile(startPage: " + startPage + ")");
+
+            PdfReader reader = new PdfReader(in);
+            // int n = reader.getNumberOfPages();
+            // reader.selectPages("1, " + (n - 2) + "-, 2-" + (n - 2));
+            PdfStamper stamper = new PdfStamper(reader, out);
+            while (true) {
+                stamper.insertPage(++startPage, reader.getPageSize(1));
+                ct.setCanvas(stamper.getOverContent(startPage));
+                ct.setSimpleColumn(36, 36, 559, 770);
+                if (!ColumnText.hasMoreText(ct.go()))
+                    break;
+            }
+            stamper.close();
+
+        } catch (FileNotFoundException e) {
+            log.error("Unable to reopen temporary generated file", e);
+        } catch (DocumentException e) {
+            log.error("Error during report post-processing", e);
+        } catch (IOException e) {
+            log.error("Error during report post-processing", e);
+        } finally {
+            IOUtils.closeQuietly(out);
+            IOUtils.closeQuietly(in);
         }
     }
 
@@ -477,8 +534,7 @@ public class PdfEmitter {
 
         try {
             document.add(summary);
-        }
-        catch (DocumentException e) {
+        } catch (DocumentException e) {
             log.warn("Failed to add summary", e);
         }
     }

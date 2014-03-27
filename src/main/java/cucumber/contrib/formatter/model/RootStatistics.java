@@ -58,7 +58,7 @@ public class RootStatistics extends BasicStatistics {
                                     ScenarioWrapper scenarioWrapper)
     {
 
-        boolean isManual = filter == null ? false : filter.isManual(scenarioWrapper);
+        boolean isManual = filter != null && filter.isManual(scenarioWrapper);
         if (isManual) {
             statisticsToUse.incScenarioManual();
             for (StepWrapper step : scenarioWrapper.getSteps()) {

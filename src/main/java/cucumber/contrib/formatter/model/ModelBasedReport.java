@@ -64,6 +64,11 @@ public abstract class ModelBasedReport {
         currentFeature.result(result);
     }
 
+    public void embedding(String mimeType, byte[] bytes) {
+        currentFeature.embedding(mimeType, bytes);
+    }
+
+
     public void done() {
         flushCurrentFeature();
         endReport();

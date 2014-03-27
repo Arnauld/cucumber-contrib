@@ -22,7 +22,7 @@ public class Visitors {
 
                 @Override
                 public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                    System.out.println("NamedBlockPluginTest.invoke::" + indent() + method.getName() + ":: " + Arrays.toString(args));
+                    System.out.println("Visitors.invoke::" + indent() + method.getName() + ":: " + Arrays.toString(args));
                     Object o = args[0];
                     if (o instanceof SuperNode) {
                         indent++;

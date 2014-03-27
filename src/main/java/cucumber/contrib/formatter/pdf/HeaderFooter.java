@@ -95,7 +95,7 @@ public class HeaderFooter extends PdfPageEventHelper {
 
         showTextAligned(writer.getDirectContent(), Element.ALIGN_CENTER, header, (rect.getLeft() + rect.getRight()) / 2, top, 0);
 
-        Phrase page = new Phrase(pageNumber.formatPageNumber(), footerFont);
+        Phrase page = new Phrase(pageNumber.pageInfos().getFormattedPageNumber(), footerFont);
         showTextAligned(writer.getDirectContent(), Element.ALIGN_LEFT, footer, rect.getLeft(), bottom, 0);
         showTextAligned(writer.getDirectContent(), Element.ALIGN_RIGHT, page, rect.getRight(), bottom, 0);
     }

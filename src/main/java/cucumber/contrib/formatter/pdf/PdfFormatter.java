@@ -149,8 +149,8 @@ public class PdfFormatter implements Formatter, Reporter {
     }
 
     @Override
-    public void embedding(String s, byte[] bytes) {
-        // TODO
+    public void embedding(String mimeType, byte[] bytes) {
+        getReport().embedding(mimeType, bytes);
     }
 
     @Override

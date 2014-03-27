@@ -1,6 +1,8 @@
 package sample.coffeemachine;
 
 import cucumber.api.PendingException;
+import cucumber.api.Scenario;
+import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -13,9 +15,20 @@ import static org.fest.assertions.Assertions.assertThat;
 public class CoffeeStepdefs {
 
     private String message;
+    private Scenario scenario;
+
+    @Before
+    public void init(Scenario scenario) {
+        this.scenario = scenario;
+    }
 
     @When("^I order an? \"([^\"]*)\" with (\\d+) sugar$")
     public void I_order_a_with_sugar(String drinkType, int nbSugar) throws Throwable {
+        scenario.embed(
+                ("" +
+                        "  /---------+     +------------+\n" +
+                        "  |  Order  |---->|  Protocol  |\n" +
+                        "  +---------/     +------------+").getBytes(), "asciidiag");
     }
 
     @Then("^the instruction generated should be \"([^\"]*)\"$")
