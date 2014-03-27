@@ -34,4 +34,25 @@ public class PageInfos {
                 ", xtra=" + extra +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof PageInfos))
+            return false;
+
+        PageInfos pageInfos = (PageInfos) o;
+        return extra == pageInfos.extra
+                && rawPageNumber == pageInfos.rawPageNumber
+                && formattedPageNumber.equals(pageInfos.formattedPageNumber);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = rawPageNumber;
+        result = 31 * result + (formattedPageNumber != null ? formattedPageNumber.hashCode() : 0);
+        result = 31 * result + (extra ? 1 : 0);
+        return result;
+    }
 }

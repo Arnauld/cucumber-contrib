@@ -61,7 +61,7 @@ public class PdfEmitter {
         this.document = configuration.createDocument();
         this.fileOutputStream = new FileOutputStream(fileTmp);
         this.pageNumber = configuration.getPageNumber();
-        this.tableOfContents = new TableOfContents(pageNumber);
+        this.tableOfContents = configuration.getTableOfContent();
         this.headerFooter = configuration.createHeaderFooter();
 
         //
@@ -457,48 +457,10 @@ public class PdfEmitter {
             in = new FileInputStream(fileTmp);
             out = new FileOutputStream(fileDst);
 
-            Chapter toc = new Chapter(new Paragraph("Table of content", configuration.chapterTitleFont()), -1);
-            toc.setChapterNumber(0);
-            toc.setNumberDepth(0);
-            toc.add(new Paragraph(""));
-
-            Chunk CONNECT = new Chunk(new LineSeparator(0.5f, 95, configuration.defaultColor(), Element.ALIGN_CENTER, -.5f));
-            Paragraph paragraph = new Paragraph();
-            paragraph.setSpacingBefore(20.0f); // first paragraph only
-
-            ColumnText ct = new ColumnText(null);
-
-            int startPage = -1;
-            for (TableOfContents.Entry entry : tableOfContents.getEntries()) {
-                System.out.println("PdfEmitter.postProcessFile(" + entry + ")");
-                startPage = entry.getRawPageNumber();
-                if (!entry.isExtra()) {
-                    startPage--;
-                    break;
-                }
-            }
-            for (TableOfContents.Entry entry : tableOfContents.getEntries()) {
-                if (entry.isExtra())
-                    continue;
-
-                Chunk chunk = new Chunk(entry.getText(), configuration.tocEntryFont());
-                //chunk.setLocalGoto(entry.getAnchorDst());
-                paragraph.add(chunk);
-                paragraph.add(CONNECT);
-                paragraph.add(new Chunk("" + entry.getFormattedPageNumber(), configuration.tocEntryFont()));
-
-                float indent = 10.0f * entry.getLevel();
-                paragraph.setIndentationLeft(indent);
-
-                ct.addElement(paragraph);
-                paragraph = new Paragraph();
-            }
-
-            System.out.println("PdfEmitter.postProcessFile(startPage: " + startPage + ")");
+            int startPage = lookupExtraInsertionPage() + 1;
+            ColumnText ct = generateTableOfContent();
 
             PdfReader reader = new PdfReader(in);
-            // int n = reader.getNumberOfPages();
-            // reader.selectPages("1, " + (n - 2) + "-, 2-" + (n - 2));
             PdfStamper stamper = new PdfStamper(reader, out);
             while (true) {
                 stamper.insertPage(++startPage, reader.getPageSize(1));
@@ -519,6 +481,44 @@ public class PdfEmitter {
             IOUtils.closeQuietly(out);
             IOUtils.closeQuietly(in);
         }
+    }
+
+    private ColumnText generateTableOfContent() {
+        ColumnText ct = new ColumnText(null);
+
+        Chunk CONNECT = new Chunk(new LineSeparator(0.5f, 95, configuration.defaultColor(), Element.ALIGN_CENTER, -.5f));
+        Paragraph paragraph = new Paragraph();
+        paragraph.setSpacingBefore(20.0f); // first paragraph only
+
+        ct.addElement(new Paragraph("Table of content", configuration.chapterTitleFont()));
+        ct.addElement(new Paragraph(""));
+
+        for (TableOfContents.Entry entry : tableOfContents.getEntries()) {
+            if (entry.isExtra())
+                continue;
+
+            Chunk chunk = new Chunk(entry.getText(), configuration.tocEntryFont());
+            paragraph.add(chunk);
+            paragraph.add(CONNECT);
+            paragraph.add(new Chunk("" + entry.getFormattedPageNumber(), configuration.tocEntryFont()));
+
+            float indent = 10.0f * entry.getLevel();
+            paragraph.setIndentationLeft(indent);
+
+            ct.addElement(paragraph);
+            paragraph = new Paragraph();
+        }
+        return ct;
+    }
+
+    private int lookupExtraInsertionPage() {
+        int startPage = -1;
+        for (PageInfos pageInfos : pageNumber.getEmittedPageInfos()) {
+            if (!pageInfos.isExtra())
+                break;
+            startPage = pageInfos.getRawPageNumber();
+        }
+        return startPage;
     }
 
     private void emitSummary() {

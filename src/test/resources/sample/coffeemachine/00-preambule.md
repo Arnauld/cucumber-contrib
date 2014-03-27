@@ -1,7 +1,3 @@
-&nbsp;
-========
-
-<!-- Empty title: it will neither be numbered nor appear -->
 
 <p style="text-align: center;">
 <img src="/customer.jpeg"/>

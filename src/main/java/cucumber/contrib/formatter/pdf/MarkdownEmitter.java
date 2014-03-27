@@ -18,10 +18,10 @@ import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
 import cucumber.contrib.formatter.BricABrac;
 import cucumber.contrib.formatter.FormatterException;
+import cucumber.contrib.formatter.pdf.html.HeaderProcessor;
 import cucumber.contrib.formatter.pdf.html.ImageProcessor;
 import cucumber.contrib.formatter.pdf.html.TableDataContentProcessor;
 import cucumber.contrib.formatter.pdf.html.TableDataHeaderProcessor;
-import cucumber.contrib.formatter.pegdown.Visitors;
 import org.pegdown.LinkRenderer;
 import org.pegdown.PegDownProcessor;
 import org.pegdown.ToHtmlSerializer;
@@ -105,8 +105,8 @@ public class MarkdownEmitter {
 
     private TagProcessorFactory getDefaultTagProcessorFactory() {
         TagProcessorFactory tpf = Tags.getHtmlTagProcessorFactory();
-        //tpf.addProcessor(new H1Processor(configuration), "h1");
-        //tpf.addProcessor(new H2Processor(configuration), "h2");
+        tpf.addProcessor(new HeaderProcessor(configuration, 1), "h1");
+        tpf.addProcessor(new HeaderProcessor(configuration, 2), "h2");
         tpf.addProcessor(new ImageProcessor(), "img");
         tpf.addProcessor(new TableDataHeaderProcessor(configuration), "th");
         tpf.addProcessor(new TableDataContentProcessor(configuration), "td");

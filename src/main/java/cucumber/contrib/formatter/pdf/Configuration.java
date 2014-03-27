@@ -7,7 +7,6 @@ import com.google.common.io.CharSource;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.CMYKColor;
 import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfPageEvent;
 import com.itextpdf.tool.xml.Tag;
 import com.itextpdf.tool.xml.css.CSS;
 import com.itextpdf.tool.xml.css.CssFile;
@@ -120,6 +119,7 @@ public class Configuration {
     private PegDownProcessor markdownProcessor;
     private File workingDir;
     private PageNumber pageNumber = new PageNumber();
+    private TableOfContents tableOfContent;
 
     //
 
@@ -602,8 +602,10 @@ public class Configuration {
     public Chapter createTitledChapter(String title) {
         if (title == null)
             throw new IllegalArgumentException();
+        return createTitledChapter(new Paragraph(title, chapterTitleFont()));
+    }
 
-        Paragraph titleParagraph = new Paragraph(title, chapterTitleFont());
+    public Chapter createTitledChapter(Paragraph titleParagraph) {
         titleParagraph.setSpacingBefore(10f);
         titleParagraph.setSpacingAfter(10f);
         Chapter chapter = new Chapter(titleParagraph, ++chapterCount);
@@ -948,5 +950,11 @@ public class Configuration {
     public Configuration withPageNumber(PageNumber pageNumber) {
         this.pageNumber = pageNumber;
         return this;
+    }
+
+    public TableOfContents getTableOfContent() {
+        if(tableOfContent == null)
+            tableOfContent = new TableOfContents(pageNumber);
+        return tableOfContent;
     }
 }

@@ -2,6 +2,9 @@ package cucumber.contrib.formatter.pdf;
 
 import cucumber.contrib.formatter.util.RomanNumeral;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
@@ -11,9 +14,10 @@ public class PageNumber {
     private Sequence pnContent = new Sequence();
     private Sequence pnExtra = new Sequence(0, true);
     private Sequence pnCurrent = pnExtra;
+    private List<PageInfos> emittedPageInfos = new ArrayList<PageInfos>();
 
     public void notifyPageChange(int newPageNumber) {
-        if(pageNumber == newPageNumber)
+        if (pageNumber == newPageNumber)
             return; // already notified
 
         pageNumber = newPageNumber;
@@ -21,10 +25,19 @@ public class PageNumber {
     }
 
     public PageInfos pageInfos() {
-        return new PageInfos(
+        PageInfos pageInfos = new PageInfos(
                 pageNumber,
                 pnCurrent.formatPageNumber(),
                 pnCurrent == pnExtra);
+
+        if (!emittedPageInfos.contains(pageInfos))
+            emittedPageInfos.add(pageInfos);
+
+        return pageInfos;
+    }
+
+    public List<PageInfos> getEmittedPageInfos() {
+        return emittedPageInfos;
     }
 
     public void continueExtra() {
@@ -58,9 +71,9 @@ public class PageNumber {
         }
 
         public String formatPageNumber() {
-            if(count == 0)
+            if (count == 0)
                 count++;
-            if(isRoman)
+            if (isRoman)
                 return new RomanNumeral().format(count);
             else
                 return String.valueOf(count);
@@ -68,7 +81,7 @@ public class PageNumber {
 
         public Sequence next() {
             count++;
-            if(next!=null) {
+            if (next != null) {
                 Sequence tmp = next;
                 next = null;
                 return tmp;
