@@ -11,13 +11,13 @@ import java.util.List;
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
-public class NamedBlockPluginNode extends AbstractNode {
+public class NamedBlockNode extends AbstractNode {
 
     private final String header;
     private final StringBuilder body;
 
 
-    public NamedBlockPluginNode(String text) {
+    public NamedBlockNode(String text) {
         this.header = text;
         this.body = new StringBuilder();
     }

@@ -19,11 +19,14 @@ Feature: Making Drinks
 #  * coffee,
 #  * chocolate.
 #
-#  {% asciidiag %}
+#  [ asciidiag ]
+#  ----
+#
 #  /---------+     +------------+
 #  |  Order  |---->|  Protocol  |
 #  +---------/     +------------+
-#  {% asciidiag %}
+#
+#  ----
 #
 
   @ProtocolOrder

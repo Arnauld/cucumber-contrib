@@ -1,6 +1,7 @@
 package cucumber.contrib.formatter;
 
 import cucumber.contrib.formatter.model.HasComments;
+import cucumber.contrib.formatter.util.BricABrac;
 import gherkin.formatter.model.Comment;
 
 import java.util.List;

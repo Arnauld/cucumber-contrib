@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static cucumber.contrib.formatter.BricABrac.*;
+import static cucumber.contrib.formatter.util.BricABrac.*;
 
 public class HtmlMarkdownReport {
 

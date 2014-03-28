@@ -7,6 +7,20 @@ Feature: Making Money
 #
 # **I want to** track statistics of machine usage
 #
+# [formula]
+#  ----
+#    {\eta \leq C(\delta(\eta) +\Lambda_M(0,\delta))
+#  ----
+#
+# {% formula %}
+#
+#    \Re{z} =\frac{n\pi \dfrac{\theta +\psi}{2}}{
+#            \left(\dfrac{\theta +\psi}{2}\right)^2 + \left( \dfrac{1}{2}
+#            \log \left\vert\dfrac{B}{A}\right\vert\right)^2}.
+#
+# {% formula %}
+#
+#
 
   @Reporting
   Scenario: Statistics collect basic usage

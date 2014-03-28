@@ -4,22 +4,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pegdown.Extensions;
 import org.pegdown.PegDownProcessor;
-import org.pegdown.ast.Node;
 import org.pegdown.ast.RootNode;
-import org.pegdown.ast.SuperNode;
-import org.pegdown.ast.Visitor;
 import org.pegdown.plugins.PegDownPlugins;
-
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
-public class NamedBlockPluginTest {
+public class NamedBlockCurlyBracePluginTest {
 
     private PegDownProcessor processor;
 
@@ -27,7 +18,7 @@ public class NamedBlockPluginTest {
     public void setUp() {
         PegDownPlugins plugins = PegDownPlugins
                 .builder()
-                .withPlugin(NamedBlockPlugin.class)
+                .withPlugin(NamedBlockCurlyBracePlugin.class)
                 .build();
         processor = new PegDownProcessor(Extensions.TABLES, plugins);
     }
@@ -37,11 +28,12 @@ public class NamedBlockPluginTest {
         String text = "" + //
                 "# Title\n" + //
                 "\n" + //
-                "{% asciidiag %}\n" + //
-                "/-------+     +-------+\n" + //
-                "|  REQ  |<--->|  REP  |\n" + //
-                "+-------/     +-------+\n" + //
-                "{% asciidiag %}"; //
+                "[asciidiag]\n" + //
+                "----\n" + //
+                "  /-------+     +-------+\n" + //
+                "  |  REQ  |<--->|  REP  |\n" + //
+                "  +-------/     +-------+\n" + //
+                "----"; //
         RootNode s = processor.parseMarkdown(text.toCharArray());
         s.accept(Visitors.dump());
     }
@@ -51,11 +43,12 @@ public class NamedBlockPluginTest {
         String text = "" + //
                 "# Title\n" + //
                 "\n" + //
-                "  {% asciidiag %}\n" + //
+                "  [ asciidiag ]\n" + //
+                "  ----\n" + //
                 "  /-------+     +-------+\n" + //
                 "  |  REQ  |<--->|  REP  |\n" + //
                 "  +-------/     +-------+\n" + //
-                "  {% asciidiag %}"; //
+                "  ----";
         RootNode s = processor.parseMarkdown(text.toCharArray());
         s.accept(Visitors.dump());
     }
@@ -65,7 +58,8 @@ public class NamedBlockPluginTest {
         String text = "" + //
                 "# Title\n" + //
                 "\n" + //
-                "{% asciidiag %}\n" +
+                "[ asciidiag ]\n" +
+                " ----\n" +
                 "/--------+  /--------+  /--------+\n" +
                 "| Client |  | Client |  | Client |\n" +
                 "+--------+  +--------+  +--------+\n" +
@@ -89,7 +83,7 @@ public class NamedBlockPluginTest {
                 "+--------+  +--------+  +--------+\n" +
                 "| Worker |  | Worker |  | Worker |\n" +
                 "+--------/  +--------/  +--------/\n" + //
-                "{% asciidiag %}"; //
+                " ----"; //
         RootNode s = processor.parseMarkdown(text.toCharArray());
         s.accept(Visitors.dump());
     }

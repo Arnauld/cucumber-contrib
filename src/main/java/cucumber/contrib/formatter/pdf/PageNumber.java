@@ -52,10 +52,6 @@ public class PageNumber {
         pnCurrent.next = pnContent;
     }
 
-    public int rawPageNumber() {
-        return pageNumber;
-    }
-
     private static class Sequence {
         int count = 1;
         Sequence next;

@@ -13,10 +13,12 @@ import com.itextpdf.tool.xml.css.CssFile;
 import com.itextpdf.tool.xml.html.HTML;
 import com.itextpdf.tool.xml.pipeline.html.AbstractImageProvider;
 import com.itextpdf.tool.xml.pipeline.html.ImageProvider;
-import cucumber.contrib.formatter.BricABrac;
+import cucumber.contrib.formatter.pegdown.AsciiDiagToHtmlPlugin;
+import cucumber.contrib.formatter.pegdown.LaTeXEquationToHtmlPlugin;
+import cucumber.contrib.formatter.pegdown.NamedBlockCurlyBracePlugin;
+import cucumber.contrib.formatter.pegdown.NamedBlockSquareBracketAndDashPlugin;
+import cucumber.contrib.formatter.util.BricABrac;
 import cucumber.contrib.formatter.FormatterException;
-import cucumber.contrib.formatter.pdf.html.AsciiDiagToHtmlPlugin;
-import cucumber.contrib.formatter.pegdown.NamedBlockPlugin;
 import org.pegdown.Extensions;
 import org.pegdown.PegDownProcessor;
 import org.pegdown.plugins.PegDownPlugins;
@@ -905,7 +907,8 @@ public class Configuration {
         if (markdownProcessor == null) {
             PegDownPlugins plugins = PegDownPlugins
                     .builder()
-                    .withPlugin(NamedBlockPlugin.class)
+                    .withPlugin(NamedBlockCurlyBracePlugin.class)
+                    .withPlugin(NamedBlockSquareBracketAndDashPlugin.class)
                     .build();
             markdownProcessor = new PegDownProcessor(Extensions.TABLES, plugins);
         }
@@ -913,7 +916,9 @@ public class Configuration {
     }
 
     public List<ToHtmlSerializerPlugin> htmlSerializerPlugins() {
-        return Arrays.<ToHtmlSerializerPlugin>asList(new AsciiDiagToHtmlPlugin(getWorkingDir()));
+        return Arrays.<ToHtmlSerializerPlugin>asList(
+                new AsciiDiagToHtmlPlugin(getWorkingDir()),
+                new LaTeXEquationToHtmlPlugin(getWorkingDir()));
     }
 
     public Configuration withWorkingDir(String dir) {

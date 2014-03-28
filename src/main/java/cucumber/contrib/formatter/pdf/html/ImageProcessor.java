@@ -56,6 +56,10 @@ public class ImageProcessor extends Image {
         else
             img.setScaleToFitLineWhenOverflow(false);
 
+        float percent = 0.75f * 100.0f;
+        img.scalePercent(percent);
+        logger.debug("Scaling '{}' by {}%", src, percent);
+
         float widthInPoints = utils.parsePxInCmMmPcToPt(width);
         float heightInPoints = utils.parsePxInCmMmPcToPt(height);
         if (widthInPoints > 0 && heightInPoints > 0) {

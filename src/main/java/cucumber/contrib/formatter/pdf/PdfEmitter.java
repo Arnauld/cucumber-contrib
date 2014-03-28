@@ -5,7 +5,7 @@ import com.google.common.io.ByteSource;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.LineSeparator;
-import cucumber.contrib.formatter.BricABrac;
+import cucumber.contrib.formatter.util.BricABrac;
 import cucumber.contrib.formatter.FormatterException;
 import cucumber.contrib.formatter.model.*;
 import gherkin.formatter.model.DataTableRow;
@@ -385,48 +385,11 @@ public class PdfEmitter {
     }
 
     public void done() {
-        pageNumber.continueExtra();
         emitSummary();
-        emitTableOfContents();
         closeDocumentAndFile();
 
         // 2nd pass
         postProcessFile();
-    }
-
-    private void emitTableOfContents() {
-        try {
-            document.add(generateTableOfContents());
-        } catch (DocumentException e) {
-            log.warn("Failed to add table of content", e);
-        }
-    }
-
-    private Chapter generateTableOfContents() {
-
-        Chapter toc = new Chapter(new Paragraph("Table of content", configuration.chapterTitleFont()), -1);
-        toc.setChapterNumber(0);
-        toc.setNumberDepth(0);
-        toc.add(new Paragraph(""));
-
-        Chunk CONNECT = new Chunk(new LineSeparator(0.5f, 95, configuration.defaultColor(), Element.ALIGN_CENTER, -.5f));
-        Paragraph paragraph = new Paragraph();
-        paragraph.setSpacingBefore(20.0f); // first paragraph only
-        for (TableOfContents.Entry entry : tableOfContents.getEntries()) {
-            Chunk chunk = new Chunk(entry.getText(), configuration.tocEntryFont());
-            chunk.setLocalGoto(entry.getAnchorDst());
-            paragraph.add(chunk);
-            paragraph.add(CONNECT);
-            paragraph.add(new Chunk("" + entry.getFormattedPageNumber(), configuration.tocEntryFont()));
-
-            float indent = 10.0f * entry.getLevel();
-            paragraph.setIndentationLeft(indent);
-
-            toc.add(paragraph);
-            paragraph = new Paragraph();
-        }
-        return toc;
-
     }
 
     private void closeDocumentAndFile() {
@@ -459,12 +422,19 @@ public class PdfEmitter {
 
             int startPage = lookupExtraInsertionPage() + 1;
             ColumnText ct = generateTableOfContent();
+            pageNumber.continueExtra();
 
             PdfReader reader = new PdfReader(in);
             PdfStamper stamper = new PdfStamper(reader, out);
             while (true) {
                 stamper.insertPage(++startPage, reader.getPageSize(1));
-                ct.setCanvas(stamper.getOverContent(startPage));
+
+                PdfContentByte under = stamper.getUnderContent(startPage);
+                pageNumber.notifyPageChange(startPage);
+                headerFooter.drawFooter(under, pageNumber.pageInfos());
+
+                PdfContentByte canvas = stamper.getOverContent(startPage);
+                ct.setCanvas(canvas);
                 ct.setSimpleColumn(36, 36, 559, 770);
                 if (!ColumnText.hasMoreText(ct.go()))
                     break;

@@ -7,11 +7,19 @@ import org.pegdown.Parser;
 import org.pegdown.plugins.BlockPluginParser;
 
 /**
+ *
+ * <pre>
+ *     [blockname options...]
+ *     ----
+ *       block content
+ *     ----
+ * </pre>
+ *
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
-public class NamedBlockPlugin extends Parser implements BlockPluginParser {
+public class NamedBlockSquareBracketAndDashPlugin extends Parser implements BlockPluginParser {
 
-    public NamedBlockPlugin() {
+    public NamedBlockSquareBracketAndDashPlugin() {
         super(ALL, 1000l, DefaultParseRunnerProvider);
     }
 
@@ -26,7 +34,7 @@ public class NamedBlockPlugin extends Parser implements BlockPluginParser {
                 BlockBeginMarker(),
                 OneOrMore(TestNot(Newline(), BlockEndMarker()), BaseParser.ANY, text.append(matchedChar())),
                 Newline(),
-                ((NamedBlockPluginNode) peek()).appendBody(text.getString()),
+                ((NamedBlockNode) peek()).appendBody(text.getString()),
                 BlockEndMarker()
         );
     }
@@ -35,25 +43,21 @@ public class NamedBlockPlugin extends Parser implements BlockPluginParser {
         StringBuilderVar text = new StringBuilderVar();
         return NodeSequence(
                 Sp(),
-                "{%",
-                OneOrMore(TestNot("%}"), BaseParser.ANY, text.append(matchedChar())),
+                "[",
+                OneOrMore(TestNot("]"), BaseParser.ANY, text.append(matchedChar())),
+                "]",
+                Newline(),
                 Sp(),
-                "%}",
-                push(new NamedBlockPluginNode(text.getString())),
+                NOrMore('-', 4),
+                push(new NamedBlockNode(text.getString())),
                 Newline());
     }
 
 
     public Rule BlockEndMarker() {
-        StringBuilderVar text = new StringBuilderVar();
-        //((NamedBlockPluginNode)peek()).getHeaderTag(),
         return Sequence(
                 Sp(),
-                "{%",
-                OneOrMore(TestNot("%}"), BaseParser.ANY, text.append(matchedChar())),
-                "%}",
-                Sp(),
-                ((NamedBlockPluginNode) peek()).endTag(text.getString()),
+                NOrMore('-', 4),
                 Newline());
     }
 

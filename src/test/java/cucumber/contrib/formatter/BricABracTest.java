@@ -1,6 +1,7 @@
 package cucumber.contrib.formatter;
 
 
+import cucumber.contrib.formatter.util.BricABrac;
 import org.junit.Test;
 
 import static org.fest.assertions.Assertions.assertThat;

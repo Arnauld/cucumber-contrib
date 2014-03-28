@@ -24,6 +24,7 @@ public class HeaderFooter extends PdfPageEventHelper {
     private final BaseColor lineColor;
 
     private int currentPage = 0;
+    private Rectangle rect;
 
 
     public HeaderFooter(PageNumber pageNumber,
@@ -59,12 +60,24 @@ public class HeaderFooter extends PdfPageEventHelper {
     }
 
     public void onEndPage(PdfWriter writer, Document document) {
-        Rectangle rect = writer.getBoxSize("art");
-        float top = rect.getTop() + 20;
-        float bottom = rect.getBottom() - 20;
+        if (rect == null)
+            rect = writer.getBoxSize("art");
 
+        PdfContentByte canvas = writer.getDirectContent();
+        drawHeader(canvas);
+        drawFooter(canvas, pageNumber.pageInfos());
+    }
+
+    public void drawHeader(PdfContentByte canvas) {
+        float top = rect.getTop() + 20;
+        Phrase header = headerText();
+        if (header != null) {
+            showTextAligned(canvas, Element.ALIGN_CENTER, header, (rect.getLeft() + rect.getRight()) / 2, top, 0);
+        }
+    }
+
+    public void drawFooter(PdfContentByte canvas, PageInfos pageInfos) {
         if (lineColor != null) {
-            PdfContentByte canvas = writer.getDirectContentUnder();
             canvas.saveState();
             canvas.setColorStroke(lineColor);
             canvas.setLineWidth(1.2f);
@@ -74,29 +87,41 @@ public class HeaderFooter extends PdfPageEventHelper {
             canvas.restoreState();
         }
 
-        Phrase header = null;
-        Phrase footer = null;
-        if (currentPage == 1) {
-            if (firstPageHeaderTemplateText != null)
-                header = new Phrase(firstPageHeaderTemplateText, headerFont);
-            if (firstPageFooterTemplateText != null)
-                footer = new Phrase(firstPageFooterTemplateText, footerFont);
-        } else {
-            if (pageHeader != null)
-                header = pageHeader;
-            else if (pageHeaderTemplateText != null)
-                header = new Phrase(pageHeaderTemplateText, headerFont);
-
-            if (pageFooter != null)
-                footer = pageFooter;
-            else if (pageFooterTemplateText != null)
-                footer = new Phrase(pageFooterTemplateText, footerFont);
+        float bottom = rect.getBottom() - 20;
+        Phrase footer = footerText();
+        if (footer != null) {
+            showTextAligned(canvas, Element.ALIGN_LEFT, footer, rect.getLeft(), bottom, 0);
         }
 
-        showTextAligned(writer.getDirectContent(), Element.ALIGN_CENTER, header, (rect.getLeft() + rect.getRight()) / 2, top, 0);
-
-        Phrase page = new Phrase(pageNumber.pageInfos().getFormattedPageNumber(), footerFont);
-        showTextAligned(writer.getDirectContent(), Element.ALIGN_LEFT, footer, rect.getLeft(), bottom, 0);
-        showTextAligned(writer.getDirectContent(), Element.ALIGN_RIGHT, page, rect.getRight(), bottom, 0);
+        Phrase page = new Phrase(pageInfos.getFormattedPageNumber(), footerFont);
+        showTextAligned(canvas, Element.ALIGN_RIGHT, page, rect.getRight(), bottom, 0);
     }
+
+    private Phrase headerText() {
+        if (currentPage == 1) {
+            if (firstPageHeaderTemplateText != null)
+                return new Phrase(firstPageHeaderTemplateText, headerFont);
+        } else {
+            if (pageHeader != null)
+                return pageHeader;
+            else if (pageHeaderTemplateText != null)
+                return new Phrase(pageHeaderTemplateText, headerFont);
+        }
+        return null;
+    }
+
+    private Phrase footerText() {
+        if (currentPage == 1) {
+            if (firstPageFooterTemplateText != null)
+                return new Phrase(firstPageFooterTemplateText, footerFont);
+        } else {
+            if (pageFooter != null)
+                return pageFooter;
+            else if (pageFooterTemplateText != null)
+                return new Phrase(pageFooterTemplateText, footerFont);
+        }
+        return null;
+    }
+
+
 }

@@ -16,7 +16,7 @@ import com.itextpdf.tool.xml.pipeline.end.ElementHandlerPipeline;
 import com.itextpdf.tool.xml.pipeline.html.AbstractImageProvider;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
-import cucumber.contrib.formatter.BricABrac;
+import cucumber.contrib.formatter.util.BricABrac;
 import cucumber.contrib.formatter.FormatterException;
 import cucumber.contrib.formatter.pdf.html.HeaderProcessor;
 import cucumber.contrib.formatter.pdf.html.ImageProcessor;

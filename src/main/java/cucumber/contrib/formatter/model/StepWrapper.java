@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static cucumber.contrib.formatter.BricABrac.areEqualsIgnoringCase;
-import static cucumber.contrib.formatter.BricABrac.isEmpty;
+import static cucumber.contrib.formatter.util.BricABrac.areEqualsIgnoringCase;
+import static cucumber.contrib.formatter.util.BricABrac.isEmpty;
 
 public class StepWrapper implements Wrapper, HasComments {
 

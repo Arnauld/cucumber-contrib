@@ -1,4 +1,4 @@
-package cucumber.contrib.formatter;
+package cucumber.contrib.formatter.util;
 
 import static java.util.regex.Pattern.compile;
 
@@ -6,6 +6,9 @@ import com.google.common.collect.Iterables;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -69,5 +72,29 @@ public class BricABrac {
 
     public static boolean isNotBlank(String content) {
         return !isBlank(content);
+    }
+
+
+    public static String md5Hex(String content) {
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("md5");
+            byte[] digest = md5.digest(content.getBytes());
+            return toHex(digest);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String toHex(byte[] bytes) {
+        BigInteger bi = new BigInteger(1, bytes);
+        return String.format("%0" + (bytes.length << 1) + "X", bi);
+    }
+
+    public static boolean isOneOfIgnoringCase(String value, String ... alternatives) {
+        for(String alt : alternatives) {
+            if(alt.equalsIgnoreCase(value))
+                return true;
+        }
+        return false;
     }
 }

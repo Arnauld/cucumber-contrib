@@ -19,7 +19,10 @@ public class LaTeXRendererTest {
 
     @Test
     public void usecase() {
-        String math = "\\frac {V_m} {K_M+S}";
+        String math = "" +
+                "    \\Re{z} =\\frac{ n\\pi \\dfrac{\\theta +\\psi}{2}}{\n" +
+                "                   \\left( \\dfrac{\\theta +\\psi}{2}\\right)^2 + " +
+                "                   \\left( \\dfrac{1}{2} \\log \\left \\vert \\dfrac{B}{A} \\right \\vert \\right)^2}";
 
         TeXFormula formula = new TeXFormula(math);
         formula.createPNG(TeXConstants.STYLE_DISPLAY, 40, "/Users/arnauld/Projects/cucumber-jvm-series/cucumber-contrib/tmp/latex.png", Color.WHITE, Color.BLUE);
