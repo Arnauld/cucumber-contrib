@@ -1,6 +1,8 @@
 package cucumber.contrib.formatter.model;
 
 import gherkin.formatter.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,10 +11,14 @@ import static cucumber.contrib.formatter.DescriptionExtractor.extractDescription
 
 public class FeatureWrapper implements Wrapper {
 
+    private Logger logger = LoggerFactory.getLogger(FeatureWrapper.class);
+
     private final Feature feature;
     private final String uri;
     private BackgroundWrapper background;
     private List<ScenarioWrapper> scenarios = new ArrayList<ScenarioWrapper>();
+    private List<Embedding> pendingEmbeddings = new ArrayList<Embedding>();
+
 
     public FeatureWrapper(String uri, Feature feature) {
         this.uri = uri;
@@ -25,6 +31,7 @@ public class FeatureWrapper implements Wrapper {
 
     public void background(Background background) {
         this.background = new BackgroundWrapper(background);
+        drainPendingEmbeddings();
     }
 
     public void result(Result result) {
@@ -37,7 +44,11 @@ public class FeatureWrapper implements Wrapper {
 
     public void embedding(String mimeType, byte[] bytes) {
         Embedding embedding = new Embedding(mimeType, bytes);
-        currentStepContainer().embedding(embedding);
+        if (isCurrentStepContainerDefined()
+                && !currentStepContainer().isComplete())
+            currentStepContainer().embedding(embedding);
+        else
+            pendingEmbeddings.add(embedding);
     }
 
     public void step(Step step) {
@@ -51,6 +62,17 @@ public class FeatureWrapper implements Wrapper {
             this.background = null;
         }
         this.scenarios.add(wrapper);
+        drainPendingEmbeddings();
+    }
+
+    private void drainPendingEmbeddings() {
+        for(Embedding embedding : pendingEmbeddings)
+            currentStepContainer().embedding(embedding);
+        pendingEmbeddings.clear();
+    }
+
+    private boolean isCurrentStepContainerDefined() {
+        return background != null || !scenarios.isEmpty();
     }
 
     private StepContainer currentStepContainer() {

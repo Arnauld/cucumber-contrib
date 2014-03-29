@@ -17,6 +17,12 @@ public class CoffeeStepdefs {
     private String message;
     private Scenario scenario;
 
+    @Before("@math")
+    public void initWithMathSupport(Scenario scenario) {
+        scenario.embed(
+                ("Value = \\dfrac{ Why }{ How }").getBytes(), "text/formula");
+    }
+
     @Before
     public void init(Scenario scenario) {
         this.scenario = scenario;
@@ -28,7 +34,7 @@ public class CoffeeStepdefs {
                 ("" +
                         "  /---------+     +------------+\n" +
                         "  |  Order  |---->|  Protocol  |\n" +
-                        "  +---------/     +------------+").getBytes(), "asciidiag");
+                        "  +---------/     +------------+").getBytes(), "text/asciidiag");
     }
 
     @Then("^the instruction generated should be \"([^\"]*)\"$")

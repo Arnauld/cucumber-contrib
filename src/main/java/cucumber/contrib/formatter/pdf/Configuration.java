@@ -916,9 +916,14 @@ public class Configuration {
     }
 
     public List<ToHtmlSerializerPlugin> htmlSerializerPlugins() {
+        File generationDirectory = new File(getWorkingDir(), "generated-image");
+        if(!generationDirectory.exists()) {
+            generationDirectory.mkdirs();
+        }
+
         return Arrays.<ToHtmlSerializerPlugin>asList(
-                new AsciiDiagToHtmlPlugin(getWorkingDir()),
-                new LaTeXEquationToHtmlPlugin(getWorkingDir()));
+                new AsciiDiagToHtmlPlugin(generationDirectory),
+                new LaTeXEquationToHtmlPlugin(generationDirectory));
     }
 
     public Configuration withWorkingDir(String dir) {

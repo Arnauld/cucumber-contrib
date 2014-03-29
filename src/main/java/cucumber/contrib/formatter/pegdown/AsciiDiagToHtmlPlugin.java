@@ -11,7 +11,7 @@ import java.io.File;
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
-public class AsciiDiagToHtmlPlugin extends ImageBasedCache {
+public class AsciiDiagToHtmlPlugin extends ImageBasedToHtmlPlugin {
 
     private Logger log = LoggerFactory.getLogger(AsciiDiagToHtmlPlugin.class);
 

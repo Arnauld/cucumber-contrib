@@ -5,9 +5,9 @@ import com.google.common.io.ByteSource;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.LineSeparator;
-import cucumber.contrib.formatter.util.BricABrac;
 import cucumber.contrib.formatter.FormatterException;
 import cucumber.contrib.formatter.model.*;
+import cucumber.contrib.formatter.util.BricABrac;
 import gherkin.formatter.model.DataTableRow;
 import gherkin.formatter.model.Row;
 import gherkin.formatter.model.Tag;
@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -147,6 +148,7 @@ public class PdfEmitter {
             emitScenarioTags(scenario, section);
         }
         emitScenarioDescription(scenario, section);
+        emitScenarioEmbeddings(scenario, section);
 
         Paragraph steps = new Paragraph("");
         steps.setKeepTogether(configuration.shouldKeepScenarioUnbreakable());
@@ -156,6 +158,12 @@ public class PdfEmitter {
         steps.setSpacingBefore(margin.marginTop);
         steps.setSpacingAfter(margin.marginBottom);
         section.add(steps);
+    }
+
+    private void emitScenarioEmbeddings(ScenarioWrapper scenario, Section section) {
+        for (Embedding embedding : scenario.getEmbeddings()) {
+            section.addAll(toElements(embedding));
+        }
     }
 
     private void emitScenarioDescription(ScenarioWrapper scenario, Section section) throws DocumentException {
@@ -252,8 +260,23 @@ public class PdfEmitter {
         steps.add(stepAsTable);
 
         for (Embedding embedding : step.getEmbeddings()) {
-            steps.add(new Paragraph(embedding.getDataAsUTF8()));
+            steps.addAll(toElements(embedding));
         }
+    }
+
+    private List<? extends Element> toElements(Embedding embedding) {
+        String mimeType = embedding.getMimeType();
+        if (mimeType.toLowerCase().startsWith("text/")) {
+            String utf8 = embedding.getDataAsUTF8();
+            String markdown =
+                    "" +
+                            "[" + mimeType.substring("text/".length()) + "]\n" +
+                            "----\n" +
+                            utf8 + "\n" +
+                            "----";
+            return configuration.markdownContent(markdown);
+        }
+        return Arrays.asList(new Paragraph());
     }
 
     private static PdfPCell noBorder(PdfPCell pdfPCell) {

@@ -33,6 +33,10 @@ public class StepWrapper implements Wrapper, HasComments {
         this.match = match;
     }
 
+    public boolean isComplete() {
+        return match!=null && result!=null;
+    }
+
     public boolean isMatching() {
         return !isNullOrEmpty(match.getLocation());
     }
@@ -81,4 +85,12 @@ public class StepWrapper implements Wrapper, HasComments {
     public List<Embedding> getEmbeddings() {
         return embeddings;
     }
+
+    @Override
+    public String toString() {
+        return "StepWrapper{" +
+                "step=" + step +
+                '}';
+    }
+
 }

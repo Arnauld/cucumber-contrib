@@ -22,6 +22,7 @@ Feature: Making Money
 #
 #
 
+  @math
   @Reporting
   Scenario: Statistics collect basic usage
 

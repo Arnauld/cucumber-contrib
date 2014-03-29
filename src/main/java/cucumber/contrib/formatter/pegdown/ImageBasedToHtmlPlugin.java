@@ -5,25 +5,22 @@ import org.pegdown.Printer;
 import org.pegdown.ast.Node;
 import org.pegdown.ast.Visitor;
 import org.pegdown.plugins.ToHtmlSerializerPlugin;
-import org.scilab.forge.jlatexmath.TeXConstants;
-import org.scilab.forge.jlatexmath.TeXFormula;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
-public abstract class ImageBasedCache implements ToHtmlSerializerPlugin {
+public abstract class ImageBasedToHtmlPlugin implements ToHtmlSerializerPlugin {
 
-    private Logger log = LoggerFactory.getLogger(ImageBasedCache.class);
+    private Logger log = LoggerFactory.getLogger(ImageBasedToHtmlPlugin.class);
 
     private final File generationDirectory;
 
-    public ImageBasedCache(File generationDirectory) {
+    public ImageBasedToHtmlPlugin(File generationDirectory) {
         this.generationDirectory = generationDirectory;
     }
 

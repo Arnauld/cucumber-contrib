@@ -3,4 +3,7 @@ cucumber-contrib
 
 
 
-ftp://ftp.ams.org/ams/doc/amsmath/short-math-guide.pdf
+
+* [Ditaa](http://ditaa.sourceforge.net/#usage)
+* [LaTex short math Guide](ftp://ftp.ams.org/ams/doc/amsmath/short-math-guide.pdf)
+

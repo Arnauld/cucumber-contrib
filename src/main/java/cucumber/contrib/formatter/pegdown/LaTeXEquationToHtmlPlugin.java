@@ -12,7 +12,7 @@ import java.io.File;
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
-public class LaTeXEquationToHtmlPlugin extends ImageBasedCache {
+public class LaTeXEquationToHtmlPlugin extends ImageBasedToHtmlPlugin {
 
     private Logger log = LoggerFactory.getLogger(LaTeXEquationToHtmlPlugin.class);
     private final Color foregroundColor;

@@ -37,6 +37,10 @@ public class StepContainer {
     }
 
     public void embedding(Embedding embedding) {
+
+        System.out.println("StepContainer.embedding\n\n" + embedding.getDataAsUTF8() + "\n\n"
+            + currentStep());
+
         StepWrapper step = currentStep();
         if(step != null) {
             step.embedding(embedding);
@@ -55,5 +59,10 @@ public class StepContainer {
 
     public List<Embedding> getEmbeddings() {
         return embeddings;
+    }
+
+    public boolean isComplete() {
+        return steps.isEmpty()
+                || steps.get(steps.size() - 1).isComplete();
     }
 }
