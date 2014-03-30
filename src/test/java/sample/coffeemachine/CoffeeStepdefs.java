@@ -51,4 +51,8 @@ public class CoffeeStepdefs {
     public void I_ve_inserted_€_in_the_machine(int amountInEuro) throws Throwable {
         throw new PendingException();
     }
+
+    @Then("^the report output should be$")
+    public void the_report_output_should_be(String rawReport) throws Throwable {
+    }
 }

@@ -1,5 +1,6 @@
 package cucumber.contrib.formatter.model;
 
+import gherkin.formatter.Argument;
 import gherkin.formatter.model.*;
 
 import java.util.ArrayList;
@@ -37,6 +38,32 @@ public class StepWrapper implements Wrapper, HasComments {
         return match!=null && result!=null;
     }
 
+    public static class Tok {
+        public final String value;
+        public final boolean param;
+
+        public Tok(String value, boolean param) {
+            this.value = value;
+            this.param = param;
+        }
+    }
+
+    public List<Tok> tokenizeBody() {
+        String full = getName();
+        int lastIndex = 0;
+        List<Tok> toks = new ArrayList<Tok>();
+        for(Argument arg : match.getArguments()) {
+            if(arg.getOffset() > lastIndex) {
+                toks.add(new Tok(full.substring(lastIndex, arg.getOffset()), false));
+            }
+            toks.add(new Tok(arg.getVal(), true));
+            lastIndex = arg.getOffset() + arg.getVal().length();
+        }
+        if(lastIndex < full.length())
+            toks.add(new Tok(full.substring(lastIndex), false));
+        return toks;
+    }
+
     public boolean isMatching() {
         return !isNullOrEmpty(match.getLocation());
     }
@@ -72,6 +99,14 @@ public class StepWrapper implements Wrapper, HasComments {
     public boolean hasTable() {
         List<DataTableRow> tableRows = getTableRows();
         return tableRows != null && !tableRows.isEmpty();
+    }
+
+    public boolean hasDocString() {
+        return step.getDocString() != null;
+    }
+
+    public DocString getDocString() {
+        return step.getDocString();
     }
 
     public List<DataTableRow> getTableRows() {

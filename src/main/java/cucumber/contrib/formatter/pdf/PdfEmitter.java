@@ -9,6 +9,7 @@ import cucumber.contrib.formatter.FormatterException;
 import cucumber.contrib.formatter.model.*;
 import cucumber.contrib.formatter.util.BricABrac;
 import gherkin.formatter.model.DataTableRow;
+import gherkin.formatter.model.DocString;
 import gherkin.formatter.model.Row;
 import gherkin.formatter.model.Tag;
 import org.apache.commons.io.IOUtils;
@@ -243,7 +244,18 @@ public class PdfEmitter {
 
         Paragraph stepParagraph = new Paragraph();
         stepParagraph.add(new Chunk(step.getKeyword(), configuration.stepKeywordFont()));
-        stepParagraph.add(new Chunk(step.getName(), configuration.stepDefaultFont()));
+
+        if(!step.isMatching()) {
+            stepParagraph.add(new Chunk(step.getName(), configuration.stepDefaultFont()));
+        }
+        else {
+            for(StepWrapper.Tok tok : step.tokenizeBody()) {
+                Font tokFont = configuration.stepDefaultFont();
+                if(tok.param)
+                    tokFont = configuration.stepParameterFont();
+                stepParagraph.add(new Chunk(tok.value, tokFont));
+            }
+        }
 
         cell = new PdfPCell(stepParagraph);
         cell.setBorder(Rectangle.NO_BORDER);
@@ -255,6 +267,13 @@ public class PdfEmitter {
             PdfPTable table = createStepDataTable(step.getTableRows());
             stepAsTable.addCell(noBorder(new PdfPCell(new Phrase(""))));
             stepAsTable.addCell(noBorder(new PdfPCell(table)));
+        }
+
+        if(step.hasDocString()) {
+            DocString docString = step.getDocString();
+            Phrase phrase = new Phrase(docString.getValue(), configuration.stepDefaultFont());
+            stepAsTable.addCell(noBorder(new PdfPCell(new Phrase(""))));
+            stepAsTable.addCell(noBorder(new PdfPCell(phrase)));
         }
 
         steps.add(stepAsTable);

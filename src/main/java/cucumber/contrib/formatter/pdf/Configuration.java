@@ -13,12 +13,12 @@ import com.itextpdf.tool.xml.css.CssFile;
 import com.itextpdf.tool.xml.html.HTML;
 import com.itextpdf.tool.xml.pipeline.html.AbstractImageProvider;
 import com.itextpdf.tool.xml.pipeline.html.ImageProvider;
+import cucumber.contrib.formatter.FormatterException;
 import cucumber.contrib.formatter.pegdown.AsciiDiagToHtmlPlugin;
 import cucumber.contrib.formatter.pegdown.LaTeXEquationToHtmlPlugin;
 import cucumber.contrib.formatter.pegdown.NamedBlockCurlyBracePlugin;
 import cucumber.contrib.formatter.pegdown.NamedBlockSquareBracketAndDashPlugin;
 import cucumber.contrib.formatter.util.BricABrac;
-import cucumber.contrib.formatter.FormatterException;
 import org.pegdown.Extensions;
 import org.pegdown.PegDownProcessor;
 import org.pegdown.plugins.PegDownPlugins;
@@ -42,7 +42,6 @@ import static com.google.common.io.Resources.getResource;
 
 /**
  * All-in-one class for the overall settings and configuration.
- *
  */
 @SuppressWarnings("UnusedDeclaration")
 public class Configuration {
@@ -106,6 +105,9 @@ public class Configuration {
     private Font tableHeaderFont;
     private Font tableContentFont;
     private Font tocEntryFont;
+    private Font stepKeywordFont;
+    private Font stepDefaultFont;
+    private Font stepParameterFont;
     private Font stepDataTableHeaderFont;
     private Font stepDataTableContentFont;
     private BaseColor stepDataTableHeaderBackground;
@@ -122,6 +124,7 @@ public class Configuration {
     private File workingDir;
     private PageNumber pageNumber = new PageNumber();
     private TableOfContents tableOfContent;
+
 
     //
 
@@ -418,16 +421,41 @@ public class Configuration {
         return sectionTitleFont();
     }
 
+    public Configuration withStepKeywordFont(Font stepKeywordFont) {
+        this.stepKeywordFont = stepKeywordFont;
+        return this;
+    }
+
     public Font stepKeywordFont() {
-        return FontFactory.getFont(defaultMonospaceFontname(), 8, Font.BOLD, new CMYKColor(255, 255, 0, 17));
+        if (stepKeywordFont == null)
+            stepKeywordFont = FontFactory.getFont(defaultMonospaceFontname(), 8, Font.BOLD, new CMYKColor(255, 255, 0, 17));
+        return stepKeywordFont;
+    }
+
+    public Configuration withStepDefaultFont(Font stepDefaultFont) {
+        this.stepDefaultFont = stepDefaultFont;
+        return this;
+    }
+
+    public Font stepDefaultFont() {
+        if (stepDefaultFont == null)
+            stepDefaultFont = FontFactory.getFont(defaultMonospaceFontname(), 8, Font.NORMAL, new CMYKColor(255, 255, 0, 17));
+        return stepDefaultFont;
+    }
+
+    public Configuration withStepParameterFont(Font stepParameterFont) {
+        this.stepParameterFont = stepParameterFont;
+        return this;
+    }
+
+    public Font stepParameterFont() {
+        if (stepParameterFont == null)
+            stepParameterFont = FontFactory.getFont(defaultMonospaceFontname(), 8, Font.BOLD, new BaseColor(115, 135, 145));
+        return stepParameterFont;
     }
 
     private String defaultMonospaceFontname() {
         return FontFactory.COURIER;
-    }
-
-    public Font stepDefaultFont() {
-        return FontFactory.getFont(defaultMonospaceFontname(), 8, Font.NORMAL, new CMYKColor(255, 255, 0, 17));
     }
 
     public Font tagsFont() {
@@ -917,7 +945,7 @@ public class Configuration {
 
     public List<ToHtmlSerializerPlugin> htmlSerializerPlugins() {
         File generationDirectory = new File(getWorkingDir(), "generated-image");
-        if(!generationDirectory.exists()) {
+        if (!generationDirectory.exists()) {
             generationDirectory.mkdirs();
         }
 
@@ -963,7 +991,7 @@ public class Configuration {
     }
 
     public TableOfContents getTableOfContent() {
-        if(tableOfContent == null)
+        if (tableOfContent == null)
             tableOfContent = new TableOfContents(pageNumber);
         return tableOfContent;
     }

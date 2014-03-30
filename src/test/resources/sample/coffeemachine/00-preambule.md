@@ -41,6 +41,15 @@ This project starts simple and will grow in added features through the iteration
  5. Fifth iteration: Running out ( *~20minutes* )
 
 
+{% asciidiag %}
+
+ +---------+--------+------+------+-----+-----+-----+
+ |         |  {o}   | {mo} | {io} | {c} | {s} | {d} |
+ |    {tr} |        |      |      |     |     |     |
+ +---------+--------+------+--=---+-----+-----+-----+
+{% asciidiag %}
+
+
 Ready ?
 
 
@@ -53,7 +62,18 @@ Ready ?
 
 
 {% asciidiag %}
-  /---------+     +------------+
-  |  Order  |---->|  Protocol  |
-  +---------/     +------------+
+                                           |
+          +----------+        +---------+  |
+          |     Mail |<-\     | Stock   |  |
+          | cPNK {d} |  | /---| cPNK {s}|  |
+          +----------+  : :   +---------+  |
+                        | v                |
+  /---------+     +------------+           |   +---------+
+  |  Order  |---->|  Protocol  |-------------->| Drink   |
+  |    cBLU |     |     {io}   |---\       |   | cGRE    |
+  +---------/     +------------+   |       |   +---------+
+                                   \-=-------->| Message |
+                                           |   | cRED    |
+                                           |   +---------+
+                                           |
 {% asciidiag %}

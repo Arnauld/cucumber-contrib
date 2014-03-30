@@ -47,6 +47,22 @@ Feature: Making Money
   @Reporting
   Scenario: Statistics collect no usage
 
+    # [asciidiag]
+    # ----
+    #   /---------------+-------------\
+    #   |cRED Chocolate |cBLU 1       |-----\
+    #   +---------------+-------------+     :
+    #   |cGRE Coffee    |cPNK 4       |     |
+    #   +---------------+-------------+     |
+    #   |cAAA               Total     |<----/
+    #   +-----------------------------+         /-------\
+    #   |cCCC               3.00€     |---+---->| DB    |
+    #   |               +-------------+         |    {s}|
+    #   |               |cYEL YEL     |         \-------/
+    #   \---------------+-------------/
+    # ----
+    #
+
     When I query for a report
     Then the report output should be
     """

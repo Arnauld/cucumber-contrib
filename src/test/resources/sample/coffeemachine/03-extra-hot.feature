@@ -19,6 +19,7 @@ Feature: Extra Hot and Orange Juice
     Then the instruction generated should be "O::"
 
   @ProtocolOrder
+  @wip
   Scenario: Extra sugar with Orange Juice is ignored
 
     When I order an "Orange Juice" with 1 sugar
