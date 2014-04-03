@@ -28,6 +28,45 @@ send commands to the drink maker.
 > engine that will receive messages according to the protocol. Your job
 > is to build those messages.
 
+{% plantuml %}
+
+@startuml
+actor Foo1
+boundary Foo2
+control Foo3
+entity Foo4
+database Foo5
+Foo1 -> Foo2 : To boundary
+Foo1 -> Foo3 : To control
+Foo1 -> Foo4 : To entity
+Foo1 -> Foo5 : To database
+
+@enduml
+{% plantuml %}
+
+{% plantuml %}
+@startuml
+:Main Admin: as Admin
+(Use the application) as (Use)
+
+User -> (Start)
+User --> (Use)
+
+Admin ---> (Use)
+
+note right of Admin : This is an example.
+
+note right of (Use)
+  A note can also
+  be on several lines
+end note
+
+note "This note is connected\nto several objects." as N2
+(Start) .. N2
+N2 .. (Use)
+@enduml
+{% plantuml %}
+
 Iterations
 ----------
 

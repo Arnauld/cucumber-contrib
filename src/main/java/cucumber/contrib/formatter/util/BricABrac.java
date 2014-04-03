@@ -1,7 +1,5 @@
 package cucumber.contrib.formatter.util;
 
-import static java.util.regex.Pattern.compile;
-
 import com.google.common.collect.Iterables;
 
 import java.io.Closeable;
@@ -12,6 +10,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import static java.util.regex.Pattern.compile;
 
 public class BricABrac {
     public static final String NL = "\n";
@@ -47,8 +47,7 @@ public class BricABrac {
             if (closeable != null) {
                 closeable.close();
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             // ignore
         }
     }
@@ -90,11 +89,20 @@ public class BricABrac {
         return String.format("%0" + (bytes.length << 1) + "X", bi);
     }
 
-    public static boolean isOneOfIgnoringCase(String value, String ... alternatives) {
-        for(String alt : alternatives) {
-            if(alt.equalsIgnoreCase(value))
+    public static boolean isOneOfIgnoringCase(String value, String... alternatives) {
+        for (String alt : alternatives) {
+            if (alt.equalsIgnoreCase(value))
                 return true;
         }
         return false;
     }
+
+    public static boolean startsWithOneOf(String value, String... alternatives) {
+        for (String alt : alternatives) {
+            if (value.startsWith(alt))
+                return true;
+        }
+        return false;
+    }
+
 }

@@ -9,7 +9,7 @@ import java.io.FileNotFoundException;
 
 @RunWith(Cucumber.class)
 @Cucumber.Options(
-        //tags = {"@wip"},
+        tags = {"@wip"},
         format = {"sample.coffeemachine.RunCucumberTest$ConfiguredFormatter:target/coffeemachine"}
 )
 public class RunCucumberTest {

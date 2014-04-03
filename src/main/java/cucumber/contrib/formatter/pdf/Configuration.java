@@ -14,10 +14,7 @@ import com.itextpdf.tool.xml.html.HTML;
 import com.itextpdf.tool.xml.pipeline.html.AbstractImageProvider;
 import com.itextpdf.tool.xml.pipeline.html.ImageProvider;
 import cucumber.contrib.formatter.FormatterException;
-import cucumber.contrib.formatter.pegdown.AsciiDiagToHtmlPlugin;
-import cucumber.contrib.formatter.pegdown.LaTeXEquationToHtmlPlugin;
-import cucumber.contrib.formatter.pegdown.NamedBlockCurlyBracePlugin;
-import cucumber.contrib.formatter.pegdown.NamedBlockSquareBracketAndDashPlugin;
+import cucumber.contrib.formatter.pegdown.*;
 import cucumber.contrib.formatter.util.BricABrac;
 import org.pegdown.Extensions;
 import org.pegdown.PegDownProcessor;
@@ -951,6 +948,7 @@ public class Configuration {
 
         return Arrays.<ToHtmlSerializerPlugin>asList(
                 new AsciiDiagToHtmlPlugin(generationDirectory),
+                new PlantUMLToHtmlPlugin(generationDirectory),
                 new LaTeXEquationToHtmlPlugin(generationDirectory));
     }
 

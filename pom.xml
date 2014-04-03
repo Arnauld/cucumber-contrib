@@ -45,6 +45,7 @@
         <cucumber.version>1.1.5</cucumber.version>
         <junit.version>4.11</junit.version>
         <itext.version>5.4.4</itext.version>
+        <plantuml.version>7995</plantuml.version>
 
         <passphrase>${gpg.passphrase}</passphrase>
     </properties>
@@ -67,7 +68,7 @@
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-junit</artifactId>
             <version>${cucumber.version}</version>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
 
         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
@@ -99,6 +100,26 @@
             <artifactId>jlatexmath</artifactId>
             <version>1.0.3</version>
         </dependency>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <!-- PlantUML -->
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+        <dependency>
+            <groupId>net.sourceforge.plantuml</groupId>
+            <artifactId>plantuml</artifactId>
+            <version>${plantuml.version}</version>
+        </dependency>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <!-- GRAphing Library -->
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+        <!--<dependency>-->
+            <!--<groupId>de.erichseifert.gral</groupId>-->
+            <!--<artifactId>gral-core</artifactId>-->
+            <!--<version>0.10</version>-->
+        <!--</dependency>-->
 
         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
         <!-- iText -->
@@ -160,8 +181,9 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert</artifactId>
