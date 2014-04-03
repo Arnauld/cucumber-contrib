@@ -11,24 +11,24 @@ import java.io.InputStream;
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
-public class DocumentFeatureFilter implements Filter<InputStream> {
+public class DocumentThroughStoreFilter implements Filter<InputStream> {
 
     private static final String NL = System.getProperty("line.separator");
 
-    private final Store store;
+    private final DocumentStore documentStore;
     private String charsetName = "UTF8";
     private boolean maintainLineCount = true;
 
-    public DocumentFeatureFilter(Store store) {
-        this.store = store;
+    public DocumentThroughStoreFilter(DocumentStore documentStore) {
+        this.documentStore = documentStore;
     }
 
-    public DocumentFeatureFilter useCharsetName(String charsetName) {
+    public DocumentThroughStoreFilter useCharsetName(String charsetName) {
         this.charsetName = charsetName;
         return this;
     }
 
-    public DocumentFeatureFilter maintainLineCount(boolean maintainLineCount) {
+    public DocumentThroughStoreFilter maintainLineCount(boolean maintainLineCount) {
         this.maintainLineCount = maintainLineCount;
         return this;
     }
@@ -79,7 +79,7 @@ public class DocumentFeatureFilter implements Filter<InputStream> {
             }
             else if(inComment) {
                 if(commentRef==null) {
-                    commentRef = store.generateRefId();
+                    commentRef = documentStore.generateRefId();
                     filtered.append(commentRef).append(NL);
                 }
                 else if(maintainLineCount) {
@@ -95,7 +95,7 @@ public class DocumentFeatureFilter implements Filter<InputStream> {
 
         private void flushComment() {
             if(commentRef != null) {
-                store.put(commentRef, comment.toString());
+                documentStore.put(commentRef, comment.toString());
             }
             commentRef = null;
             comment.setLength(0);
@@ -124,7 +124,7 @@ public class DocumentFeatureFilter implements Filter<InputStream> {
             if (inComment) {
                 if (isCommentStop(trimmed)) {
                     if (commentRef != null) {
-                        store.put(commentRef, comment.toString());
+                        documentStore.put(commentRef, comment.toString());
                         commentRef = null;
                         comment.setLength(0);
                     }
@@ -132,7 +132,7 @@ public class DocumentFeatureFilter implements Filter<InputStream> {
                     filtered.append(line).append(NL);
                 } else {
                     if (commentRef == null) {
-                        commentRef = store.generateRefId();
+                        commentRef = documentStore.generateRefId();
                         filtered.append(commentRef).append(NL);
                     } else if (maintainLineCount) {
                         filtered.append(NL);
@@ -163,11 +163,4 @@ public class DocumentFeatureFilter implements Filter<InputStream> {
     }
 
 
-    public interface Store {
-        void put(String refId, String content);
-
-        String get(String refId);
-
-        String generateRefId();
-    }
 }

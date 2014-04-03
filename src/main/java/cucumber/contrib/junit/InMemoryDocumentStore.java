@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
-public class InMemoryStore implements DocumentFeatureFilter.Store {
+public class InMemoryDocumentStore implements DocumentStore {
 
     private AtomicInteger idGen = new AtomicInteger();
     private Map<String,String> data = new ConcurrentHashMap<String,String>();

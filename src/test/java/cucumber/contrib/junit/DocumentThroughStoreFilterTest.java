@@ -15,15 +15,15 @@ import static org.fest.assertions.Assertions.assertThat;
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
-public class DocumentFeatureFilterTest {
+public class DocumentThroughStoreFilterTest {
 
-    private InMemoryStore store;
-    private DocumentFeatureFilter filter;
+    private InMemoryDocumentStore store;
+    private DocumentThroughStoreFilter filter;
 
     @Before
     public void setUp() {
-        store = new InMemoryStore();
-        filter = new DocumentFeatureFilter(store);
+        store = new InMemoryDocumentStore();
+        filter = new DocumentThroughStoreFilter(store);
     }
 
     @Test
