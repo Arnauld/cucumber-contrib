@@ -7,6 +7,7 @@ import com.google.common.io.CharSource;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.CMYKColor;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.Tag;
 import com.itextpdf.tool.xml.css.CSS;
 import com.itextpdf.tool.xml.css.CssFile;
@@ -16,6 +17,7 @@ import com.itextpdf.tool.xml.pipeline.html.ImageProvider;
 import cucumber.contrib.formatter.FormatterException;
 import cucumber.contrib.formatter.pegdown.*;
 import cucumber.contrib.formatter.util.BricABrac;
+import cucumber.contrib.util.Provider;
 import org.pegdown.Extensions;
 import org.pegdown.PegDownProcessor;
 import org.pegdown.plugins.PegDownPlugins;
@@ -121,6 +123,7 @@ public class Configuration {
     private File workingDir;
     private PageNumber pageNumber = new PageNumber();
     private TableOfContents tableOfContent;
+    private Provider<PdfWriter> writerProvider;
 
 
     //
@@ -149,7 +152,7 @@ public class Configuration {
 
     private MarkdownEmitter getMarkdownEmitter() {
         if (markdownEmitter == null) {
-            markdownEmitter = new MarkdownEmitter(this);
+            markdownEmitter = new MarkdownEmitter(this, getWriterProvider());
         }
         return markdownEmitter;
     }
@@ -949,7 +952,8 @@ public class Configuration {
         return Arrays.<ToHtmlSerializerPlugin>asList(
                 new AsciiDiagToHtmlPlugin(generationDirectory),
                 new PlantUMLToHtmlPlugin(generationDirectory),
-                new LaTeXEquationToHtmlPlugin(generationDirectory));
+                new LaTeXEquationToHtmlPlugin(generationDirectory),
+                new GralToHtmlPlugin(generationDirectory));
     }
 
     public Configuration withWorkingDir(String dir) {
@@ -992,5 +996,13 @@ public class Configuration {
         if (tableOfContent == null)
             tableOfContent = new TableOfContents(pageNumber);
         return tableOfContent;
+    }
+
+    void defineWriter(Provider<PdfWriter> writerProvider) {
+        this.writerProvider = writerProvider;
+    }
+
+    Provider<PdfWriter> getWriterProvider() {
+        return writerProvider;
     }
 }

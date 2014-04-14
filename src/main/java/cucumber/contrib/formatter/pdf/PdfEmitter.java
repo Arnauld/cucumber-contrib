@@ -8,6 +8,7 @@ import com.itextpdf.text.pdf.draw.LineSeparator;
 import cucumber.contrib.formatter.FormatterException;
 import cucumber.contrib.formatter.model.*;
 import cucumber.contrib.formatter.util.BricABrac;
+import cucumber.contrib.util.Provider;
 import gherkin.formatter.model.DataTableRow;
 import gherkin.formatter.model.DocString;
 import gherkin.formatter.model.Row;
@@ -25,7 +26,7 @@ import java.util.Map;
 import static com.google.common.io.Resources.asByteSource;
 import static cucumber.contrib.formatter.pdf.Configuration.extendTableToWidth;
 
-public class PdfEmitter {
+public class PdfEmitter implements Provider<PdfWriter> {
 
     private Logger log = LoggerFactory.getLogger(PdfEmitter.class);
 
@@ -55,6 +56,11 @@ public class PdfEmitter {
                 return scenarioWrapper.hasTag(configuration.manualTag());
             }
         });
+    }
+
+    @Override
+    public PdfWriter get() {
+        return pdfWriter;
     }
 
     public void init(File fileDst) throws FileNotFoundException, DocumentException {

@@ -59,7 +59,8 @@ public class PdfFormatter implements Formatter, Reporter {
 
     private PdfEmitter getPdfEmitter() {
         if (pdfEmitter == null) {
-            pdfEmitter = new PdfEmitter(getConfiguration());
+            Configuration cfg = getConfiguration();
+            pdfEmitter = new PdfEmitter(cfg);
             try {
                 pdfEmitter.init(new File(reportDir, configuration.getReportFilename()));
             } catch (FileNotFoundException e) {
@@ -67,6 +68,7 @@ public class PdfFormatter implements Formatter, Reporter {
             } catch (DocumentException e) {
                 throw new FormatterException("Failed to create report file", e);
             }
+            cfg.defineWriter(pdfEmitter);
         }
         return pdfEmitter;
     }

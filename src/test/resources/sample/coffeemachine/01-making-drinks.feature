@@ -1,33 +1,39 @@
 Feature: Making Drinks
 
-#  **In order** to send commands to the drink maker
+
+--
 #
-#  **As a** developer
+# Document Block starts with '--' and ends with '--'
 #
-#  **I want to** implement the logic that translates orders
-#  from customers of the coffee machine to the drink maker
-#
-# <p style="text-align: right;">
-#   <img src="/coffee-cup.jpeg" width="66px" height="100px"/>
-# </p>
-#
-# The code will use the drink maker protocol (see below) to send commands to the drink maker.
-#
-# The coffee machine can serves 3 type of drinks:
-#
-#  * tea,
-#  * coffee,
-#  * chocolate.
-#
-#  [ asciidiag ]
-#  ----
-#
-#  /---------+     +------------+
-#  |  Order  |---->|  Protocol  |
-#  +---------/     +------------+
-#
-#  ----
-#
+  **In order** to send commands to the drink maker
+
+  **As a** developer
+
+  **I want to** implement the logic that translates orders
+  from customers of the coffee machine to the drink maker
+
+<p style="text-align: right;">
+   <img src="/coffee-cup.jpeg" width="66px" height="100px"/>
+</p>
+
+The code will use the drink maker protocol (see below) to send commands to the drink maker.
+
+The coffee machine can serves 3 type of drinks:
+
+  * tea,
+  * coffee,
+  * chocolate.
+
+
+[ asciidiag ]
+----
+
+  /---------+     +------------+
+  |  Order  |---->|  Protocol  |
+  +---------/     +------------+
+
+----
+--
 
   @ProtocolOrder
   Scenario: A tea with 1 sugar and a stick

@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
+import java.net.MalformedURLException;
 
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
@@ -34,15 +34,16 @@ public abstract class ImageBasedToHtmlPlugin implements ToHtmlSerializerPlugin {
         if (!acceptsNode(named))
             return false;
 
-        File pngFile = null;
+        File imageFile = null;
         try {
-            pngFile = getOrGenerateImage(named);
+            imageFile = getOrGenerateImage(named);
 
-            if (pngFile != null) {
+            if (imageFile != null) {
                 printer
                         .println()
-                        .print("<p>").indent(+1).println()
-                        .print("<img src=\"").print(pngFile.toURI().toURL().toString()).print("\" />")
+                        .print("<p>").indent(+1).println();
+                printImageHtml(printer, imageFile);
+                printer
                         .println().indent(-1).print("</p>")
                         .println();
             } else {
@@ -53,32 +54,48 @@ public abstract class ImageBasedToHtmlPlugin implements ToHtmlSerializerPlugin {
                         .println().indent(-1).print("</pre>")
                         .println();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("Failed to generate image", e);
         }
         return true;
     }
 
+    protected void printImageHtml(Printer printer, File imageFile) throws MalformedURLException {
+        printer.print("<").print(getHtmlTagName()).print(" src=\"").print(imageFile.toURI().toURL().toString()).print("\" />");
+    }
+
+    protected String getHtmlTagName() {
+        return "img";
+    }
+
+    protected String getImageExtension() {
+        return "png";
+    }
+
     protected abstract boolean acceptsNode(NamedBlockNode named);
 
     private File getOrGenerateImage(NamedBlockNode named) {
-        File pngFile;
+        File imageFile;
         if (!generationDirectory.exists())
             generationDirectory.mkdirs();
 
         String id = BricABrac.md5Hex(named.getBody());
 
-        pngFile = new File(generationDirectory, id + ".png");
-        if (!pngFile.exists()) {
+        imageFile = new File(generationDirectory, id + "." + getImageExtension());
+        if (shouldRegenerate() || !imageFile.exists()) {
             try {
-                generateImage(pngFile, named);
+                generateImage(imageFile, named);
             } catch (Exception e) {
                 return null;
             }
         } else {
-            log.debug("PNG file already generated {}", pngFile.getAbsolutePath());
+            log.debug("Image file already generated {}", imageFile.getAbsolutePath());
         }
-        return pngFile;
+        return imageFile;
+    }
+
+    protected boolean shouldRegenerate() {
+        return false;
     }
 
     protected abstract void generateImage(File pngFile, NamedBlockNode named) throws Exception;

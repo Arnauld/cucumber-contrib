@@ -75,7 +75,8 @@ public class ImageProcessor extends Image {
             HtmlPipelineContext htmlPipelineContext = getHtmlPipelineContext(ctx);
 
             ArrayList<Element> l = new ArrayList<Element>(1);
-            l.add(getCssAppliers().apply(new Chunk((com.itextpdf.text.Image) getCssAppliers().apply(img, tag, htmlPipelineContext), 0, 0, true), tag, htmlPipelineContext));
+            Chunk chunk = new Chunk((com.itextpdf.text.Image) getCssAppliers().apply(img, tag, htmlPipelineContext), 0, 0, true);
+            l.add(getCssAppliers().apply(chunk, tag, htmlPipelineContext));
             return l;
         } catch (NoCustomContextException e) {
             throw new RuntimeWorkerException(e);

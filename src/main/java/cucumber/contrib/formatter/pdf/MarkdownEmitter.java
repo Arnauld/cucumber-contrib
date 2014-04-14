@@ -1,6 +1,7 @@
 package cucumber.contrib.formatter.pdf;
 
 import com.itextpdf.text.Element;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.*;
 import com.itextpdf.tool.xml.css.CssFile;
 import com.itextpdf.tool.xml.css.CssFileImpl;
@@ -16,12 +17,10 @@ import com.itextpdf.tool.xml.pipeline.end.ElementHandlerPipeline;
 import com.itextpdf.tool.xml.pipeline.html.AbstractImageProvider;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
+import cucumber.contrib.formatter.pdf.html.*;
 import cucumber.contrib.formatter.util.BricABrac;
 import cucumber.contrib.formatter.FormatterException;
-import cucumber.contrib.formatter.pdf.html.HeaderProcessor;
-import cucumber.contrib.formatter.pdf.html.ImageProcessor;
-import cucumber.contrib.formatter.pdf.html.TableDataContentProcessor;
-import cucumber.contrib.formatter.pdf.html.TableDataHeaderProcessor;
+import cucumber.contrib.util.Provider;
 import org.pegdown.LinkRenderer;
 import org.pegdown.PegDownProcessor;
 import org.pegdown.ToHtmlSerializer;
@@ -35,10 +34,12 @@ import java.util.List;
 
 public class MarkdownEmitter {
 
-    private Configuration configuration;
+    private final Configuration configuration;
+    private final Provider<PdfWriter> writer;
 
-    public MarkdownEmitter(Configuration configuration) {
+    public MarkdownEmitter(Configuration configuration, Provider<PdfWriter> writer) {
         this.configuration = configuration;
+        this.writer = writer;
     }
 
     public List<Element> markdownToElements(String markdownText) {
@@ -108,6 +109,7 @@ public class MarkdownEmitter {
         tpf.addProcessor(new HeaderProcessor(configuration, 1), "h1");
         tpf.addProcessor(new HeaderProcessor(configuration, 2), "h2");
         tpf.addProcessor(new ImageProcessor(), "img");
+        tpf.addProcessor(new GralProcessor(writer), "gral");
         tpf.addProcessor(new TableDataHeaderProcessor(configuration), "th");
         tpf.addProcessor(new TableDataContentProcessor(configuration), "td");
         return tpf;

@@ -3,15 +3,19 @@ package sample.coffeemachine;
 import cucumber.api.junit.Cucumber;
 import cucumber.contrib.formatter.pdf.PdfFormatter;
 
+import cucumber.contrib.junit.CommentDocBlockFilter;
+import cucumber.contrib.junit.CucumberExt;
+import cucumber.contrib.junit.CucumberExtOptions;
 import org.junit.runner.RunWith;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-@RunWith(Cucumber.class)
+@RunWith(CucumberExt.class)
 @Cucumber.Options(
-        tags = {"@wip"},
+        //tags = {"@wip"},
         format = {"sample.coffeemachine.RunCucumberTest$ConfiguredFormatter:target/coffeemachine"}
 )
+@CucumberExtOptions(filters = CommentDocBlockFilter.class)
 public class RunCucumberTest {
 
     public static class ConfiguredFormatter extends PdfFormatter {

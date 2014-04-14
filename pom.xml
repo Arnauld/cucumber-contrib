@@ -115,11 +115,23 @@
         <!-- GRAphing Library -->
         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
-        <!--<dependency>-->
-            <!--<groupId>de.erichseifert.gral</groupId>-->
-            <!--<artifactId>gral-core</artifactId>-->
-            <!--<version>0.10</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.2.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>de.erichseifert</groupId>
+            <artifactId>gral</artifactId>
+            <version>0.10</version>
+        </dependency>
+
+        <dependency>
+            <groupId>de.erichseifert</groupId>
+            <artifactId>VectorGraphics2D</artifactId>
+            <version>0.9.1</version>
+        </dependency>
 
         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
         <!-- iText -->
@@ -251,6 +263,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -264,6 +277,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
@@ -272,6 +286,26 @@
                     <localCheckout>true</localCheckout>
                     <pushChanges>false</pushChanges>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/third-parties.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>

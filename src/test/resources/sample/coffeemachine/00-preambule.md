@@ -91,6 +91,13 @@ This project starts simple and will grow in added features through the iteration
 
 Ready ?
 
+{% chart %}
+      type: pie
+      data: [1.0, 23.5, 10, 11, 9.4]
+      radius: 0.9
+      inner-radius: 0.4
+      gap: 0.2
+{% chart %}
 
 **Requirements**
 
