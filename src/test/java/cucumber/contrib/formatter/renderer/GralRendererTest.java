@@ -43,6 +43,7 @@ public class GralRendererTest {
         random = new Random();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void usecase() throws IOException {
         //  Create data

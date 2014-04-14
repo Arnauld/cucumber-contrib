@@ -55,6 +55,7 @@ public class CucumberExt extends ParentRunner<FeatureRunner> {
         ClassLoader classLoader = clazz.getClassLoader();
         Assertions.assertNoCucumberAnnotatedMethods(clazz);
 
+        @SuppressWarnings("unchecked")
         RuntimeOptionsFactory runtimeOptionsFactory = new RuntimeOptionsFactory(clazz, new Class[]{CucumberOptions.class, Cucumber.Options.class});
         RuntimeOptions runtimeOptions = runtimeOptionsFactory.create();
 
