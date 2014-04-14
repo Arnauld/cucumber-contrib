@@ -46,8 +46,6 @@
         <junit.version>4.11</junit.version>
         <itext.version>5.4.4</itext.version>
         <plantuml.version>7995</plantuml.version>
-
-        <passphrase>${gpg.passphrase}</passphrase>
     </properties>
 
     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
