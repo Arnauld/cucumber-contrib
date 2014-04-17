@@ -27,14 +27,13 @@ import static org.fest.assertions.Assertions.assertThat;
 public class GrammarParserTest {
 
     private static String basedir;
-    private static Properties properties;
     //
     private GrammarParser parser;
     private File sourceTree;
 
     @BeforeClass
     public static void initProperties() throws IOException {
-        properties = new PropertiesLoader().load(GrammarParserTest.class.getResource("/test-settings.properties"));
+        Properties properties = new PropertiesLoader().load(GrammarParserTest.class.getResource("/test-settings.properties"));
         basedir = properties.getProperty("basedir");
     }
 
@@ -81,7 +80,7 @@ public class GrammarParserTest {
                 .usingListener(listener);
 
         //When
-        Grammar grammar = parser.process();
+        parser.process();
 
         //Then
         assertThat(listener.numberOfPackagesParsed()).isEqualTo(1);
