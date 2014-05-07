@@ -10,7 +10,7 @@
 
     <groupId>org.technbolts</groupId>
     <artifactId>cucumber-contrib</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.2</version>
 
     <licenses>
         <license>
