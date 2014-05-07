@@ -10,7 +10,7 @@
 
     <groupId>org.technbolts</groupId>
     <artifactId>cucumber-contrib</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3-SNAPSHOT</version>
 
     <licenses>
         <license>
@@ -87,7 +87,7 @@
             <groupId>org.technbolts</groupId>
             <artifactId>asciitech</artifactId>
             <classifier>third-parties</classifier>
-            <version>0.0.4</version>
+            <version>0.0.5</version>
         </dependency>
 
         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
@@ -304,17 +304,4 @@
             </build>
         </profile>
     </profiles>
-
-
-    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-    <!-- REPOSITORIES -->
-    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-    <repositories>
-        <!-- embedded repo -->
-        <repository>
-            <id>project.local</id>
-            <name>project</name>
-            <url>file:${project.basedir}/repo</url>
-        </repository>
-    </repositories>
 </project>
