@@ -297,7 +297,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <keyname>9E5867B7x</keyname>
+                            <keyname>9E5867B7</keyname>
                         </configuration>
                     </plugin>
                 </plugins>
