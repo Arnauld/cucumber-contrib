@@ -7,6 +7,7 @@ Compatible with cucumber-jvm `1.1.5`
 Maven dependencies
 ------------------
 
+```xml
     <properties>
         <cucumber-contrib.version>0.0.3</cucumber-contrib.version>
     </properties>
@@ -16,6 +17,7 @@ Maven dependencies
         <artifactId>cucumber-contrib</artifactId>
         <version>${cucumber-contrib.version}</version>
     </dependency>
+```
 
 Example
 -------
@@ -65,8 +67,8 @@ public class RunCucumberTest {
 ```
 
 
-`CommentDocBlockFilter`
------------------------
+Predefined Filter
+-----------------
 
 Because the markdown syntax can be incompatible with the gherkin language the first approach is to rely on comment
 to ensure markdown part can still be parsed, e.g.:
@@ -93,8 +95,9 @@ from customers of the coffee machine to the drink maker
 --
 ```
 
-the docblock is delimited by the `--` lines, by activating the filter through `@CucumberExtOptions(filters = CommentDocBlockFilter.class)
-` the docblock is converted into the previous commented equivalent.
+the docblock is delimited by the `--` lines, by activating the filter through
+`@CucumberExtOptions(filters = CommentDocBlockFilter.class)` the docblock is
+converted into the previous commented equivalent.
 
 
 3rd party connector: ditaa
@@ -129,6 +132,7 @@ which will be rendered to:
 3rd party libraries
 -------------------
 
+```xml
     <properties>
         <asciitech.version>0.0.5</asciitech.version>
     </properties>
@@ -140,6 +144,7 @@ which will be rendered to:
         <classifier>third-parties</classifier>
         <version>${asciitech.version}</version>
     </dependency>
+```
 
 * [Ditaa](http://ditaa.sourceforge.net/#usage)
 * [LaTex short math Guide](ftp://ftp.ams.org/ams/doc/amsmath/short-math-guide.pdf)
