@@ -21,7 +21,8 @@
  */
 package cucumber.contrib.discovery.gral;
 
-import java.awt.Color;
+import java.awt.*;
+import java.awt.geom.Ellipse2D;
 import java.util.Random;
 
 import de.erichseifert.gral.data.DataSeries;
@@ -85,14 +86,19 @@ public class AreaPlot extends ExamplePanel {
 
 	private static void formatFilledArea(XYPlot plot, DataSource data, Color color) {
 		PointRenderer point = new DefaultPointRenderer2D();
+        point.setShape(new Ellipse2D.Double(-3,-3,6,6));
 		point.setColor(color);
 		plot.setPointRenderer(data, point);
+
 		LineRenderer line = new DefaultLineRenderer2D();
 		line.setColor(color);
+        float[] DOT_DOT = {4.0f, 4.0f};
+        line.setStroke(new BasicStroke(4.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.f, DOT_DOT, 0.f));
 		line.setGap(3.0);
 		line.setGapRounded(true);
 		plot.setLineRenderer(data, line);
-		AreaRenderer area = new DefaultAreaRenderer2D();
+
+        AreaRenderer area = new DefaultAreaRenderer2D();
 		area.setColor(GraphicsUtils.deriveWithAlpha(color, 64));
 		plot.setAreaRenderer(data, area);
 	}
@@ -102,6 +108,7 @@ public class AreaPlot extends ExamplePanel {
 		point.setColor(color);
 		plot.setPointRenderer(data, point);
 		plot.setLineRenderer(data, null);
+
 		AreaRenderer area = new LineAreaRenderer2D();
 		area.setGap(3.0);
 		area.setColor(color);

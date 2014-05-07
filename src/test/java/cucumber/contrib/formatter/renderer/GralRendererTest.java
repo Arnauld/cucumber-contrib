@@ -81,7 +81,7 @@ public class GralRendererTest {
         pointRenderer.setValueColor(Color.WHITE);
         pointRenderer.setValueFont(Font.decode(null).deriveFont(Font.BOLD, 24));
 
-        File output = new File("/Users/arnauld/Projects/cucumber-jvm-series/cucumber-contrib/tmp/");
+        File output = new File("/Users/Arnauld/tmp/");
         writePNG_byHand(plot, output, "gral-pie.png");
     }
 

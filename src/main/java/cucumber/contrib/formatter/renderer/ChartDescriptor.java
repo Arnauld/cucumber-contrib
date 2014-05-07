@@ -9,7 +9,6 @@ import java.util.List;
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
 public abstract class ChartDescriptor {
-    private List<double[]> series = new ArrayList<double[]>();
     private boolean legendVisible;
     private String title;
     private Insets2D.Double insets;
@@ -17,14 +16,6 @@ public abstract class ChartDescriptor {
     private double height = 300;
 
     public abstract ChartType getType();
-
-    public List<double[]> getSeries() {
-        return series;
-    }
-
-    public void addSerie(double... values) {
-        this.series.add(values);
-    }
 
     public void setLegendVisible(boolean visible) {
         this.legendVisible = visible;

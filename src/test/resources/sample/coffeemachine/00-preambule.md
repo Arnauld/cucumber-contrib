@@ -9,7 +9,7 @@ Preamble
 
 In this Coffe Machine Project, your task is to implement the logic (starting
 from a simple class) that translates orders from customers of the coffee
-machine to the drink maker. Your code will use the drink maker protocol to
+machine to the drink maker. Your value will use the drink maker protocol to
 send commands to the drink maker.
 
 <p style="text-align: center;">
@@ -21,7 +21,7 @@ send commands to the drink maker.
 
 
 > You do not have to implement the coffee machine customer interface. For
-> instance, your code could consume a simple POJO that would represent an
+> instance, your value could consume a simple POJO that would represent an
 > order from a customer.
 >
 > You do not have to implement the drink maker. It is only a imaginery
@@ -104,7 +104,7 @@ Ready ?
  * Your favorite IDE or text editor
  * A testing framework (`junit`, `rspec`, ...)
  * A mocking framework (`mockito`, ...)
- * A passion for tested code ;)
+ * A passion for tested value ;)
 
 
 {% asciidiag %}

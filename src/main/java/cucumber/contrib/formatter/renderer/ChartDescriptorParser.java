@@ -1,5 +1,7 @@
 package cucumber.contrib.formatter.renderer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,17 +11,49 @@ import java.util.regex.Pattern;
 public class ChartDescriptorParser {
 
     private static final Pattern TYPE = singleLine("type", "([a-zA-Z]+)");
-    private static final Pattern DATA = singleLine("data", "\\[(.*)\\]");
     private static final Pattern LEGEND = singleLine("legend", "(true|false)");
 
     public ChartDescriptor parse(String input) {
         ChartDescriptor descriptor = handleType(input);
-        handleData(input, descriptor);
         handleLegend(input, descriptor);
         return descriptor;
     }
 
+    private void handleLegend(String input, ChartDescriptor descriptor) {
+        Boolean bool = bool(input, LEGEND);
+        if (bool != null)
+            descriptor.setLegendVisible(bool);
+    }
+
+    private ChartDescriptor handleType(String input) {
+        String value = first(input, TYPE);
+        if (value == null) {
+            throw new IllegalArgumentException("No type defined");
+        }
+
+        ChartType chartType = ChartType.fromString(value);
+        switch (chartType) {
+            case Pie: {
+                ChartPieDescriptor descriptor = new ChartPieDescriptor();
+                handlePieSpecifics(input, descriptor);
+                return descriptor;
+            }
+            case XY: {
+                ChartXYDescriptor descriptor = new ChartXYDescriptor();
+                handleXYSpecifics(input, descriptor);
+                return descriptor;
+            }
+            default:
+                throw new UnsupportedOperationException("Chart type " + chartType + " not yet supported");
+        }
+    }
+
+
     private void handlePieSpecifics(String input, ChartPieDescriptor descriptor) {
+        double[] values = commaSeparatedDoubles(input, singleLine("data", "\\[(.*)\\]"));
+        if (values != null)
+            descriptor.setValues(values);
+
         String radius = first(input, singleLine("radius", "(.+)"));
         if (radius != null)
             descriptor.setRadius(Double.parseDouble(radius));
@@ -33,36 +67,21 @@ public class ChartDescriptorParser {
             descriptor.setGap(Double.parseDouble(gap));
     }
 
-    private void handleLegend(String input, ChartDescriptor descriptor) {
-        Boolean bool = bool(input, LEGEND);
-        if (bool != null)
-            descriptor.setLegendVisible(bool);
-    }
+    private void handleXYSpecifics(String input, ChartXYDescriptor descriptor) {
+        double[] xs = commaSeparatedDoubles(input, singleLine("x", "\\[(.*)\\]"));
+        if (xs != null)
+            descriptor.setXs(xs);
 
-    private void handleData(String input, ChartDescriptor descriptor) {
-        double[] values = commaSeparatedDoubles(input, DATA);
-        if (values != null)
-            descriptor.addSerie(values);
-    }
+        List<String> blocks = allMultiline(input, "(y:[^\n]*(?:\n\\s*\\-[^\n]*)*)");
+        for(String block : blocks) {
+            double[] ys = commaSeparatedDoubles(block, singleLine("y", "\\[(.*)\\]"));
 
-    private ChartPieDescriptor handleType(String input) {
-        String value = first(input, TYPE);
-        if (value == null) {
-            throw new IllegalArgumentException("No type defined");
+            descriptor.addYs(ys);
         }
 
-        ChartType chartType = ChartType.fromString(value);
-        switch (chartType) {
-            case Pie:
-                ChartPieDescriptor descriptor = new ChartPieDescriptor();
-                handlePieSpecifics(input, descriptor);
-                return descriptor;
-            default:
-                throw new UnsupportedOperationException();
-        }
     }
 
-    private double[] commaSeparatedDoubles(String input, Pattern pattern) {
+    private static double[] commaSeparatedDoubles(String input, Pattern pattern) {
         String raw = first(input, pattern);
         if (raw == null)
             return null;
@@ -100,6 +119,16 @@ public class ChartDescriptorParser {
         }
         return null;
     }
+
+    private List<String> allMultiline(String input, String pattern) {
+        Matcher matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE|Pattern.MULTILINE).matcher(input);
+        List<String> found = new ArrayList<String>();
+        while(matcher.find()) {
+            found.add(matcher.group(1));
+        }
+        return found;
+    }
+
 
     private static Pattern singleLine(String key, String valuePattern) {
         return Pattern.compile("^\\s*\\Q" + key + "\\E\\s*:\\s*" + valuePattern + "\\s*$",

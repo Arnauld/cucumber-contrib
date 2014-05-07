@@ -7,6 +7,7 @@ public class ChartPieDescriptor extends ChartDescriptor {
     private Double radius;
     private Double innerRadius;
     private Double gap;
+    private double[] values;
 
     @Override
     public ChartType getType() {
@@ -35,5 +36,13 @@ public class ChartPieDescriptor extends ChartDescriptor {
 
     public Double getGap() {
         return gap;
+    }
+
+    public void setValues(double[] values) {
+        this.values = values;
+    }
+
+    public double[] getValues() {
+        return values;
     }
 }

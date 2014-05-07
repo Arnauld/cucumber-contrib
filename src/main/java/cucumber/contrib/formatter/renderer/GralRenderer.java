@@ -90,10 +90,21 @@ public class GralRenderer {
 
     @SuppressWarnings("unchecked")
     private DataSource createDataSource(ChartDescriptor descriptor) {
-        DataTable data = new DataTable(Double.class);
-        for (double d : descriptor.getSeries().get(0)) {
-            data.add(d);
+        switch (descriptor.getType()) {
+            case Pie: {
+                ChartPieDescriptor pie = (ChartPieDescriptor) descriptor;
+                DataTable data = new DataTable(Double.class);
+                for (double d : pie.getValues()) {
+                    data.add(d);
+                }
+                return data;
+            }
+            case XY: {
+                ChartXYDescriptor xy = (ChartXYDescriptor) descriptor;
+                DataTable data = new DataTable(xy.getSeriesCount() + 1, Double.class);
+            }
+
         }
-        return data;
+        throw new UnsupportedOperationException("Chart type not supported '" + descriptor.getType() + "'");
     }
 }

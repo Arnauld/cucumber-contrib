@@ -5,6 +5,7 @@ package cucumber.contrib.formatter.renderer;
 */
 public enum ChartType {
     Pie,
+    XY,
     Histogram;
 
     public static ChartType fromString(String value) {

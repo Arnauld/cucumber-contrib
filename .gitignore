@@ -1,6 +1,8 @@
 *.class
 
 *.pdf
+*.pdf.tmp
+
 .DS_Store
 
 # Package Files #
