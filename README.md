@@ -149,3 +149,7 @@ which will be rendered to:
 * [Ditaa](http://ditaa.sourceforge.net/#usage)
 * [LaTex short math Guide](ftp://ftp.ams.org/ams/doc/amsmath/short-math-guide.pdf)
 
+Incubation
+----------
+
+* [pandoc](http://johnmacfarlane.net/pandoc/README.html#pandocs-markdown)
