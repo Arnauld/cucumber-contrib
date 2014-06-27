@@ -153,3 +153,6 @@ Incubation
 ----------
 
 * [pandoc](http://johnmacfarlane.net/pandoc/README.html#pandocs-markdown)
+* [markdown extra](https://michelf.ca/projects/php-markdown/extra/#abbr)
+* [webdesign lnf](http://webdesign.tutsplus.com/articles/quick-and-easy-documentation-using-markdown--webdesign-8163)
+
