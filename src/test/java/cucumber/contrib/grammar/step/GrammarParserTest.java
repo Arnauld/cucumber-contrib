@@ -1,4 +1,4 @@
-package cucumber.contrib.grammar;
+package cucumber.contrib.grammar.step;
 
 import com.google.gson.GsonBuilder;
 import cucumber.api.java.en.*;
@@ -17,9 +17,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
-import static cucumber.contrib.grammar.GrammarParser.STEP_KEYWORD_QUALIFIED_NAME;
-import static cucumber.contrib.grammar.Source.classSource;
-import static cucumber.contrib.grammar.Source.packageSource;
+import static cucumber.contrib.grammar.step.GrammarParser.STEP_KEYWORD_QUALIFIED_NAME;
+import static cucumber.contrib.grammar.step.Source.classSource;
+import static cucumber.contrib.grammar.step.Source.packageSource;
 import static org.fest.assertions.Assertions.assertThat;
 
 /**
@@ -41,7 +41,7 @@ public class GrammarParserTest {
     @Before
     public void setUp() throws IOException {
         parser = new GrammarParser();
-        sourceTree = new File(basedir, "src/test/java/cucumber/contrib/grammar/stepdefs");
+        sourceTree = new File(basedir, "src/test/java/cucumber/contrib/grammar/step/stepdefs");
     }
 
     @Test
@@ -92,9 +92,7 @@ public class GrammarParserTest {
     @Test
     public void parser_should_return_a_grammar_organized_by_package_and_classes() {
         // Given
-        GrammarParserListener listener = new GrammarParserStatisticsListener();
-        parser.usingSourceDirectory(sourceTree)
-                .usingListener(listener);
+        parser.usingSourceDirectory(sourceTree);
 
         //When
         Grammar grammar = parser.process();
@@ -109,12 +107,12 @@ public class GrammarParserTest {
         assertThat(grammar.subGroups()).hasSize(1);
 
         SentenceGroup subGroup = grammar.subGroups().get(0);
-        assertThat(subGroup.source()).isEqualTo(packageSource("cucumber.contrib.grammar.stepdefs"));
+        assertThat(subGroup.source()).isEqualTo(packageSource("cucumber.contrib.grammar.step.stepdefs"));
         assertThat(subGroup.comment()).isNullOrEmpty();
         assertThat(subGroup.subGroups()).hasSize(1);
 
         SentenceGroup clazzGroup = subGroup.subGroup(0);
-        assertThat(clazzGroup.source()).isEqualTo(classSource("cucumber.contrib.grammar.stepdefs", "OptionStepdefs"));
+        assertThat(clazzGroup.source()).isEqualTo(classSource("cucumber.contrib.grammar.step.stepdefs", "OptionStepdefs"));
         assertThat(clazzGroup.comment()).isNullOrEmpty();
 
         List<Sentence> sentences = clazzGroup.sentences();
@@ -124,9 +122,7 @@ public class GrammarParserTest {
     @Test
     public void parser_should_parse_and_fill_method_information() {
         // Given
-        GrammarParserListener listener = new GrammarParserStatisticsListener();
-        parser.usingSourceDirectory(sourceTree)
-                .usingListener(listener);
+        parser.usingSourceDirectory(sourceTree);
 
         //When
         Grammar grammar = parser.process();

@@ -1,4 +1,4 @@
-package cucumber.contrib.grammar;
+package cucumber.contrib.grammar.step;
 
 import com.thoughtworks.qdox.JavaProjectBuilder;
 import com.thoughtworks.qdox.model.*;
@@ -8,15 +8,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static cucumber.contrib.grammar.Source.*;
-
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
 public class GrammarParser {
     public static Pattern STEP_KEYWORD_QUALIFIED_NAME = Pattern.compile("cucumber\\.api\\.java\\.[^.]+\\.(.+)");
     //
-    private GrammarParserListener listener = new GrammarParserStatisticsListener();
+    private GrammarParserListener listener = new GrammarParserListenerAdapter();
     private JavaProjectBuilder builder = new JavaProjectBuilder();
 
     public GrammarParser usingSourceDirectory(File sourceTree) {
@@ -42,7 +40,7 @@ public class GrammarParser {
         listener.enteringPackage(pkg);
 
         SentenceGroup pkgGroup = new SentenceGroup();
-        pkgGroup.defineSource(packageSource(pkg.getName()));
+        pkgGroup.defineSource(Source.packageSource(pkg.getName()));
         describe(pkgGroup, pkg);
 
         for (JavaClass klazz : pkg.getClasses()) {
@@ -61,7 +59,7 @@ public class GrammarParser {
         listener.enteringClass(klazz);
 
         SentenceGroup group = new SentenceGroup();
-        group.defineSource(classSource(klazz.getPackageName(), klazz.getName()));
+        group.defineSource(Source.classSource(klazz.getPackageName(), klazz.getName()));
         describe(group, klazz);
 
         for (JavaMethod method : klazz.getMethods()) {
@@ -82,7 +80,7 @@ public class GrammarParser {
         listener.enteringMethod(method);
 
         Sentence sentence = new Sentence();
-        sentence.defineSource(methodSource(method.getName(), toString(method.getParameterTypes())));
+        sentence.defineSource(Source.methodSource(method.getName(), toString(method.getParameterTypes())));
         describe(sentence, method);
 
         fillWithPatterns(method, sentence);
