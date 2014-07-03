@@ -1,4 +1,4 @@
-package cucumber.contrib.grammar.step;
+package cucumber.contrib.grammar.java;
 
 import com.google.gson.GsonBuilder;
 import cucumber.api.java.en.*;
@@ -17,9 +17,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
-import static cucumber.contrib.grammar.step.GrammarParser.STEP_KEYWORD_QUALIFIED_NAME;
-import static cucumber.contrib.grammar.step.Source.classSource;
-import static cucumber.contrib.grammar.step.Source.packageSource;
+import static cucumber.contrib.grammar.java.GrammarParser.STEP_KEYWORD_QUALIFIED_NAME;
+import static cucumber.contrib.grammar.java.Source.classSource;
+import static cucumber.contrib.grammar.java.Source.packageSource;
 import static org.fest.assertions.Assertions.assertThat;
 
 /**
@@ -41,7 +41,7 @@ public class GrammarParserTest {
     @Before
     public void setUp() throws IOException {
         parser = new GrammarParser();
-        sourceTree = new File(basedir, "src/test/java/cucumber/contrib/grammar/step/stepdefs");
+        sourceTree = new File(basedir, "src/test/java/cucumber/contrib/grammar/java/stepdefs");
     }
 
     @Test
@@ -107,12 +107,12 @@ public class GrammarParserTest {
         assertThat(grammar.subGroups()).hasSize(1);
 
         SentenceGroup subGroup = grammar.subGroups().get(0);
-        assertThat(subGroup.source()).isEqualTo(packageSource("cucumber.contrib.grammar.step.stepdefs"));
+        assertThat(subGroup.source()).isEqualTo(packageSource("cucumber.contrib.grammar.java.stepdefs"));
         assertThat(subGroup.comment()).isNullOrEmpty();
         assertThat(subGroup.subGroups()).hasSize(1);
 
         SentenceGroup clazzGroup = subGroup.subGroup(0);
-        assertThat(clazzGroup.source()).isEqualTo(classSource("cucumber.contrib.grammar.step.stepdefs", "OptionStepdefs"));
+        assertThat(clazzGroup.source()).isEqualTo(classSource("cucumber.contrib.grammar.java.stepdefs", "OptionStepdefs"));
         assertThat(clazzGroup.comment()).isNullOrEmpty();
 
         List<Sentence> sentences = clazzGroup.sentences();

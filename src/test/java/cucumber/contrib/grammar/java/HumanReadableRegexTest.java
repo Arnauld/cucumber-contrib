@@ -1,6 +1,5 @@
-package cucumber.contrib.grammar.step;
+package cucumber.contrib.grammar.java;
 
-import cucumber.contrib.grammar.step.HumanReadableRegex;
 import org.junit.Test;
 
 import static org.fest.assertions.Assertions.assertThat;

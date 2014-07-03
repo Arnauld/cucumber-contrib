@@ -1,4 +1,4 @@
-package cucumber.contrib.grammar.step.stepdefs;
+package cucumber.contrib.grammar.java.stepdefs;
 
 import cucumber.api.PendingException;
 import cucumber.api.Scenario;

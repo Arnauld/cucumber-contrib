@@ -1,4 +1,4 @@
-package cucumber.contrib.grammar.step;
+package cucumber.contrib.grammar.java;
 
 import com.thoughtworks.qdox.model.JavaClass;
 import com.thoughtworks.qdox.model.JavaMethod;

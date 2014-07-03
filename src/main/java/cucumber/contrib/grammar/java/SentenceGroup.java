@@ -1,4 +1,4 @@
-package cucumber.contrib.grammar.step;
+package cucumber.contrib.grammar.java;
 
 import java.util.ArrayList;
 import java.util.List;

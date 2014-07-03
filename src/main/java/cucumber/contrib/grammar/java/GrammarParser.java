@@ -1,4 +1,4 @@
-package cucumber.contrib.grammar.step;
+package cucumber.contrib.grammar.java;
 
 import com.thoughtworks.qdox.JavaProjectBuilder;
 import com.thoughtworks.qdox.model.*;
@@ -144,7 +144,7 @@ public class GrammarParser {
         JavaClass annotationType = annotation.getType();
         String name = qualifiedName(annotationType);
 
-        // Note: it seems that a step annotation is itself annotated
+        // Note: it seems that a java annotation is itself annotated
         // with '@cucumber.runtime.java.StepDefAnnotation'
         // it may be a safer way to determine if an annotation corresponds
         // to a keyword...

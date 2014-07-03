@@ -1,4 +1,4 @@
-package cucumber.contrib.grammar.step;
+package cucumber.contrib.grammar.java;
 
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
