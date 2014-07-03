@@ -7,42 +7,16 @@ import com.thoughtworks.qdox.model.JavaPackage;
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
-public class GrammarParserListener {
-    private int packagesParsed = 0;
-    private int classesParsed = 0;
-    private int methodsParsed = 0;
+public interface GrammarParserListener {
+    void enteringPackage(JavaPackage pkg);
 
-    public int numberOfClassesParsed() {
-        return classesParsed;
-    }
+    void exitingPackage(JavaPackage pkg);
 
-    public int numberOfPackagesParsed() {
-        return packagesParsed;
-    }
+    void enteringClass(JavaClass klazz);
 
-    public int numberOfMethodsParsed() {
-        return methodsParsed;
-    }
+    void exitingClass(JavaClass klazz);
 
-    public void enteringPackage(JavaPackage pkg) {
-    }
+    void enteringMethod(JavaMethod method);
 
-    public void exitingPackage(JavaPackage pkg) {
-        packagesParsed++;
-    }
-
-    public void enteringClass(JavaClass klazz) {
-    }
-
-    public void exitingClass(JavaClass klazz) {
-        classesParsed++;
-    }
-
-    public void enteringMethod(JavaMethod method) {
-
-    }
-
-    public void exitingMethod(JavaMethod method) {
-        methodsParsed++;
-    }
+    void exitingMethod(JavaMethod method);
 }

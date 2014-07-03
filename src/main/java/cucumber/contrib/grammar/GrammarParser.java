@@ -16,7 +16,7 @@ import static cucumber.contrib.grammar.Source.*;
 public class GrammarParser {
     public static Pattern STEP_KEYWORD_QUALIFIED_NAME = Pattern.compile("cucumber\\.api\\.java\\.[^.]+\\.(.+)");
     //
-    private GrammarParserListener listener = new GrammarParserListener();
+    private GrammarParserListener listener = new GrammarParserStatisticsListener();
     private JavaProjectBuilder builder = new JavaProjectBuilder();
 
     public GrammarParser usingSourceDirectory(File sourceTree) {

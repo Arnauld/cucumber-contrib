@@ -17,6 +17,7 @@ public class HumanReadableRegex {
     public String humanReadable() {
         String s = discardStartAndEndModifier(rawPattern);
         s = replaceCapturingDigits(s);
+        s = replaceCapturingDecimal(s);
         s = replaceCapturingAnything(s);
         s = replaceOptionalCharacterWithParenthesis(s);
         return s;
@@ -33,6 +34,11 @@ public class HumanReadableRegex {
     private String replaceCapturingDigits(String s) {
         return s.replaceAll("\\(\\\\d[+*]\\)", "<integer>");
     }
+
+    private String replaceCapturingDecimal(String s) {
+        return s.replaceAll("\\(\\\\d[+](\\\\.\\?)?\\|\\\\d[*]\\\\.\\\\d[+]\\)", "<decimal>");
+    }
+
 
     private String discardStartAndEndModifier(String value) {
         return value

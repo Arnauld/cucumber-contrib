@@ -1,5 +1,6 @@
 package cucumber.contrib.grammar;
 
+import com.google.gson.GsonBuilder;
 import cucumber.api.java.en.*;
 import cucumber.api.java.en_tx.Givenyall;
 import cucumber.api.java.en_tx.Thenyall;
@@ -75,7 +76,7 @@ public class GrammarParserTest {
     @Test
     public void parser_should_invoke_listener_during_parsing() {
         // Given
-        GrammarParserListener listener = new GrammarParserListener();
+        GrammarParserStatisticsListener listener = new GrammarParserStatisticsListener();
         parser.usingSourceDirectory(sourceTree)
                 .usingListener(listener);
 
@@ -91,12 +92,17 @@ public class GrammarParserTest {
     @Test
     public void parser_should_return_a_grammar_organized_by_package_and_classes() {
         // Given
-        GrammarParserListener listener = new GrammarParserListener();
+        GrammarParserListener listener = new GrammarParserStatisticsListener();
         parser.usingSourceDirectory(sourceTree)
                 .usingListener(listener);
 
         //When
         Grammar grammar = parser.process();
+
+        System.out.println("GrammarParserTest.parser_should_return_a_grammar_organized_by_package_and_classes\n"
+                + new GsonBuilder().setPrettyPrinting().create().toJson(grammar)
+                + "\n"
+        );
 
         //Then
         assertThat(grammar).isNotNull();
@@ -118,7 +124,7 @@ public class GrammarParserTest {
     @Test
     public void parser_should_parse_and_fill_method_information() {
         // Given
-        GrammarParserListener listener = new GrammarParserListener();
+        GrammarParserListener listener = new GrammarParserStatisticsListener();
         parser.usingSourceDirectory(sourceTree)
                 .usingListener(listener);
 

@@ -18,7 +18,7 @@ public class HumanReadableRegexTest {
 
     @Test
     public void should_discard_end_operator() {
-        String pattern = "I order something";
+        String pattern = "I order something$";
         HumanReadableRegex regex = new HumanReadableRegex(pattern);
         assertThat(regex.humanReadable()).isEqualTo("I order something");
     }
@@ -36,6 +36,21 @@ public class HumanReadableRegexTest {
         HumanReadableRegex regex = new HumanReadableRegex(pattern);
         assertThat(regex.humanReadable()).isEqualTo("I order <anything>");
     }
+
+    @Test
+    public void should_replace_digit_matcher() {
+        String pattern = "I order (\\d+)";
+        HumanReadableRegex regex = new HumanReadableRegex(pattern);
+        assertThat(regex.humanReadable()).isEqualTo("I order <integer>");
+    }
+
+    @Test
+    public void should_replace_decimal_digit_matcher() {
+        String pattern = "I order (\\d+|\\d*\\.\\d+)";
+        HumanReadableRegex regex = new HumanReadableRegex(pattern);
+        assertThat(regex.humanReadable()).isEqualTo("I order <decimal>");
+    }
+
 
     @Test
     public void should_replace_any_non_double_quote() {

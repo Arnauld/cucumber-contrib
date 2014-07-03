@@ -20,6 +20,6 @@ public class Describable {
     }
 
     public String comment() {
-            return comment;
+        return comment;
     }
 }
