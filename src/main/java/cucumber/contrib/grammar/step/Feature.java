@@ -9,8 +9,13 @@ import java.util.List;
  */
 public class Feature {
 
+    private final String uri;
     private List<Scenario> scenarios = Lists.newArrayList();
     private List<ScenarioOutline> scenarioOutlines = Lists.newArrayList();
+
+    public Feature(String uri) {
+        this.uri = uri;
+    }
 
     public void add(Scenario scenario) {
         scenarios.add(scenario);
@@ -27,5 +32,9 @@ public class Feature {
         for(ScenarioOutline scenarioOutline : scenarioOutlines)
             scenarioOutline.traverse(visitor);
         visitor.exitFeature(this);
+    }
+
+    public String uri() {
+        return uri;
     }
 }

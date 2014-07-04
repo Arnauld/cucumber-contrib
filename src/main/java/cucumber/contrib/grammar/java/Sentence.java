@@ -1,7 +1,10 @@
 package cucumber.contrib.grammar.java;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
@@ -9,6 +12,7 @@ import java.util.List;
 public class Sentence extends Describable {
     private List<String> patterns = new ArrayList<String>();
     private List<Parameter> parameters = new ArrayList<Parameter>();
+    private Set<UsedBy> usedBySet = new HashSet<UsedBy>();
 
     public List<String> patterns() {
         return patterns;
@@ -35,5 +39,18 @@ public class Sentence extends Describable {
 
     public Parameter parameter(int index) {
         return parameters.get(index);
+    }
+
+    public void declareUsedBy(UsedBy usedBy) {
+        usedBySet.add(usedBy);
+    }
+
+    public boolean matches(String text) {
+        for (String regex : patterns) {
+            Pattern pattern = Pattern.compile(regex);
+            if (pattern.matcher(text).matches())
+                return true;
+        }
+        return false;
     }
 }

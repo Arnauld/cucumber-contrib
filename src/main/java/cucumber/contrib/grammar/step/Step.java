@@ -5,14 +5,35 @@ package cucumber.contrib.grammar.step;
  */
 public class Step {
     private final String keyword;
-    private final String name;
+    private final String text;
+    private int grammarMatchCount;
 
-    public Step(String keyword, String name) {
-        this.keyword = keyword;
-        this.name = name;
+    public Step(String keyword, String text) {
+        this.keyword = keyword.trim();
+        this.text = text;
+    }
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public String getText() {
+        return text;
     }
 
     public void traverse(FeatureVisitor visitor) {
         visitor.visitStep(this);
+    }
+
+    public void grammarMatchCount(int nb) {
+        grammarMatchCount = nb;
+    }
+
+    @Override
+    public String toString() {
+        return "Step{" +
+                "@" + keyword + '(' + text + ')' +
+                ", matchCount=" + grammarMatchCount +
+                '}';
     }
 }

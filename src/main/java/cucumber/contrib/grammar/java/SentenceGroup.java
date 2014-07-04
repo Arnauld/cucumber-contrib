@@ -1,5 +1,7 @@
 package cucumber.contrib.grammar.java;
 
+import com.google.common.collect.Lists;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,5 +35,17 @@ public class SentenceGroup extends Describable {
 
     public SentenceGroup subGroup(int index) {
         return subGroups.get(index);
+    }
+
+    public List<Sentence> matchingSentences(String text) {
+        List<Sentence> matches = Lists.newArrayList();
+        for (SentenceGroup subGroup : subGroups) {
+            matches.addAll(subGroup.matchingSentences(text));
+        }
+        for (Sentence sentence : sentences) {
+            if (sentence.matches(text))
+                matches.add(sentence);
+        }
+        return matches;
     }
 }

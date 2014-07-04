@@ -1,7 +1,6 @@
 package cucumber.contrib.grammar.step;
 
 import com.google.common.collect.Lists;
-import cucumber.runtime.model.CucumberScenario;
 
 import java.util.List;
 
@@ -23,5 +22,12 @@ public class ScenarioOutline {
 
     public void add(Scenario exampleScenario) {
         exampleScenarios.add(exampleScenario);
+    }
+
+    public void traverse(FeatureVisitor visitor) {
+        visitor.enterScenarioOutline(this);
+        for (Scenario scenario : exampleScenarios)
+            scenario.traverse(visitor);
+        visitor.exitScenarioOutline(this);
     }
 }
