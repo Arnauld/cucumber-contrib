@@ -22,4 +22,11 @@ public class Scenario {
     public void add(Step step) {
         stepList.add(step);
     }
+
+    public void traverse(FeatureVisitor visitor) {
+        visitor.enterScenario(this);
+        for (Step step : stepList)
+            step.traverse(visitor);
+        visitor.exitScenario(this);
+    }
 }

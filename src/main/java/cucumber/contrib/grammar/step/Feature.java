@@ -19,4 +19,13 @@ public class Feature {
     public void add(ScenarioOutline scenarioOutline) {
         scenarioOutlines.add(scenarioOutline);
     }
+
+    public void traverse(FeatureVisitor visitor) {
+        visitor.enterFeature(this);
+        for(Scenario scenario : scenarios)
+            scenario.traverse(visitor);
+        for(ScenarioOutline scenarioOutline : scenarioOutlines)
+            scenarioOutline.traverse(visitor);
+        visitor.exitFeature(this);
+    }
 }

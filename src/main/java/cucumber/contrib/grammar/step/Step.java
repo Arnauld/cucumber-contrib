@@ -11,4 +11,8 @@ public class Step {
         this.keyword = keyword;
         this.name = name;
     }
+
+    public void traverse(FeatureVisitor visitor) {
+        visitor.visitStep(this);
+    }
 }

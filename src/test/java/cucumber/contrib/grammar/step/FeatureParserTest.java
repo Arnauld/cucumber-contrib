@@ -1,20 +1,13 @@
 package cucumber.contrib.grammar.step;
 
-import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
-import cucumber.contrib.grammar.step.Feature;
 import cucumber.contrib.util.PropertiesLoader;
-import cucumber.runtime.FeatureBuilder;
-import cucumber.runtime.model.CucumberFeature;
-import gherkin.formatter.Formatter;
-import gherkin.parser.Parser;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Properties;
 
 public class FeatureParserTest {
@@ -31,7 +24,6 @@ public class FeatureParserTest {
 
     @Before
     public void setUp() throws IOException {
-        // /Users/Arnauld/Projects/cucumber-contrib/src/test/resources/cucumber.contrib.grammar.step
         sourceTree = new File(basedir, "src/test/resources/cucumber/contrib/grammar/step");
     }
 
