@@ -28,7 +28,7 @@ public class GrammarConsolidation {
         features.traverse(new Consolidator(grammar));
     }
 
-    private class Consolidator extends FeatureVisitorAdapter {
+    private static class Consolidator extends FeatureVisitorAdapter {
         private final Grammar grammar;
         //
         private String featureUri;
@@ -65,7 +65,7 @@ public class GrammarConsolidation {
                 sentence.declareUsedBy(usedBy);
             }
 
-            System.out.println("Consolidator.visitStep((" + step + ", " + sentences + ")");
+            System.out.println("::(" + step + ", " + sentences + ")");
         }
     }
 }
