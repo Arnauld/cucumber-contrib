@@ -6,12 +6,14 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.tool.xml.ElementList;
 import cucumber.contrib.formatter.pdf.Configuration;
 import cucumber.contrib.formatter.pdf.PdfEmitter;
+import cucumber.contrib.util.PropertiesLoader;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Properties;
 
 /**
  *
@@ -28,14 +30,17 @@ public class HtmlIntegTest {
 
     private PdfEmitter pdfEmitter;
     private Configuration configuration;
+    private String basedir;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
+        Properties properties = new PropertiesLoader().load(getClass().getResource("/test-settings.properties"));
+        basedir = properties.getProperty("basedir");
         configuration = new Configuration()
-                            .withChapterTitleFont(CHAPTER_TITLE_FONT)
-                            .withSectionTitleFont(SECTION_TITLE_FONT)
-                            .withTableHeaderFont(FontFactory.getFont("Arial", 9, Font.BOLD, BaseColor.BLACK))
-                            .withTableContentFont(FontFactory.getFont("Arial", 9, Font.NORMAL, BaseColor.BLACK));
+                .withChapterTitleFont(CHAPTER_TITLE_FONT)
+                .withSectionTitleFont(SECTION_TITLE_FONT)
+                .withTableHeaderFont(FontFactory.getFont("Arial", 9, Font.BOLD, BaseColor.BLACK))
+                .withTableContentFont(FontFactory.getFont("Arial", 9, Font.NORMAL, BaseColor.BLACK));
         pdfEmitter = new PdfEmitter(configuration);
     }
 
@@ -44,13 +49,12 @@ public class HtmlIntegTest {
         ElementList elementList = new ElementList();
         configuration.appendMarkdownContent(elementList, IOUtils.toString(HtmlIntegTest.class.getResourceAsStream("preambule.md")));
 
-        pdfEmitter.init(new File(getClass().getSimpleName() + ".pdf"));
+        pdfEmitter.init(new File(basedir, getClass().getSimpleName() + ".pdf"));
         Document document = pdfEmitter.getDocument();
 
-        for(Element element : elementList) {
-            if(element instanceof PdfPTable) {
-                //((PdfPTable)element).setTotalWidth(document.right() - document.left());
-                ((PdfPTable)element).setTotalWidth(document.right() - document.left());
+        for (Element element : elementList) {
+            if (element instanceof PdfPTable) {
+                ((PdfPTable) element).setTotalWidth(document.right() - document.left());
             }
             document.add(element);
         }

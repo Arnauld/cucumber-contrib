@@ -34,4 +34,13 @@ public class UsedBy {
         result = 31 * result + scenarioName.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "UsedBy{" +
+                "featureUri='" + featureUri + '\'' +
+                ", scenarioOutlineName='" + scenarioOutlineName + '\'' +
+                ", scenarioName='" + scenarioName + '\'' +
+                '}';
+    }
 }

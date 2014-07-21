@@ -9,17 +9,25 @@ import java.util.regex.Pattern;
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
-public class Sentence extends Describable {
-    private List<String> patterns = new ArrayList<String>();
-    private List<Parameter> parameters = new ArrayList<Parameter>();
-    private Set<UsedBy> usedBySet = new HashSet<UsedBy>();
+public class MethodEntry extends Describable {
+    private final String methodName;
+    private final List<String> args;
+
+    private final List<String> patterns = new ArrayList<String>();
+    private final List<Parameter> parameters = new ArrayList<Parameter>();
+    private final Set<UsedBy> usedBySet = new HashSet<UsedBy>();
+
+    public MethodEntry(String methodName, List<String> args) {
+        this.methodName = methodName;
+        this.args = args;
+    }
 
     public List<String> patterns() {
         return patterns;
     }
 
-    public boolean isEmpty() {
-        return patterns.isEmpty();
+    public boolean hasPatterns() {
+        return !patterns.isEmpty();
     }
 
     public void declarePattern(String keyword, String pattern) {
@@ -52,5 +60,14 @@ public class Sentence extends Describable {
                 return true;
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return "Sentence{" +
+                "patterns=" + patterns +
+                ", parameters=" + parameters +
+                ", usedBySet=" + usedBySet +
+                '}';
     }
 }

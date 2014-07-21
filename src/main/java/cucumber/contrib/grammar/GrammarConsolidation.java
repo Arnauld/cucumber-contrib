@@ -1,7 +1,8 @@
 package cucumber.contrib.grammar;
 
+import com.google.common.collect.FluentIterable;
 import cucumber.contrib.grammar.java.Grammar;
-import cucumber.contrib.grammar.java.Sentence;
+import cucumber.contrib.grammar.java.MethodEntry;
 import cucumber.contrib.grammar.java.UsedBy;
 import cucumber.contrib.grammar.step.Feature;
 import cucumber.contrib.grammar.step.FeatureVisitorAdapter;
@@ -9,8 +10,6 @@ import cucumber.contrib.grammar.step.Features;
 import cucumber.contrib.grammar.step.Scenario;
 import cucumber.contrib.grammar.step.ScenarioOutline;
 import cucumber.contrib.grammar.step.Step;
-
-import java.util.List;
 
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
@@ -57,15 +56,13 @@ public class GrammarConsolidation {
         @Override
         public void visitStep(Step step) {
             String text = step.getText();
-            List<Sentence> sentences = grammar.matchingSentences(text);
-            step.grammarMatchCount(sentences.size());
+            FluentIterable<MethodEntry> methodEntries = grammar.matchingEntries(text);
+            step.grammarMatchCount(methodEntries.size());
 
             UsedBy usedBy = new UsedBy(featureUri, scenarioOutlineName, scenarioName);
-            for (Sentence sentence : sentences) {
-                sentence.declareUsedBy(usedBy);
+            for (MethodEntry methodEntry : methodEntries) {
+                methodEntry.declareUsedBy(usedBy);
             }
-
-            System.out.println("::(" + step + ", " + sentences + ")");
         }
     }
 }

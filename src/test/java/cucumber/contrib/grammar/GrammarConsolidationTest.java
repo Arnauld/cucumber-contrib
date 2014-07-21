@@ -1,5 +1,6 @@
 package cucumber.contrib.grammar;
 
+import com.google.gson.GsonBuilder;
 import cucumber.contrib.grammar.java.Grammar;
 import cucumber.contrib.grammar.java.GrammarParser;
 import cucumber.contrib.grammar.step.FeatureParser;
@@ -45,6 +46,9 @@ public class GrammarConsolidationTest {
 
         //When
         consolidation.consolidate();
+
+        String json = new GsonBuilder().setPrettyPrinting().create().toJson(grammar);
+        System.out.println("GrammarConsolidationTest.usecase:::\n" + json);
 
     }
 }

@@ -1,5 +1,7 @@
 package cucumber.contrib.grammar.java;
 
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import com.thoughtworks.qdox.JavaProjectBuilder;
 import com.thoughtworks.qdox.model.*;
 
@@ -30,42 +32,43 @@ public class GrammarParser {
     public Grammar process() {
         Grammar grammar = new Grammar();
         for (JavaPackage pkg : builder.getPackages()) {
-            SentenceGroup pkgGroup = analyzePackage(pkg);
-            addIfNotEmpty(grammar, pkgGroup);
+            PackageEntry pkgEntry = analyzePackage(pkg);
+            if(pkgEntry.hasEntries())
+                grammar.declarePackage(pkgEntry);
         }
         return grammar;
     }
 
-    private SentenceGroup analyzePackage(JavaPackage pkg) {
+    private PackageEntry analyzePackage(JavaPackage pkg) {
         listener.enteringPackage(pkg);
 
-        SentenceGroup pkgGroup = new SentenceGroup();
-        pkgGroup.defineSource(Source.packageSource(pkg.getName()));
+        PackageEntry pkgGroup = new PackageEntry(pkg.getName());
         describe(pkgGroup, pkg);
 
         for (JavaClass klazz : pkg.getClasses()) {
-            SentenceGroup klazzGroup = analyzeClass(klazz);
-            addIfNotEmpty(pkgGroup, klazzGroup);
+            ClassEntry classEntry = analyzeClass(klazz);
+            if(classEntry.hasEntries())
+                pkgGroup.declareClass(classEntry);
         }
         for (JavaPackage subPkg : pkg.getSubPackages()) {
-            SentenceGroup subGroup = analyzePackage(subPkg);
-            addIfNotEmpty(pkgGroup, subGroup);
+            PackageEntry subPkgEntry = analyzePackage(subPkg);
+            if(subPkgEntry.hasEntries())
+                pkgGroup.declareSubPackage(subPkgEntry);
         }
         listener.exitingPackage(pkg);
         return pkgGroup;
     }
 
-    private SentenceGroup analyzeClass(JavaClass klazz) {
+    private ClassEntry analyzeClass(JavaClass klazz) {
         listener.enteringClass(klazz);
 
-        SentenceGroup group = new SentenceGroup();
-        group.defineSource(Source.classSource(klazz.getPackageName(), klazz.getName()));
+        ClassEntry group = new ClassEntry(klazz.getPackageName(), klazz.getName());
         describe(group, klazz);
 
         for (JavaMethod method : klazz.getMethods()) {
-            Sentence sentence = analyzeMethod(method);
-            if (!sentence.isEmpty()) {
-                group.declareSentence(sentence);
+            MethodEntry methodEntry = analyzeMethod(method);
+            if (methodEntry.hasPatterns()) {
+                group.declareEntry(methodEntry);
             }
         }
         listener.exitingClass(klazz);
@@ -76,24 +79,33 @@ public class GrammarParser {
         describable.describeWith(klazz.getComment());
     }
 
-    private Sentence analyzeMethod(JavaMethod method) {
+    private MethodEntry analyzeMethod(JavaMethod method) {
         listener.enteringMethod(method);
 
-        Sentence sentence = new Sentence();
-        sentence.defineSource(Source.methodSource(method.getName(), toString(method.getParameterTypes())));
-        describe(sentence, method);
+        List<JavaType> parameterTypes = method.getParameterTypes();
+        MethodEntry methodEntry = new MethodEntry(method.getName(), typesAsStrings(parameterTypes));
+        describe(methodEntry, method);
 
-        fillWithPatterns(method, sentence);
+        fillWithPatterns(method, methodEntry);
 
-        if (!sentence.isEmpty()) {
-            fillWithParameters(method, sentence);
+        if (methodEntry.hasPatterns()) {
+            fillWithParameters(method, methodEntry);
         }
 
         listener.exitingMethod(method);
-        return sentence;
+        return methodEntry;
     }
 
-    private void fillWithParameters(JavaMethod method, Sentence sentence) {
+    private static List<String> typesAsStrings(List<JavaType> parameterTypes) {
+        return FluentIterable.from(parameterTypes).transform(new Function<JavaType, String>() {
+            @Override
+            public String apply(JavaType javaType) {
+                return javaType.getFullyQualifiedName();
+            }
+        }).toList();
+    }
+
+    private void fillWithParameters(JavaMethod method, MethodEntry methodEntry) {
         List<DocletTag> paramDocs = method.getTagsByName("param");
         List<JavaParameter> parameters = method.getParameters();
         for (int i = 0; i < parameters.size(); i++) {
@@ -102,7 +114,7 @@ public class GrammarParser {
             DocletTag paramDoc = findParamDocByNameOrIndex(paramName, i, paramDocs);
             String doc = (paramDoc != null) ? extractDoc(paramName, paramDoc) : null;
 
-            sentence.defineParameter(i, paramName, doc);
+            methodEntry.defineParameter(i, paramName, doc);
         }
     }
 
@@ -129,13 +141,13 @@ public class GrammarParser {
         return null;
     }
 
-    private void fillWithPatterns(JavaMethod method, Sentence sentence) {
+    private void fillWithPatterns(JavaMethod method, MethodEntry methodEntry) {
         List<JavaAnnotation> annotations = method.getAnnotations();
         for (JavaAnnotation annotation : annotations) {
             String keyword = extractStepKeywordIfRelevant(annotation);
             if (keyword != null) {
                 String pattern = String.valueOf(annotation.getNamedParameter("value"));
-                sentence.declarePattern(keyword, unescape(unquote(pattern)));
+                methodEntry.declarePattern(keyword, unescape(unquote(pattern)));
             }
         }
     }
@@ -169,21 +181,6 @@ public class GrammarParser {
         if (len >= 2 && value.charAt(0) == '"' && value.charAt(len - 1) == '"')
             return value.substring(1, len - 1);
         return value;
-    }
-
-    private static String toString(List<JavaType> parameterTypes) {
-        StringBuilder b = new StringBuilder();
-        for (JavaType type : parameterTypes) {
-            if (b.length() > 0)
-                b.append(",");
-            b.append(type.getFullyQualifiedName());
-        }
-        return b.toString();
-    }
-
-    private static void addIfNotEmpty(SentenceGroup groupParent, SentenceGroup subGroup) {
-        if (!subGroup.isEmpty())
-            groupParent.declareGroup(subGroup);
     }
 
 }
