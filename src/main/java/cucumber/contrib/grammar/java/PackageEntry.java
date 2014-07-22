@@ -32,8 +32,17 @@ public class PackageEntry extends Describable {
     }
 
     public boolean hasEntries() {
-        return !subPkgEntries.isEmpty() || !classEntries.isEmpty();
+        return hasSubPackageEntries() || hasClassEntries();
     }
+
+    public boolean hasSubPackageEntries() {
+        return !subPkgEntries.isEmpty();
+    }
+
+    public boolean hasClassEntries() {
+        return !classEntries.isEmpty();
+    }
+
 
     public FluentIterable<PackageEntry> subPackages() {
         return FluentIterable.from(subPkgEntries);

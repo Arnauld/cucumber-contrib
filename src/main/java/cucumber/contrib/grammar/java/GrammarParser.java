@@ -50,11 +50,12 @@ public class GrammarParser {
             if(classEntry.hasEntries())
                 pkgGroup.declareClass(classEntry);
         }
-        for (JavaPackage subPkg : pkg.getSubPackages()) {
-            PackageEntry subPkgEntry = analyzePackage(subPkg);
-            if(subPkgEntry.hasEntries())
-                pkgGroup.declareSubPackage(subPkgEntry);
-        }
+
+//        for (JavaPackage subPkg : pkg.getSubPackages()) {
+//            PackageEntry subPkgEntry = analyzePackage(subPkg);
+//            if(subPkgEntry.hasEntries())
+//                pkgGroup.declareSubPackage(subPkgEntry);
+//        }
         listener.exitingPackage(pkg);
         return pkgGroup;
     }

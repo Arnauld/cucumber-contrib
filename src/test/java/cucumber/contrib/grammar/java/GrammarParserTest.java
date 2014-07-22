@@ -133,7 +133,7 @@ public class GrammarParserTest {
         FluentIterable<MethodEntry> methodEntries = clazzGroup.methods();
 
         MethodEntry methodEntry0 = methodEntries.get(0);
-        assertThat(methodEntry0.patterns()).containsExactly("^I order an? \"([^\"]*)\" with (\\d+) sugar$");
+        assertThat(methodEntry0.patterns().toList()).containsExactly("^I order an? \"([^\"]*)\" with (\\d+) sugar$");
         assertThat(methodEntry0.comment()).isEqualTo(
                 "Order a <b>drink</b> with a number of sugar.\n" +
                         "If the drink does not support the addition of sugar it won't\n" +
@@ -146,7 +146,7 @@ public class GrammarParserTest {
         assertThat(methodEntry0.parameter(1).getDoc()).isEqualTo("number of sugar (if applicable)");
 
         MethodEntry methodEntry1 = methodEntries.get(1);
-        assertThat(methodEntry1.patterns()).containsExactly("^the instruction generated should be \"([^\"]*)\"$");
+        assertThat(methodEntry1.patterns().toList()).containsExactly("^the instruction generated should be \"([^\"]*)\"$");
         assertThat(methodEntry1.comment()).isNullOrEmpty();
         assertThat(methodEntry1.parameters()).hasSize(1);
         assertThat(methodEntry1.parameter(0).getName()).isEqualTo("expectedProtocol");

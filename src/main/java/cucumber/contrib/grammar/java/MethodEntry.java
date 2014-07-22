@@ -1,5 +1,7 @@
 package cucumber.contrib.grammar.java;
 
+import com.google.common.collect.FluentIterable;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -22,8 +24,16 @@ public class MethodEntry extends Describable {
         this.args = args;
     }
 
-    public List<String> patterns() {
-        return patterns;
+    public String name() {
+        return methodName;
+    }
+
+    public String signature() {
+        return methodName + "(" + args + ")";
+    }
+
+    public FluentIterable<String> patterns() {
+        return FluentIterable.from(patterns);
     }
 
     public boolean hasPatterns() {
@@ -70,4 +80,5 @@ public class MethodEntry extends Describable {
                 ", usedBySet=" + usedBySet +
                 '}';
     }
+
 }
