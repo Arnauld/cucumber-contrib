@@ -30,11 +30,11 @@ public class HtmlIntegTest {
     private TestSettings testSettings;
     private PdfEmitter pdfEmitter;
     private Configuration configuration;
+    private String basedir;
 
     @Before
     public void setUp() {
         testSettings = new TestSettings();
-
         configuration = new Configuration()
                 .withChapterTitleFont(CHAPTER_TITLE_FONT)
                 .withSectionTitleFont(SECTION_TITLE_FONT)
@@ -53,7 +53,6 @@ public class HtmlIntegTest {
 
         for (Element element : elementList) {
             if (element instanceof PdfPTable) {
-                //((PdfPTable)element).setTotalWidth(document.right() - document.left());
                 ((PdfPTable) element).setTotalWidth(document.right() - document.left());
             }
             document.add(element);
