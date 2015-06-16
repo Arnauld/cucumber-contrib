@@ -159,8 +159,14 @@ public class PdfEmitter implements Provider<PdfWriter> {
 
         Paragraph steps = new Paragraph("");
         steps.setKeepTogether(configuration.shouldKeepScenarioUnbreakable());
-        for (StepWrapper step : scenario.getSteps()) {
-            emitStep(scenario, steps, step);
+        
+        BackgroundWrapper background=scenario.getBackground();
+        for(StepWrapper backgroundStep : background.getSteps()){
+        	emitStep(scenario, steps, backgroundStep);
+        }
+                
+        for (StepWrapper scenarioStep : scenario.getSteps()) {
+            emitStep(scenario, steps, scenarioStep);
         }
         steps.setSpacingBefore(margin.marginTop);
         steps.setSpacingAfter(margin.marginBottom);

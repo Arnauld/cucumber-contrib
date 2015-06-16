@@ -47,4 +47,8 @@ public class ScenarioWrapper extends StepContainer implements Wrapper, HasCommen
         }
         return false;
     }
+
+	public BackgroundWrapper getBackground() {
+		return background;
+	}
 }
