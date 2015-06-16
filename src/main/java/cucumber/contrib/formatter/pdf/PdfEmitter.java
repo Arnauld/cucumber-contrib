@@ -126,6 +126,14 @@ public class PdfEmitter implements Provider<PdfWriter> {
             featureChap.add(paragraph);
         }
 
+        // Background
+        if (configuration.shouldDisplayBackgroundOfFeature() && (feature.getBackground() != null)) {
+        	try {
+        		emitBackground(featureChap, feature.getBackground());
+        	} catch (DocumentException e) {
+                log.warn("Failed to emit background '{}'", feature.getBackground().getName(), e);
+            }
+        }
 
         // Scenario
         for (ScenarioWrapper scenario : feature.getScenarios()) {
@@ -144,6 +152,25 @@ public class PdfEmitter implements Provider<PdfWriter> {
         }
     }
 
+    private void emitBackground(Chapter featureChap, BackgroundWrapper background) throws DocumentException {
+        Paragraph scenarioTitle = new Paragraph("Background - " + background.getName(), configuration.scenarioTitleFont());
+        Section section = featureChap.addSection(scenarioTitle);
+
+        Margin margin = configuration.getScenarioMargin();
+        section.setIndentationLeft(margin.marginLeft);
+
+        emitBackgroundEmbeddings(background, section);
+
+        Paragraph steps = new Paragraph("");
+        steps.setKeepTogether(configuration.shouldKeepScenarioUnbreakable());
+        for (StepWrapper step : background.getSteps()) {
+            emitStep(background, steps, step);
+        }
+        steps.setSpacingBefore(margin.marginTop);
+        steps.setSpacingAfter(margin.marginBottom);
+        section.add(steps);
+    }
+    
     private void emitScenario(Chapter featureChap, ScenarioWrapper scenario) throws DocumentException {
         Paragraph scenarioTitle = new Paragraph(scenario.getName(), configuration.scenarioTitleFont());
         Section section = featureChap.addSection(scenarioTitle);
@@ -167,6 +194,12 @@ public class PdfEmitter implements Provider<PdfWriter> {
         section.add(steps);
     }
 
+    private void emitBackgroundEmbeddings(BackgroundWrapper background, Section section) {
+        for (Embedding embedding : background.getEmbeddings()) {
+        	section.addAll(toElements(embedding));
+        }
+    }
+    
     private void emitScenarioEmbeddings(ScenarioWrapper scenario, Section section) {
         for (Embedding embedding : scenario.getEmbeddings()) {
             section.addAll(toElements(embedding));
@@ -216,6 +249,82 @@ public class PdfEmitter implements Provider<PdfWriter> {
 
     private float documentContentWidth() {
         return document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin();
+    }
+    
+    private void emitStep(BackgroundWrapper scenario, Paragraph steps, StepWrapper step) {
+    	Image stepStatus;
+
+
+        float imageWidth = 16.5f;
+        float imageHeight = 10.5f;
+
+        PdfPTable stepAsTable = new PdfPTable(2);
+        stepAsTable.setWidthPercentage(100);
+        stepAsTable.setKeepTogether(true);
+        try {
+            float imageCellWidth = imageWidth + 5f;
+            stepAsTable.setTotalWidth(new float[]{imageCellWidth, documentContentWidth() - imageCellWidth});
+        } catch (DocumentException e) {
+            log.warn("Step table issue", e);
+        }
+
+        if (configuration.shouldDisplayBackgroundStepsResult()) {
+        	stepStatus = getStepStatusAsImageOrNull(step);
+        } else {
+        	stepStatus = null;
+        }
+        
+        PdfPCell cell;
+        if (stepStatus != null) {
+            stepStatus.scaleAbsolute(imageWidth, imageHeight);
+            cell = new PdfPCell(stepStatus);
+            cell.setPaddingTop(2.0f);
+        } else {
+            cell = new PdfPCell(new Phrase(""));
+        }
+
+        cell.setBorder(Rectangle.NO_BORDER);
+        stepAsTable.addCell(cell);
+
+        Paragraph stepParagraph = new Paragraph();
+        stepParagraph.add(new Chunk(step.getKeyword(), configuration.stepKeywordFont()));
+
+        if(!step.isMatching()) {
+            stepParagraph.add(new Chunk(step.getName(), configuration.stepDefaultFont()));
+        }
+        else {
+            for(StepWrapper.Tok tok : step.tokenizeBody()) {
+                Font tokFont = configuration.stepDefaultFont();
+                if(tok.param)
+                    tokFont = configuration.stepParameterFont();
+                stepParagraph.add(new Chunk(tok.value, tokFont));
+            }
+        }
+
+        cell = new PdfPCell(stepParagraph);
+        cell.setBorder(Rectangle.NO_BORDER);
+        stepAsTable.addCell(cell);
+
+        if (step.hasTable()) {
+            // table added on stepParagraph is not visible...
+            // thus it becomes a direct nested table
+            PdfPTable table = createStepDataTable(step.getTableRows());
+            stepAsTable.addCell(noBorder(new PdfPCell(new Phrase(""))));
+            stepAsTable.addCell(noBorder(new PdfPCell(table)));
+        }
+
+        if(step.hasDocString()) {
+            DocString docString = step.getDocString();
+            Phrase phrase = new Phrase(docString.getValue(), configuration.stepDefaultFont());
+            stepAsTable.addCell(noBorder(new PdfPCell(new Phrase(""))));
+            stepAsTable.addCell(noBorder(new PdfPCell(phrase)));
+        }
+
+        steps.add(stepAsTable);
+
+        for (Embedding embedding : step.getEmbeddings()) {
+            steps.addAll(toElements(embedding));
+        }
     }
 
     private void emitStep(ScenarioWrapper scenario, Paragraph steps, StepWrapper step) {

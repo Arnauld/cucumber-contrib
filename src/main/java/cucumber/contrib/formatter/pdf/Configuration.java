@@ -119,6 +119,8 @@ public class Configuration {
     private boolean displayUri = true;
     private boolean displayTags = true;
     private boolean unbreakableScenario = false;
+    private boolean displayBackgroundStepsResult = false;
+    private boolean displayBackgroundOfFeature = false;
     private PegDownProcessor markdownProcessor;
     private File workingDir;
     private PageNumber pageNumber = new PageNumber();
@@ -925,6 +927,25 @@ public class Configuration {
         return unbreakableScenario;
     }
 
+    public boolean shouldDisplayBackgroundStepsResult() {
+        return displayBackgroundStepsResult;
+    }
+
+
+    public Configuration displayBackgroundStepsResult(boolean displayBackgroundStepsResult) {
+        this.displayBackgroundStepsResult = displayBackgroundStepsResult;
+        return this;
+    }
+    
+    public boolean shouldDisplayBackgroundOfFeature() {
+        return displayBackgroundOfFeature;
+    }
+
+
+    public Configuration displayBackgroundOfFeature(boolean displayBackgroundOfFeature) {
+        this.displayBackgroundOfFeature = displayBackgroundOfFeature;
+        return this;
+    }
 
     public Configuration withMarkdownProcessor(PegDownProcessor processor) {
         this.markdownProcessor = processor;

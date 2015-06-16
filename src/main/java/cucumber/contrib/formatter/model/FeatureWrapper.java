@@ -1,13 +1,18 @@
 package cucumber.contrib.formatter.model;
 
-import gherkin.formatter.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static cucumber.contrib.formatter.DescriptionExtractor.extractDescription;
+import gherkin.formatter.model.Background;
+import gherkin.formatter.model.Feature;
+import gherkin.formatter.model.Match;
+import gherkin.formatter.model.Result;
+import gherkin.formatter.model.Scenario;
+import gherkin.formatter.model.Step;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static cucumber.contrib.formatter.DescriptionExtractor.extractDescription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FeatureWrapper implements Wrapper {
 
@@ -16,9 +21,9 @@ public class FeatureWrapper implements Wrapper {
     private final Feature feature;
     private final String uri;
     private BackgroundWrapper background;
+    private BackgroundWrapper featureBackground;
     private List<ScenarioWrapper> scenarios = new ArrayList<ScenarioWrapper>();
     private List<Embedding> pendingEmbeddings = new ArrayList<Embedding>();
-
 
     public FeatureWrapper(String uri, Feature feature) {
         this.uri = uri;
@@ -31,6 +36,7 @@ public class FeatureWrapper implements Wrapper {
 
     public void background(Background background) {
         this.background = new BackgroundWrapper(background);
+        
         drainPendingEmbeddings();
     }
 
@@ -52,13 +58,14 @@ public class FeatureWrapper implements Wrapper {
     }
 
     public void step(Step step) {
-        currentStepContainer().step(step);
+   		currentStepContainer().step(step);
     }
 
     public void scenario(Scenario scenario) {
         ScenarioWrapper wrapper = new ScenarioWrapper(scenario);
         if (this.background != null) {
             wrapper.setBackground(background);
+            featureBackground = this.background;
             this.background = null;
         }
         this.scenarios.add(wrapper);
@@ -76,7 +83,7 @@ public class FeatureWrapper implements Wrapper {
     }
 
     private StepContainer currentStepContainer() {
-        return (background != null) ? background : currentScenario();
+    	return (background != null) ? background : currentScenario();
     }
 
     private ScenarioWrapper currentScenario() {
@@ -93,5 +100,9 @@ public class FeatureWrapper implements Wrapper {
 
     public List<ScenarioWrapper> getScenarios() {
         return scenarios;
+    }
+    
+    public BackgroundWrapper getBackground() {
+    	return featureBackground;
     }
 }
