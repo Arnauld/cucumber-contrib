@@ -1,24 +1,19 @@
 package cucumber.contrib.formatter.model;
 
-import static cucumber.contrib.formatter.DescriptionExtractor.extractDescription;
 import gherkin.formatter.model.Comment;
 import gherkin.formatter.model.Scenario;
-import gherkin.formatter.model.ScenarioOutline;
 import gherkin.formatter.model.Tag;
 
 import java.util.List;
 
+import static cucumber.contrib.formatter.DescriptionExtractor.extractDescription;
+
 public class ScenarioWrapper extends StepContainer implements Wrapper, HasComments {
-    private Scenario scenario;
-    private ScenarioOutline scenarioOutline;
+    private final Scenario scenario;
     private BackgroundWrapper background;
 
     public ScenarioWrapper(Scenario scenario) {
         this.scenario = scenario;
-    }
-    
-    public ScenarioWrapper(ScenarioOutline scenarioOutline) {
-        this.scenarioOutline = scenarioOutline;
     }
 
     public void setBackground(BackgroundWrapper background) {
@@ -30,35 +25,19 @@ public class ScenarioWrapper extends StepContainer implements Wrapper, HasCommen
     }
 
     public List<Comment> getComments() {
-    	if (scenario != null) {
-    		return scenario.getComments();
-    	} else {
-    		return scenarioOutline.getComments();
-    	}
+        return scenario.getComments();
     }
 
     public String getName() {
-    	if (scenario != null) {
-    		return scenario.getName();
-    	} else {
-    		return scenarioOutline.getName();
-    	}
+        return scenario.getName();
     }
 
     public List<Tag> getTags() {
-    	if (scenario != null) {
-    		return scenario.getTags();
-    	} else {
-    		return scenarioOutline.getTags();
-    	}
+        return scenario.getTags();
     }
 
     public String getDescription() {
-    	if (scenario != null) {
-    		return  extractDescription(scenario.getDescription(), steps);
-    	} else {
-    		return  extractDescription(scenarioOutline.getDescription(), steps);
-    	}
+        return extractDescription(scenario.getDescription(), steps);
     }
 
     public boolean hasTag(String searchedTag) {
